@@ -7,7 +7,9 @@
 <title>Münster Research Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Carlito = metric-compatible open clone of Calibri (fallback when Calibri isn't installed locally) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/carlito/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/carlito/700.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
@@ -30,8 +32,8 @@
   --c-hero-text: #00305D;
   --shadow:      0 1px 4px rgba(0,0,0,.08);
   --radius:      8px;
-  --font-h:      'Playfair Display', Georgia, serif;
-  --font-b:      'Source Sans 3', system-ui, sans-serif;
+  --font-h:      Calibri, Carlito, 'Segoe UI', system-ui, sans-serif;
+  --font-b:      Calibri, Carlito, 'Segoe UI', system-ui, sans-serif;
   --nav-h:       62px;
 }
 [data-theme="dark"] {
@@ -111,7 +113,7 @@ section:last-child{border-bottom:none}
 .hero{background:var(--c-hero-bg);padding:3.5rem 0 2.5rem}
 .hero-inner{max-width:1280px;margin:0 auto;padding:0 1.5rem}
 .hero-eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--c-accent);margin-bottom:1rem}
-.hero h1{font-family:var(--font-h);font-weight:900;font-size:clamp(2.4rem,6vw,4.6rem);line-height:.98;letter-spacing:-.02em;text-transform:uppercase;color:var(--c-hero-text)}
+.hero h1{font-family:var(--font-h);font-weight:700;font-size:clamp(2.2rem,5.2vw,3.9rem);line-height:1.04;letter-spacing:-.01em;text-transform:none;color:var(--c-hero-text)}
 .hero-sub{color:var(--c-muted);font-size:1.05rem;margin:1rem 0 1.5rem;max-width:60ch}
 .hero-meta{display:flex;gap:.6rem;flex-wrap:wrap}
 .chip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:20px;font-size:.76rem;font-weight:600;background:var(--c-card);border:1px solid var(--c-border);color:var(--c-text)}
@@ -255,16 +257,9 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
 /* ── Triangular corporate header ───────────────────────────── */
 .hero{position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;top:0;right:0;width:46%;height:64px;background:var(--c-accent);clip-path:polygon(100% 0,100% 100%,18% 0);pointer-events:none}
-.hero::after{content:"";position:absolute;bottom:0;left:0;width:55%;height:5px;background:var(--c-accent);clip-path:polygon(0 100%,100% 100%,0 0);pointer-events:none;opacity:.9}
+.hero::before{content:"";position:absolute;top:0;left:0;width:46%;height:72px;background:var(--c-accent);clip-path:polygon(0 0,0 100%,82% 0);pointer-events:none}
+.hero::after{content:"";position:absolute;bottom:0;right:0;width:55%;height:5px;background:var(--c-accent);clip-path:polygon(100% 100%,0 100%,100% 0);pointer-events:none;opacity:.9}
 .hero-inner{position:relative;z-index:1}
-
-/* ── Warning banner ────────────────────────────────────────── */
-.warn-banner{background:var(--c-accent);color:#fff;font-size:.86rem;line-height:1.45}
-[data-theme="dark"] .warn-banner{color:#0b1118}
-.warn-banner .container{display:flex;gap:.75rem;align-items:flex-start;padding-top:.8rem;padding-bottom:.8rem}
-.warn-banner svg{flex-shrink:0;width:22px;height:22px;margin-top:1px}
-.warn-banner strong{font-weight:700}
 
 /* ── Corporate footer (wissen.leben + MüCOS) ───────────────── */
 .brand-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--c-border)}
@@ -307,6 +302,20 @@ footer p{font-size:.8rem;color:var(--c-muted)}
   </div>
 </div>
 
+<!-- Warning popup modal -->
+<div class="modal-overlay" id="warn-overlay"></div>
+<div class="modal" id="warn-modal" role="alertdialog" aria-labelledby="warn-title" aria-modal="true">
+  <h2 id="warn-title" style="display:flex;align-items:center;gap:.5rem">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    A note before you start
+  </h2>
+  <p><strong>Quantitative metrics are not a proxy for research quality.</strong> Publication and citation counts measure volume and attention — not significance, rigour, or societal value. Read every figure here as context, never as a verdict on a person, group, or field.</p>
+  <p>This dashboard is a free and open-source alternative to commercial tools such as SciVal, built so that bibliometric transparency need not depend on a paid subscription.</p>
+  <div class="modal-actions">
+    <button class="btn btn-primary" id="warn-ack-btn">I understand</button>
+  </div>
+</div>
+
 <!-- Navigation -->
 <nav id="navbar" aria-label="Main navigation">
   <div class="nav-brand">
@@ -315,6 +324,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
   </div>
   <nav class="nav-links" aria-label="Section links">
     <a href="#overview">Overview</a>
+    <a href="#methods">Methods</a>
     <a href="#output">Scholarly Output</a>
     <a href="#openaccess">Open Access</a>
     <a href="#topics">Research Topics</a>
@@ -334,14 +344,6 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 </nav>
 
 <main>
-
-<!-- Warning banner -->
-<div class="warn-banner" role="note">
-  <div class="container">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <div><strong>Quantitative metrics are not a proxy for research quality.</strong> Publication and citation counts measure volume and attention, not significance, rigour, or societal value — read them as context, never as a verdict. This dashboard is a free and open-source alternative to commercial tools such as SciVal, built so that bibliometric transparency need not depend on a paid subscription.</div>
-  </div>
-</div>
 
 <!-- ════════ 1. OVERVIEW ════════ -->
 <section id="overview" aria-labelledby="s1-heading">
@@ -368,6 +370,41 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     <div class="card">
       <div class="card-header"><h3>Output Trajectory — last 10 years</h3></div>
       <div class="card-body"><div class="chart-wrap" style="height:120px"><canvas id="sparkline-chart" aria-label="Publication output over the last 10 years" role="img"></canvas></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ METHODS ════════ -->
+<section id="methods" aria-labelledby="sm-heading">
+  <div class="container">
+    <div class="section-header"><div class="section-eyebrow">Methods</div><h2 id="sm-heading">Where does the data come from?</h2><p>Read this before interpreting any figure on this page.</p></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-body">
+        <h3 style="margin-bottom:.6rem">The data pipeline</h3>
+        <p style="font-size:.9rem;color:var(--c-muted)">Every figure is derived from <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a>, an open, freely licensed (CC0) catalogue of the world's scholarly works, authors, institutions and venues. A scheduled GitHub Action queries the OpenAlex REST API once per week and commits the responses as static JSON into this repository; the page then renders those snapshots entirely in your browser. There is no backend, no database, and no tracking — the whole tool is one static HTML file plus a folder of cached API responses.</p>
+        <p style="font-size:.9rem;color:var(--c-muted);margin-top:.6rem">Works are attributed to Münster via its OpenAlex institution ID (<code>I22465464</code>). Disciplines, topics and the four Impact Areas are derived from OpenAlex's automated topic classification, not from any faculty roster.</p>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <h3 style="margin-bottom:.6rem">Limitations</h3>
+        <ul style="font-size:.9rem;color:var(--c-muted);padding-left:1.1rem;display:flex;flex-direction:column;gap:.35rem">
+          <li><strong>Metrics ≠ quality.</strong> Counts capture volume and attention, never significance or rigour.</li>
+          <li><strong>Coverage gaps.</strong> OpenAlex indexes works with a discoverable record; books, reports, non-English and pre-2000 output are under-represented.</li>
+          <li><strong>Classification is algorithmic.</strong> Topic, field and SDG tags are machine-assigned and occasionally wrong.</li>
+          <li><strong>Faculty figures are a proxy.</strong> Faculties are mapped to OpenAlex research fields, so related faculties sharing a field show similar numbers.</li>
+          <li><strong>Author disambiguation</strong> is automated and can merge or split people.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="grid-2" style="margin-top:1.25rem">
+      <div class="card"><div class="card-body">
+        <h3 style="margin-bottom:.6rem">How is this different from Scopus or Web of Science?</h3>
+        <p style="font-size:.9rem;color:var(--c-muted)">Scopus (Elsevier) and Web of Science (Clarivate) are <em>curated, selective</em> databases behind paid subscriptions: an editorial board decides which journals are indexed, which tends to favour established, English-language, journal-based fields. OpenAlex is <em>open and inclusive</em> — it ingests Crossref, PubMed, the former Microsoft Academic Graph, repositories and more under a CC0 licence, so it is broader (more preprints, datasets, books, Global-South and non-English output) but less hand-curated. Consequently absolute counts here will differ from a SciVal/InCites report built on Scopus/WoS; treat the numbers as one open lens, not as the single ground truth. Commercial tools also offer field-normalised indicators (e.g. FWCI) that OpenAlex does not provide out of the box.</p>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <h3 style="margin-bottom:.6rem">What this dashboard does <em>not</em> use</h3>
+        <p style="font-size:.9rem;color:var(--c-muted)"><strong>It does not use the University's research-information system (CRIS).</strong> Münster's internal CRIS holds authoritative, locally curated records — including complete project, funding and personnel data — but it is internal and not openly licensed. This dashboard deliberately relies only on the public OpenAlex data so that anyone can reproduce it.</p>
+        <p style="font-size:.9rem;color:var(--c-muted);margin-top:.6rem"><strong>Funding &amp; cost data are limited.</strong> OpenAlex records some funder acknowledgements but no programme-level detail (DFG SFBs, Exzellenzstrategie clusters) and no euro amounts; those live in the CRIS and in <a href="https://gepris.dfg.de" target="_blank" rel="noopener">DFG GEPRIS</a>. Likewise, money spent on APCs and journal subscriptions is not in OpenAlex — APC spending is tracked by the <a href="https://openapc.net" target="_blank" rel="noopener">OpenAPC</a> initiative, and subscription costs sit in library budgets. See the answers in the project notes for detail.</p>
+      </div></div>
     </div>
   </div>
 </section>
@@ -569,8 +606,9 @@ const IMPACT_AREAS = [
   { name:'Sustainable Futures',                            color:'#E65100', fields:[23,19,21,11] },
 ];
 
-const OA_COLORS = { gold:'#FFD700', green:'#2e7d32', hybrid:'#FF8F00', bronze:'#CD7F32', closed:'#9e9e9e' };
-const OA_LABELS = { gold:'Gold', green:'Green', hybrid:'Hybrid', bronze:'Bronze', closed:'Closed' };
+const OA_COLORS = { gold:'#FFD700', diamond:'#00B8D4', green:'#2e7d32', hybrid:'#FF8F00', bronze:'#CD7F32', closed:'#9e9e9e' };
+const OA_LABELS = { gold:'Gold', diamond:'Diamond', green:'Green', hybrid:'Hybrid', bronze:'Bronze', closed:'Closed' };
+const OA_KEYS = ['gold','diamond','green','hybrid','bronze','closed'];
 const DOMAIN_COLORS = ['#1565C0','#2e7d32','#AD1457','#E65100'];
 const SDG_COLORS = {1:'#E5243B',2:'#DDA63A',3:'#4C9F38',4:'#C5192D',5:'#FF3A21',6:'#26BDE2',7:'#FCC30B',8:'#A21942',9:'#FD6925',10:'#DD1367',11:'#FD9D24',12:'#BF8B2E',13:'#3F7E44',14:'#0A97D9',15:'#56C02B',16:'#00689D',17:'#19486A'};
 
@@ -714,7 +752,14 @@ document.getElementById('modal-save-btn').addEventListener('click',()=>{ const v
 document.getElementById('modal-skip-btn').addEventListener('click',closeModal);
 document.getElementById('settings-btn').addEventListener('click',openModal);
 $overlay.addEventListener('click',closeModal);
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* Warning popup — shown once per session, dismissible */
+const $warnModal=document.getElementById('warn-modal'), $warnOverlay=document.getElementById('warn-overlay');
+function closeWarn(){ $warnModal.classList.remove('open'); $warnOverlay.classList.remove('open'); sessionStorage.setItem('warn_ack','1'); }
+function maybeShowWarn(){ if(!sessionStorage.getItem('warn_ack')){ $warnModal.classList.add('open'); $warnOverlay.classList.add('open'); document.getElementById('warn-ack-btn').focus(); } }
+document.getElementById('warn-ack-btn').addEventListener('click',closeWarn);
+$warnOverlay.addEventListener('click',closeWarn);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeWarn(); } });
 
 /* ============================================================ 1 · OVERVIEW */
 async function loadOverview(){
@@ -766,7 +811,7 @@ async function loadOutput(){
       fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID}`,group_by:'primary_location.source.id',per_page:'10',sort:'count:desc'})),
       fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:>${CURR_YEAR-4}`,sort:'cited_by_count:desc',per_page:'5',select:'id,title,doi,publication_year,cited_by_count,open_access,primary_location'})),
     ]);
-    const oaKeys=['gold','green','hybrid','bronze','closed'];
+    const oaKeys=OA_KEYS;
     setWrap('output-bar-wrap','<canvas id="output-bar-chart" aria-label="Annual publications by OA status" role="img"></canvas>');
     mkChart('output-bar-chart',{type:'bar',data:{labels:years,datasets:oaKeys.map(k=>({label:OA_LABELS[k],data:years.map((_,i)=>{const g=(oaByYear[i].group_by||[]).find(x=>x.key===k);return g?g.count:0;}),backgroundColor:OA_COLORS[k]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10}}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)}}}}});
 
@@ -794,16 +839,17 @@ async function loadOpenAccess(){
       fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${cy}`,group_by:'open_access.oa_status'})),
       ...ty.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'open_access.oa_status'})))
     ]);
-    const oaKeys=['gold','green','hybrid','bronze','closed'];
+    const oaKeys=OA_KEYS;
     const rate=(g,ex='closed')=>{const t=g.reduce((s,x)=>s+x.count,0);const o=g.filter(x=>x.key!==ex).reduce((s,x)=>s+x.count,0);return t>0?o/t*100:0;};
     const og=overall.group_by||[], cg=curr.group_by||[];
     const goldCurr=(()=>{const t=cg.reduce((s,x)=>s+x.count,0);const gold=cg.find(x=>x.key==='gold')?.count||0;return t>0?gold/t*100:0;})();
     document.getElementById('oa-stat-cards').innerHTML=[{v:fmtP(rate(cg)),l:`OA rate ${cy}`},{v:fmtP(goldCurr),l:`Gold OA rate ${cy}`},{v:fmtP(rate(og)),l:'OA rate all time'}].map(c=>`<div class="stat-card"><div class="stat-val">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('');
 
     const dc=oaKeys.map(k=>og.find(g=>g.key===k)?.count||0), dt=dc.reduce((s,v)=>s+v,0);
-    const oaPct=dt>0?dc.slice(0,4).reduce((s,v)=>s+v,0)/dt*100:0;
+    const closedCount=og.find(g=>g.key==='closed')?.count||0;
+    const oaPct=dt>0?(dt-closedCount)/dt*100:0;
     setWrap('oa-donut-wrap','<canvas id="oa-donut-chart" aria-label="OA status donut" role="img"></canvas>');
-    mkChart('oa-donut-chart',{type:'doughnut',data:{labels:oaKeys.map(k=>OA_LABELS[k]),datasets:[{data:dc,backgroundColor:oaKeys.map(k=>OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#15233c':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} (${fmtP(c.raw/dt*100)})`}},title:{display:true,text:`${fmtP(oaPct)} Open Access`,font:{family:'Playfair Display',size:16},color:isDark()?'#4ea3d6':'#00305D'}},cutout:'60%'}});
+    mkChart('oa-donut-chart',{type:'doughnut',data:{labels:oaKeys.map(k=>OA_LABELS[k]),datasets:[{data:dc,backgroundColor:oaKeys.map(k=>OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} (${fmtP(c.raw/dt*100)})`}},title:{display:true,text:`${fmtP(oaPct)} Open Access`,font:{family:'Calibri, Carlito, sans-serif',size:16,weight:'700'},color:isDark()?'#5fb5e5':'#00305D'}},cutout:'60%'}});
 
     setWrap('oa-trend-wrap','<canvas id="oa-trend-chart" aria-label="OA trend" role="img"></canvas>');
     mkChart('oa-trend-chart',{type:'line',data:{labels:ty,datasets:oaKeys.map(k=>({label:OA_LABELS[k],data:ty.map((_,i)=>{const g=trend[i]?.group_by||[];const t=g.reduce((s,x)=>s+x.count,0);const c=g.find(x=>x.key===k)?.count||0;return t>0?c/t*100:0;}),fill:true,backgroundColor:OA_COLORS[k]+'cc',borderColor:OA_COLORS[k],borderWidth:1,tension:.3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtP(c.raw)}`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{stacked:true,min:0,max:100,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>v+'%'}}}}});
@@ -1064,8 +1110,8 @@ function setupNavSpy(){
 function initDashboard(){ $pb.style.width='5%'; $pb.style.opacity='1'; loadOverview(); setupLazyLoad(); setupNavSpy(); }
 (function boot(){
   initTheme();
+  maybeShowWarn();              // dismissible quality/SciVal warning popup
   initDashboard();              // data-only: works from data/*.json, no key required
-  if(!apiKey() && !localStorage.getItem('seen_modal')){ /* first visit: gentle hint only, non-blocking */ }
 })();
 </script>
 </body>
