@@ -1,0 +1,37 @@
+name: Refresh OpenAlex Data
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'   # Every Monday at 03:00 UTC
+  workflow_dispatch:       # Allow manual trigger from the Actions tab
+
+permissions:
+  contents: write          # Needed to push data/ back to the repo
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false  # Never cancel a running refresh; let it finish
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download OpenAlex data
+        env:
+          OA_API_KEY: ${{ secrets.OA_API_KEY }}
+        run: bash scripts/download-data.sh
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: refresh OpenAlex data $(date -u '+%Y-%m-%d') [skip ci]"
+            git push
+          fi
