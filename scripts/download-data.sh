@@ -85,6 +85,9 @@ download "topics" \
 download "domains" \
   "${API}/works?filter=institutions.id:${INST}&group_by=topics.domain.id"
 
+download "fields" \
+  "${API}/works?filter=institutions.id:${INST}&group_by=topics.field.id&per_page=30"
+
 download "sdg" \
   "${API}/works?filter=institutions.id:${INST}&group_by=sustainable_development_goals.id&per_page=20"
 
@@ -94,7 +97,36 @@ download "topics_early" \
 download "topics_late" \
   "${API}/works?filter=institutions.id:${INST},publication_year:>2021,publication_year:<2025&group_by=topics.id&per_page=200"
 
-# ── Section 5 — Collaboration ─────────────────────────────────────────────────
+# ── Section 5 — Faculty profiles (field-level proxy) ──────────────────────────
+# Each faculty maps to one or more OpenAlex field IDs. We download yearly output,
+# OA status and leading topics per faculty. Faculties that share a field set
+# produce identical data (a known OpenAlex limitation).
+
+echo "▸ Faculties"
+declare -A FAC_FIELDS=(
+  [FB1]="12" [FB2]="12" [FB3]="33" [FB4]="20|14" [FB5]="27|13|24"
+  [FB6]="33" [FB7]="32" [FB8]="12" [FB9]="12" [FB10]="26|17"
+  [FB11]="31" [FB12]="16|30" [FB13]="11|13" [FB14]="19|23" [FB15]="12"
+)
+for code in FB1 FB2 FB3 FB4 FB5 FB6 FB7 FB8 FB9 FB10 FB11 FB12 FB13 FB14 FB15; do
+  # Build topics.field.id filter: prefix each numeric id with the OpenAlex URL
+  raw="${FAC_FIELDS[$code]}"
+  fieldfilter=""
+  IFS='|' read -ra nums <<< "$raw"
+  for n in "${nums[@]}"; do
+    seg="https://openalex.org/fields/${n}"
+    fieldfilter="${fieldfilter:+${fieldfilter}|}${seg}"
+  done
+  facfilter="institutions.id:${INST},topics.field.id:${fieldfilter}"
+  download "faculty_${code}_year" \
+    "${API}/works?filter=${facfilter}&group_by=publication_year&per_page=200"
+  download "faculty_${code}_oa" \
+    "${API}/works?filter=${facfilter}&group_by=open_access.oa_status"
+  download "faculty_${code}_topics" \
+    "${API}/works?filter=${facfilter}&group_by=topics.id&per_page=10&sort=count:desc"
+done
+
+# ── Section 6 — Collaboration ─────────────────────────────────────────────────
 
 echo "▸ Collaboration"
 download "collab_countries" \
@@ -104,7 +136,7 @@ download "collab_institutions" \
   "${API}/works?filter=institutions.id:${INST}&group_by=authorships.institutions.id&per_page=20&sort=count:desc"
 
 download "collab_intl" \
-  "${API}/works?filter=institutions.id:${INST},authorships.institutions.country_code:!de&per_page=1"
+  "${API}/works?filter=institutions.id:${INST},countries_distinct_count:>1&per_page=1"
 
 # ── Section 6 — Benchmarking ──────────────────────────────────────────────────
 
