@@ -17,16 +17,16 @@
    Dark  = WWU deep navy. Toggled via [data-theme] on <html>. */
 :root,
 [data-theme="light"] {
-  --c-primary:   #00305D;   /* WWU dark blue  */
-  --c-accent:    #009FE3;   /* WWU light blue */
+  --c-primary:   #00305D;   /* Uni Münster dark blue */
+  --c-accent:    #009FE3;   /* Uni Münster cyan */
   --c-success:   #2e7d32;
-  --c-surface:   #ecebe3;   /* warm cream panel */
-  --c-border:    #d9d6cb;
+  --c-surface:   #eef1f4;
+  --c-border:    #dce1e6;
   --c-text:      #1a1d21;
-  --c-muted:     #6c6b63;
-  --c-bg:        #f5f4ee;   /* cream page */
+  --c-muted:     #5b6770;
+  --c-bg:        #ffffff;   /* corporate-design light = white */
   --c-card:      #ffffff;
-  --c-hero-bg:   #f5f4ee;
+  --c-hero-bg:   #ffffff;
   --c-hero-text: #00305D;
   --shadow:      0 1px 4px rgba(0,0,0,.08);
   --radius:      8px;
@@ -35,18 +35,18 @@
   --nav-h:       62px;
 }
 [data-theme="dark"] {
-  --c-primary:   #4ea3d6;
-  --c-accent:    #2bb3f0;
+  --c-primary:   #5fb5e5;   /* headings on slate */
+  --c-accent:    #00A0E0;   /* corporate cyan */
   --c-success:   #66bb6a;
-  --c-surface:   #16213e;
-  --c-border:    #2a3a5c;
-  --c-text:      #e2e8f0;
-  --c-muted:     #8ea0b6;
-  --c-bg:        #0b1626;
-  --c-card:      #15233c;
-  --c-hero-bg:   #0b1626;
-  --c-hero-text: #e8eef6;
-  --shadow:      0 1px 6px rgba(0,0,0,.45);
+  --c-surface:   #3b4654;
+  --c-border:    #4a5663;
+  --c-text:      #eef2f6;
+  --c-muted:     #a7b4c0;
+  --c-bg:        #2c343f;   /* corporate-design dark = slate grey */
+  --c-card:      #353f4b;
+  --c-hero-bg:   #2c343f;
+  --c-hero-text: #00A0E0;   /* cyan headline, as on the poster */
+  --shadow:      0 1px 6px rgba(0,0,0,.4);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -248,6 +248,30 @@ footer{background:var(--c-surface);border-top:1px solid var(--c-border);padding:
 footer .container{display:flex;flex-direction:column;gap:.5rem}
 footer p{font-size:.8rem;color:var(--c-muted)}
 
+/* ── Theme-conditional assets ──────────────────────────────── */
+[data-theme="dark"] .only-light{display:none!important}
+[data-theme="light"] .only-dark{display:none!important}
+.nav-logo{height:34px;width:auto;display:block}
+
+/* ── Triangular corporate header ───────────────────────────── */
+.hero{position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:0;right:0;width:46%;height:64px;background:var(--c-accent);clip-path:polygon(100% 0,100% 100%,18% 0);pointer-events:none}
+.hero::after{content:"";position:absolute;bottom:0;left:0;width:55%;height:5px;background:var(--c-accent);clip-path:polygon(0 100%,100% 100%,0 0);pointer-events:none;opacity:.9}
+.hero-inner{position:relative;z-index:1}
+
+/* ── Warning banner ────────────────────────────────────────── */
+.warn-banner{background:var(--c-accent);color:#fff;font-size:.86rem;line-height:1.45}
+[data-theme="dark"] .warn-banner{color:#0b1118}
+.warn-banner .container{display:flex;gap:.75rem;align-items:flex-start;padding-top:.8rem;padding-bottom:.8rem}
+.warn-banner svg{flex-shrink:0;width:22px;height:22px;margin-top:1px}
+.warn-banner strong{font-weight:700}
+
+/* ── Corporate footer (wissen.leben + MüCOS) ───────────────── */
+.brand-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--c-border)}
+.wl-wordmark{font-family:var(--font-b);font-size:1.3rem;font-weight:300;color:var(--c-text)}
+.wl-wordmark b{font-weight:700}
+.mucos-logo{height:40px;width:auto;background:#fff;padding:6px 10px;border-radius:6px;border:1px solid var(--c-border)}
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media(max-width:1024px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){.nav-links{display:none}.grid-2,.grid-3,.grid-4,.stat-cards{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
@@ -286,12 +310,8 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 <!-- Navigation -->
 <nav id="navbar" aria-label="Main navigation">
   <div class="nav-brand">
-    <svg width="30" height="36" viewBox="0 0 32 38" fill="none" aria-hidden="true">
-      <path d="M16 1L2 7v12c0 9 6.5 15.5 14 18 7.5-2.5 14-9 14-18V7L16 1z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.2"/>
-      <path d="M16 5L5 10v10c0 7 4.5 12 11 14 6.5-2 11-7 11-14V10L16 5z" fill="none" stroke="currentColor" stroke-width=".7" stroke-opacity=".6"/>
-      <text x="16" y="24" text-anchor="middle" font-family="serif" font-size="10" fill="currentColor" font-weight="bold">UM</text>
-    </svg>
-    <span class="wordmark">Münster Research Intelligence</span>
+    <img class="nav-logo only-light" src="data/logo-um.svg" alt="Universität Münster">
+    <img class="nav-logo only-dark"  src="data/logo-um-white.svg" alt="Universität Münster">
   </div>
   <nav class="nav-links" aria-label="Section links">
     <a href="#overview">Overview</a>
@@ -315,13 +335,21 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
 <main>
 
+<!-- Warning banner -->
+<div class="warn-banner" role="note">
+  <div class="container">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div><strong>Quantitative metrics are not a proxy for research quality.</strong> Publication and citation counts measure volume and attention, not significance, rigour, or societal value — read them as context, never as a verdict. This dashboard is a free and open-source alternative to commercial tools such as SciVal, built so that bibliometric transparency need not depend on a paid subscription.</div>
+  </div>
+</div>
+
 <!-- ════════ 1. OVERVIEW ════════ -->
 <section id="overview" aria-labelledby="s1-heading">
   <div class="hero">
     <div class="hero-inner">
-      <div class="hero-eyebrow">Research Intelligence · OpenAlex Live</div>
-      <h1 id="s1-heading">University of Münster</h1>
-      <p class="hero-sub">A live bibliometric portrait of the Westfälische Wilhelms-Universität — publication output, open access, collaboration and strategic indicators aligned to the Hochschulentwicklungsplan 2024–2028.</p>
+      <div class="hero-eyebrow">Bibliometric Dashboard · OpenAlex Live</div>
+      <h1 id="s1-heading">Quantitative Research Output of the University of Münster</h1>
+      <p class="hero-sub">Publication output, open access, collaboration and strategic indicators of the University of Münster — drawn live from OpenAlex and aligned to the Hochschulentwicklungsplan 2024–2028.</p>
       <div class="hero-meta" id="hero-meta">
         <span class="chip">Public Research University</span>
         <span class="chip">Germany · U15 Alliance</span>
@@ -461,7 +489,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
       <div class="hep-card skeleton" style="height:170px"></div><div class="hep-card skeleton" style="height:170px"></div>
     </div>
     <div class="grid-2">
-      <div class="card"><div class="card-header"><h3>Research Profile — Four Impact Areas</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:360px;width:100%" id="impact-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Research Profile — Four Impact Areas</h3></div><div class="card-body"><div class="chart-wrap" id="impact-wrap"><div class="skeleton skel-chart"></div></div></div></div>
       <div class="card"><div class="card-header"><h3>Strategic Partner Countries (co-authorship)</h3></div><div class="card-body"><div class="chart-wrap" id="partners-wrap"><div class="skeleton skel-chart"></div></div></div></div>
     </div>
     <div class="callout">
@@ -474,10 +502,13 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
 <footer>
   <div class="container">
+    <div class="brand-bar">
+      <span class="wl-wordmark">wissen.<b>leben</b></span>
+      <img class="mucos-logo" src="data/logo-mucos.jpg" alt="MüCOS — Münster Center for Open Science">
+    </div>
     <p>Data source: <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> (openalex.org) — CC0 licence. Dashboard built for the University of Münster.</p>
     <p>Strategic indicators reference the <em>Hochschulentwicklungsplan der Universität Münster 2024–2028</em>.</p>
     <p>Last data refresh: <span id="footer-refresh"></span></p>
-    <p>This dashboard is not affiliated with or endorsed by Elsevier/SciVal.</p>
   </div>
 </footer>
 
@@ -489,24 +520,25 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 const INST_ID  = 'I22465464';
 const API_BASE = 'https://api.openalex.org';
 const CURR_YEAR = 2026;
-const FIELD_BASE = 'https://openalex.org/fields/';
+const FIELD_BASE = 'fields/';   /* OpenAlex filter wants the short form, not a full URL */
 
+/* OpenAlex institution IDs verified against the live API (June 2026). */
 const U15 = [
-  { name: "Universität Münster",    id: "I22465464",   highlight: true },
-  { name: "FU Berlin",              id: "I1292875679"  },
-  { name: "HU Berlin",              id: "I45335783"    },
-  { name: "Universität Bonn",       id: "I112057170"   },
-  { name: "Universität Frankfurt",  id: "I55449684"    },
-  { name: "Universität Freiburg",   id: "I16951967"    },
-  { name: "Universität Göttingen",  id: "I1278002445"  },
-  { name: "Universität Hamburg",    id: "I202697675"   },
-  { name: "Universität Heidelberg", id: "I14961990"    },
-  { name: "Universität Köln",       id: "I55249678"    },
-  { name: "LMU München",            id: "I43489663"    },
-  { name: "TU München",             id: "I51556381"    },
-  { name: "Universität Stuttgart",  id: "I179430786"   },
-  { name: "Universität Tübingen",   id: "I74977"       },
-  { name: "Universität Würzburg",   id: "I66743132"    },
+  { name: "Universität Münster",    id: "I22465464",  highlight: true },
+  { name: "FU Berlin",              id: "I75951250"  },
+  { name: "HU Berlin",              id: "I39343248"  },
+  { name: "Universität Bonn",       id: "I135140700" },
+  { name: "Universität Frankfurt",  id: "I114090438" },
+  { name: "Universität Freiburg",   id: "I161046081" },
+  { name: "Universität Göttingen",  id: "I74656192"  },
+  { name: "Universität Hamburg",    id: "I159176309" },
+  { name: "Universität Heidelberg", id: "I223822909" },
+  { name: "Universität Köln",       id: "I180923762" },
+  { name: "LMU München",            id: "I8204097"   },
+  { name: "TU München",             id: "I62916508"  },
+  { name: "Universität Stuttgart",  id: "I100066346" },
+  { name: "Universität Tübingen",   id: "I8087733"   },
+  { name: "Universität Würzburg",   id: "I25974101"  },
 ];
 
 /* Faculty → OpenAlex field-id proxy. code is used for the cache filename. */
@@ -992,17 +1024,18 @@ async function loadStrategy(){
     const s=_instData?.summary_stats||{};
 
     document.getElementById('hep-grid').innerHTML=[
-      {goal:'Forschung · Exzellenz',val:fmt(s.h_index??'—'),desc:'Institutional h-index — overall citation impact of Münster research.',ref:'HEP: „exzellente Forschung in all ihren Formen“ (Planungsgrundsatz 1).'},
-      {goal:'Open Science',val:fmtP(oaRate),desc:'Share of all output that is openly accessible.',ref:'HEP: Etablierung einer „Open-Science-Kultur“ (wissen.leben.forschen).'},
-      {goal:'Internationalisierung',val:fmtP(intlRate),desc:'Share of works with at least one non-German co-author.',ref:'HEP: Ausbau „internationaler Vernetzung“ (Planungsgrundsatz 5).'},
-      {goal:'Nachhaltigkeit',val:fmtP(sdgShare),desc:`${fmt(sdgTotal)} works aligned to the UN Sustainable Development Goals.`,ref:'HEP: Nachhaltigkeit als „verbindende Leitidee“ (Planungsgrundsatz 7).'},
+      {goal:'Research Excellence',val:fmt(s.h_index??'—'),desc:'Institutional h-index — overall citation impact of Münster research.',ref:'HEP: support for “excellent research in all its forms” (Planning Principle 1).'},
+      {goal:'Open Science',val:fmtP(oaRate),desc:'Share of all output that is openly accessible.',ref:'HEP: establishing an “open-science culture” (Research chapter).'},
+      {goal:'Internationalization',val:fmtP(intlRate),desc:'Share of works co-authored across more than one country.',ref:'HEP: expanding “international networking” (Planning Principle 5).'},
+      {goal:'Sustainability',val:fmtP(sdgShare),desc:`${fmt(sdgTotal)} works aligned to the UN Sustainable Development Goals.`,ref:'HEP: sustainability as a “unifying guiding principle” (Planning Principle 7).'},
     ].map(c=>`<div class="hep-card"><div class="hep-goal">${SVG.up} ${c.goal}</div><div class="hep-val">${c.val}</div><div class="hep-desc">${c.desc}</div><div class="hep-ref">${c.ref}</div></div>`).join('');
 
     // Impact Areas doughnut
     const fnum={}; (fields.group_by||[]).forEach(g=>{const n=parseInt((g.key||'').replace(/\D/g,''));if(n)fnum[n]=(fnum[n]||0)+g.count;});
     const areaVals=IMPACT_AREAS.map(a=>a.fields.reduce((s,n)=>s+(fnum[n]||0),0));
-    setWrap('impact-wrap','<canvas id="impact-chart" aria-label="Impact areas" role="img"></canvas>');
-    mkChart('impact-chart',{type:'doughnut',data:{labels:IMPACT_AREAS.map(a=>a.name),datasets:[{data:areaVals,backgroundColor:IMPACT_AREAS.map(a=>a.color),borderWidth:2,borderColor:isDark()?'#15233c':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>{const t=areaVals.reduce((s,v)=>s+v,0);return `${c.label}: ${fmt(c.raw)} (${fmtP(t>0?c.raw/t*100:0)})`;}}}},cutout:'55%'}});
+    const areaTot=areaVals.reduce((s,v)=>s+v,0)||1;
+    setWrap('impact-wrap','<canvas id="impact-chart" style="max-height:340px" aria-label="Output across the four HEP impact areas" role="img"></canvas>');
+    mkChart('impact-chart',{type:'bar',data:{labels:IMPACT_AREAS.map(a=>a.name),datasets:[{data:areaVals,backgroundColor:IMPACT_AREAS.map(a=>a.color),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{bottom:6}},plugins:{legend:{display:false},subtitle:{display:true,text:['Münster bundles its disciplinary strengths into four interfaculty Impact Areas.','Bars show the number of works whose OpenAlex research field maps to each area.'],color:tickColor(),font:{size:10.5},padding:{bottom:12}},tooltip:{callbacks:{label:c=>`${fmt(c.raw)} works (${fmtP(c.raw/areaTot*100)})`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)}},y:{grid:{display:false},ticks:{color:tickColor(),font:{size:11}}}}}});
 
     // Strategic partner countries
     const cg=(countries.group_by||[]).filter(g=>g.key&&cc2(g.key)!=='DE'&&cc2(g.key)!=='UNKNOWN').sort((a,b)=>b.count-a.count);

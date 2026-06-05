@@ -114,7 +114,7 @@ for code in FB1 FB2 FB3 FB4 FB5 FB6 FB7 FB8 FB9 FB10 FB11 FB12 FB13 FB14 FB15; d
   fieldfilter=""
   IFS='|' read -ra nums <<< "$raw"
   for n in "${nums[@]}"; do
-    seg="https://openalex.org/fields/${n}"
+    seg="fields/${n}"
     fieldfilter="${fieldfilter:+${fieldfilter}|}${seg}"
   done
   facfilter="institutions.id:${INST},topics.field.id:${fieldfilter}"
