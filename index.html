@@ -805,9 +805,100 @@ function buildUrl(path, params = {}) {
   return u.toString();
 }
 
+/* Map an API URL to a pre-fetched local data file (data/*.json).
+   Returns null for dynamic URLs that cannot be pre-cached. */
+function localFilePath(url) {
+  try {
+    const u      = new URL(url);
+    const p      = u.pathname;
+    const gb     = u.searchParams.get('group_by') || '';
+    const filter = u.searchParams.get('filter')   || '';
+    const sort   = u.searchParams.get('sort')      || '';
+
+    // Institution overview
+    if (p === `/institutions/${INST_ID}` && !u.searchParams.get('select')) return 'data/institution.json';
+
+    // Works — grouped by year
+    if (p === '/works' && gb === 'publication_year') return 'data/works_by_year.json';
+
+    // Works — grouped by type
+    if (p === '/works' && gb === 'type') return 'data/works_by_type.json';
+
+    // Works — top venues
+    if (p === '/works' && gb === 'primary_location.source.id') return 'data/venues.json';
+
+    // Works — recent highly-cited (sorted by citations, filtered by recent years)
+    if (p === '/works' && sort.includes('cited_by_count') && filter.includes('publication_year:>')) return 'data/recent_works.json';
+
+    // Works — OA status per year
+    if (p === '/works' && gb === 'open_access.oa_status' && filter.includes('publication_year:')) {
+      const m = filter.match(/publication_year:(\d{4})/);
+      if (m) return `data/oa_year_${m[1]}.json`;
+    }
+    // Works — OA status overall
+    if (p === '/works' && gb === 'open_access.oa_status') return 'data/oa_all.json';
+
+    // Works — topics (year-range variants must be checked before the catch-all)
+    if (p === '/works' && gb === 'topics.id') {
+      if (filter.includes('>2018')) return 'data/topics_early.json';
+      if (filter.includes('>2021')) return 'data/topics_late.json';
+      return 'data/topics.json';
+    }
+    // Works — topic domains
+    if (p === '/works' && gb === 'topics.domain.id') return 'data/domains.json';
+
+    // Works — SDGs
+    if (p === '/works' && gb === 'sustainable_development_goals.id') return 'data/sdg.json';
+
+    // Works — collaboration countries
+    if (p === '/works' && gb === 'authorships.institutions.country_code') return 'data/collab_countries.json';
+
+    // Works — collaboration institutions
+    if (p === '/works' && gb === 'authorships.institutions.id') return 'data/collab_institutions.json';
+
+    // Works — international co-authorship count (non-DE, per_page=1)
+    if (p === '/works' && filter.includes('country_code:!de')) return 'data/collab_intl.json';
+
+    // Works — active authors per year
+    if (p === '/works' && gb === 'authorships.author.id') {
+      const m = filter.match(/publication_year:(\d{4})/);
+      if (m) return `data/active_${m[1]}.json`;
+    }
+
+    // Institutions — U15 benchmarking (with ?select params) + Münster itself
+    if (p.startsWith('/institutions/')) {
+      const id = p.replace('/institutions/', '');
+      if (id === INST_ID) return 'data/institution.json';
+      return `data/bench_${id}.json`;
+    }
+
+    // Authors — top 20 (no search term)
+    if (p === '/authors' && !u.searchParams.get('search')) return 'data/authors.json';
+
+    // Dynamic endpoints (batch topic details, author search) — no local file
+  } catch {}
+  return null;
+}
+
 async function fetchAPI(rawUrl) {
+  // 1. SessionStorage (within-session cache)
   const cached = sessionStorage.getItem(rawUrl);
   if (cached) { try { return JSON.parse(cached); } catch {} }
+
+  // 2. Pre-fetched weekly snapshot in data/
+  const localPath = localFilePath(rawUrl);
+  if (localPath) {
+    try {
+      const r = await fetch(localPath);
+      if (r.ok) {
+        const data = await r.json();
+        try { sessionStorage.setItem(rawUrl, JSON.stringify(data)); } catch {}
+        return data;
+      }
+    } catch {}
+  }
+
+  // 3. Live OpenAlex API (fallback)
   const resp = await fetch(rawUrl);
   if (!resp.ok) throw Object.assign(new Error(`HTTP ${resp.status}`), { url: rawUrl, status: resp.status });
   const data = await resp.json();
