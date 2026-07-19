@@ -24,11 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject OpenAlex API key
-        env:
-          OA_API_KEY: ${{ secrets.OA_API_KEY }}
-        run: sed -i "s|%%OA_API_KEY%%|${OA_API_KEY}|g" index.html
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

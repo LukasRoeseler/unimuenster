@@ -2,7 +2,10 @@ name: Refresh OpenAlex Data
 
 on:
   schedule:
-    - cron: '0 3 * * 1'   # Every Monday at 03:00 UTC
+    # Every Monday at 03:23 UTC. Off the top of the hour: GitHub's own docs warn
+    # that :00 schedules are the most likely to be delayed or dropped under load
+    # (this file previously had no .yml extension, so it never actually ran at all).
+    - cron: '23 3 * * 1'
   workflow_dispatch:       # Allow manual trigger from the Actions tab
 
 permissions:
