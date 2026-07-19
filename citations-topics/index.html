@@ -100,6 +100,10 @@ h1,h2,h3,.num{font-family:var(--font-h)}
 .btn-primary{background:var(--c-primary);color:#fff}
 [data-theme="dark"] .btn-primary{color:#08121f}
 .btn-secondary{background:var(--c-surface);color:var(--c-text);border:1px solid var(--c-border)}
+.mode-toggle{display:flex;gap:2px;background:var(--c-surface);border-radius:6px;padding:2px}
+.mode-btn{font-size:.72rem;font-weight:600;padding:.3rem .7rem;border:none;background:transparent;color:var(--c-muted);cursor:pointer;border-radius:4px;font-family:var(--font-b);transition:all .15s}
+.mode-btn.active{background:var(--c-primary);color:#fff}
+[data-theme="dark"] .mode-btn.active{color:#08121f}
 
 /* ── Layout ────────────────────────────────────────────────── */
 main{padding-top:calc(var(--nav-h) + 3px)}
@@ -173,6 +177,11 @@ tr.highlight-row{border-left:3px solid var(--c-accent);font-weight:700;backgroun
 .badge-hybrid{background:#ffe9d1;color:#b35200}
 .badge-bronze{background:#f1e2da;color:#6d4c41}
 .badge-closed{background:var(--c-surface);color:var(--c-muted)}
+.badge-retraction{background:#fbe0e0;color:#8a2222}
+.badge-correction{background:#fff3c4;color:#7d5a00}
+.badge-expression-of-concern{background:#ffe9d1;color:#b35200}
+.badge-reinstatement{background:#e3f3e4;color:#1b5e20}
+.badge-other{background:var(--c-surface);color:var(--c-muted)}
 .cite-badge{display:inline-flex;align-items:center;gap:.3rem;background:var(--c-primary);color:#fff;padding:.12rem .55rem;border-radius:10px;font-size:.72rem;font-weight:600}
 [data-theme="dark"] .cite-badge{color:#08121f}
 
@@ -326,12 +335,12 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     <a href="#overview">Overview</a>
     <a href="#methods">Methods</a>
     <a href="#output">Scholarly Output</a>
-    <a href="#openaccess">Open Access</a>
-    <a href="#pubcosts">Article&nbsp;Processing&nbsp;Charges</a>
+    <a href="#pubcosts">Open&nbsp;Access&nbsp;&amp;&nbsp;Costs</a>
     <a href="#topics">Research Topics</a>
     <a href="#collaboration">Collaboration</a>
     <a href="#benchmarking">Benchmarking</a>
     <a href="#authors">Authors</a>
+    <a href="#retractions">Retractions</a>
     <a href="#strategy">HEP&nbsp;Strategy</a>
   </nav>
   <div class="nav-right">
@@ -423,30 +432,10 @@ footer p{font-size:.8rem;color:var(--c-muted)}
   </div>
 </section>
 
-<!-- ════════ 3. OPEN ACCESS ════════ -->
-<section id="openaccess" aria-labelledby="s3-heading" data-lazy="true">
+<!-- ════════ 3. OPEN ACCESS & COSTS ════════ -->
+<section id="pubcosts" aria-labelledby="s3-heading" data-lazy="true">
   <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 03</div><h2 id="s3-heading">Open Access</h2><p>OA status distribution and year-on-year trends — a core indicator of the HEP Open-Science goal.</p></div>
-    <div class="stat-cards" id="oa-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
-    <div class="grid-2" style="margin-bottom:1.25rem">
-      <div class="card"><div class="card-header"><h3>OA Status Distribution (all time)</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="oa-donut-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>OA Share Trend (2015–present)</h3></div><div class="card-body"><div class="chart-wrap" id="oa-trend-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-    </div>
-    <div class="callout" id="oa-explainer">
-      <strong>Understanding OA types:</strong>
-      <strong>Gold</strong> — published in a fully open-access journal.
-      <strong>Green</strong> — freely available via a repository deposit.
-      <strong>Hybrid</strong> — open under an APC in a subscription journal.
-      <strong>Bronze</strong> — free to read on the publisher site without a stated licence.
-      <strong>Closed</strong> — accessible only via subscription or paywall.
-    </div>
-  </div>
-</section>
-
-<!-- ════════ 4. ARTICLE PROCESSING CHARGES ════════ -->
-<section id="pubcosts" aria-labelledby="s10-heading" data-lazy="true">
-  <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 04</div><h2 id="s10-heading">Article Processing Charges</h2><p>Estimated article processing charges (APCs) across the institution's recorded output, broken down by open access route, publisher, discipline and year.</p></div>
+    <div class="section-header"><div class="section-eyebrow">Section 03</div><h2 id="s3-heading">Open Access &amp; Costs</h2><p>OA status, year-on-year trends, and estimated article processing charges (APCs) across the institution's recorded output — a core indicator of the HEP Open-Science goal.</p></div>
 
     <div class="callout" id="pc-progress-banner" style="margin-bottom:1rem"></div>
 
@@ -458,9 +447,30 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     <div class="stat-cards" id="pc-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
 
     <div class="grid-2" style="margin:1.25rem 0">
-      <div class="card"><div class="card-header"><h3>Cost Distribution</h3></div><div class="card-body"><div class="chart-wrap" id="pc-histogram-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Open Access Type (by cost)</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="pc-oa-donut-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+          <h3>OA Status Distribution</h3>
+          <div class="mode-toggle" id="oa-donut-toggle" role="group" aria-label="Show OA distribution by">
+            <button type="button" class="mode-btn active" data-mode="works">By works</button>
+            <button type="button" class="mode-btn" data-mode="cost">By cost</button>
+          </div>
+        </div>
+        <div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="pc-oa-donut-wrap"><div class="skeleton skel-chart"></div></div></div>
+      </div>
+      <div class="card"><div class="card-header"><h3>OA Share Trend by Year</h3></div><div class="card-body"><div class="chart-wrap" id="oa-trend-wrap"><div class="skeleton skel-chart"></div></div></div></div>
     </div>
+
+    <div class="callout" id="oa-explainer" style="margin-bottom:1.25rem">
+      <strong>Understanding OA types:</strong>
+      <strong>Gold</strong> — published in a fully open-access journal.
+      <strong>Diamond</strong> — fully open access with no author-facing fee.
+      <strong>Green</strong> — freely available via a repository deposit.
+      <strong>Hybrid</strong> — open under an APC in a subscription journal.
+      <strong>Bronze</strong> — free to read on the publisher site without a stated licence.
+      <strong>Closed</strong> — accessible only via subscription or paywall.
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Cost Distribution</h3></div><div class="card-body"><div class="chart-wrap" id="pc-histogram-wrap"><div class="skeleton skel-chart"></div></div></div></div>
 
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Cost by Publication Year, by Open Access Type</h3></div><div class="card-body"><div class="chart-wrap" id="pc-year-oa-wrap"><div class="skeleton skel-chart"></div></div></div></div>
 
@@ -483,7 +493,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 <!-- ════════ 5. RESEARCH TOPICS ════════ -->
 <section id="topics" aria-labelledby="s4-heading" data-lazy="true">
   <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 05</div><h2 id="s4-heading">Research Topics</h2><p>Thematic landscape, disciplinary balance, SDG alignment, and emerging areas.</p></div>
+    <div class="section-header"><div class="section-eyebrow">Section 04</div><h2 id="s4-heading">Research Topics</h2><p>Thematic landscape, disciplinary balance, SDG alignment, and emerging areas.</p></div>
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Topic Landscape — Top 25 Topics</h3></div><div class="card-body"><div id="treemap-wrap"><div class="skeleton skel-chart" style="height:420px"></div></div></div></div>
     <div class="grid-2" style="margin-bottom:1.25rem">
       <div class="card"><div class="card-header"><h3>Research Domain Profile</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:360px;width:100%" id="domain-radar-wrap"><div class="skeleton skel-chart"></div></div></div></div>
@@ -496,17 +506,21 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 <!-- ════════ 6. COLLABORATION ════════ -->
 <section id="collaboration" aria-labelledby="s6-heading" data-lazy="true">
   <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 06</div><h2 id="s6-heading">Collaboration</h2><p>International co-authorship network and top partner institutions — tracking the HEP internationalisation goal.</p></div>
+    <div class="section-header"><div class="section-eyebrow">Section 05</div><h2 id="s6-heading">Collaboration</h2><p>International co-authorship network and top partner institutions — tracking the HEP internationalisation goal.</p></div>
     <div class="stat-cards" id="collab-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>International Co-authorship Map</h3></div><div class="card-body" style="position:relative"><div id="worldmap-wrap"><div class="skeleton skel-chart" style="height:420px"></div></div><div class="map-legend" id="map-legend"></div></div></div>
-    <div class="card"><div class="card-header"><h3>Top 20 Collaborating Institutions</h3></div><div class="card-body"><div class="table-wrap" id="collab-inst-wrap"><div class="skeleton skel-table"></div></div></div></div>
+    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Top 20 Collaborating Institutions</h3></div><div class="card-body"><div class="table-wrap" id="collab-inst-wrap"><div class="skeleton skel-table"></div></div></div></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-header"><h3>Top Countries by Year</h3></div><div class="card-body"><div class="chart-wrap" id="collab-countries-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Top Collaborating Institutions by Year</h3></div><div class="card-body"><div class="chart-wrap" id="collab-inst-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+    </div>
   </div>
 </section>
 
 <!-- ════════ 7. BENCHMARKING ════════ -->
 <section id="benchmarking" aria-labelledby="s7-heading" data-lazy="true">
   <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 07</div><h2 id="s7-heading">Benchmarking</h2><p>University of Münster vs. the U15 alliance of leading German research universities.</p></div>
+    <div class="section-header"><div class="section-eyebrow">Section 06</div><h2 id="s7-heading">Benchmarking</h2><p>University of Münster vs. the U15 alliance of leading German research universities.</p></div>
     <div class="card" style="margin-bottom:1.5rem"><div class="card-header"><h3>U15 Comparison Table</h3></div><div class="card-body"><div class="table-wrap" id="bench-table-wrap"><div class="skeleton skel-table" style="height:320px"></div></div></div></div>
     <div class="grid-3">
       <div class="card"><div class="card-header"><h3>Total Works</h3></div><div class="card-body"><div class="chart-wrap" id="bench-works-wrap"><div class="skeleton skel-chart"></div></div></div></div>
@@ -520,7 +534,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 <!-- ════════ 8. AUTHORS ════════ -->
 <section id="authors" aria-labelledby="s8-heading" data-lazy="true">
   <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 08</div><h2 id="s8-heading">Authors</h2><p>Top-cited researchers, author search, and active-author trends (early-career capacity).</p></div>
+    <div class="section-header"><div class="section-eyebrow">Section 07</div><h2 id="s8-heading">Authors</h2><p>Top-cited researchers, author search, and active-author trends (early-career capacity).</p></div>
     <div class="search-wrap">
       <input type="text" id="author-search" placeholder="Search authors by name (requires API key)…" aria-label="Search authors">
       <button class="btn btn-secondary" id="author-clear-btn" style="display:none" aria-label="Clear author search">Clear</button>
@@ -530,6 +544,22 @@ footer p{font-size:.8rem;color:var(--c-muted)}
       <div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div>
     </div>
     <div class="card" style="margin-top:1.5rem"><div class="card-header"><h3>Active Authors per Year (estimated)</h3></div><div class="card-body"><div class="chart-wrap" id="active-authors-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+  </div>
+</section>
+
+<!-- ════════ 8. RETRACTIONS & EDITORIAL NOTICES ════════ -->
+<section id="retractions" aria-labelledby="s-retractions-heading" data-lazy="true">
+  <div class="container">
+    <div class="section-header"><div class="section-eyebrow">Section 08</div><h2 id="s-retractions-heading">Retractions &amp; Editorial Notices</h2><p>Retractions, corrections, and expressions of concern naming a University of Münster institution, via the Retraction Watch Database.</p></div>
+    <div class="stat-cards" id="rw-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
+    <div class="grid-2" style="margin:1.25rem 0">
+      <div class="card"><div class="card-header"><h3>Notices by Year</h3></div><div class="card-body"><div class="chart-wrap" id="rw-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Notice Type</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="rw-nature-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>All Matched Notices</h3></div><div class="card-body"><div class="table-wrap" id="rw-table-wrap"><div class="skeleton skel-table" style="height:320px"></div></div></div></div>
+    <div class="callout">
+      <strong>How matches are found.</strong> The Retraction Watch Database's Institution and Country fields are free text, not linked to OpenAlex or any other institution registry, so records here are matched by searching for a "Münster" name variant in the institution field (guarding against the unrelated Irish province of the same name). This can both miss records where Münster isn't named in that field and, rarely, include a false positive. Data via the <a href="https://gitlab.com/crossref/retraction-watch-data" target="_blank" rel="noopener">Retraction Watch Database</a>, hosted by Crossref and refreshed weekly — see <span id="rw-updated">—</span> for when this data was last refreshed.
+    </div>
   </div>
 </section>
 
@@ -654,7 +684,13 @@ function localFilePath(url){
     if(p==='/works' && gb==='topics.domain.id')              return 'data/domains.json';
     if(p==='/works' && gb==='topics.field.id')               return 'data/fields.json';
     if(p==='/works' && gb==='sustainable_development_goals.id') return 'data/sdg.json';
+    if(p==='/works' && gb==='authorships.institutions.country_code' && filter.includes('publication_year:')){
+      const m=filter.match(/publication_year:(\d{4})/); if(m) return `data/collab_countries_${m[1]}.json`;
+    }
     if(p==='/works' && gb==='authorships.institutions.country_code') return 'data/collab_countries.json';
+    if(p==='/works' && gb==='authorships.institutions.id' && filter.includes('publication_year:')){
+      const m=filter.match(/publication_year:(\d{4})/); if(m) return `data/collab_institutions_${m[1]}.json`;
+    }
     if(p==='/works' && gb==='authorships.institutions.id')   return 'data/collab_institutions.json';
     if(p==='/works' && filter.includes('countries_distinct_count:>1')) return 'data/collab_intl.json';
     if(p==='/works' && gb==='authorships.author.id'){
@@ -813,34 +849,6 @@ async function loadOutput(){
   }catch(err){ ['output-bar-wrap','output-type-wrap','venues-table-wrap','recent-works-wrap'].forEach(id=>setWrap(id,errBox(err.message,'loadOutput'))); progressTick(); }
 }
 
-/* ============================================================ 3 · OPEN ACCESS */
-async function loadOpenAccess(){
-  if(_sectionLoaded.openaccess) return; _sectionLoaded.openaccess=true;
-  try{
-    const cy=CURR_YEAR-1; const ty=[]; for(let y=2015;y<=cy;y++) ty.push(y);
-    const [overall,curr,...trend]=await Promise.all([
-      fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID}`,group_by:'open_access.oa_status'})),
-      fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${cy}`,group_by:'open_access.oa_status'})),
-      ...ty.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'open_access.oa_status'})))
-    ]);
-    const oaKeys=OA_KEYS;
-    const rate=(g,ex='closed')=>{const t=g.reduce((s,x)=>s+x.count,0);const o=g.filter(x=>x.key!==ex).reduce((s,x)=>s+x.count,0);return t>0?o/t*100:0;};
-    const og=overall.group_by||[], cg=curr.group_by||[];
-    const goldCurr=(()=>{const t=cg.reduce((s,x)=>s+x.count,0);const gold=cg.find(x=>x.key==='gold')?.count||0;return t>0?gold/t*100:0;})();
-    document.getElementById('oa-stat-cards').innerHTML=[{v:fmtP(rate(cg)),l:`OA rate ${cy}`},{v:fmtP(goldCurr),l:`Gold OA rate ${cy}`},{v:fmtP(rate(og)),l:'OA rate all time'}].map(c=>`<div class="stat-card"><div class="stat-val">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('');
-
-    const dc=oaKeys.map(k=>og.find(g=>g.key===k)?.count||0), dt=dc.reduce((s,v)=>s+v,0);
-    const closedCount=og.find(g=>g.key==='closed')?.count||0;
-    const oaPct=dt>0?(dt-closedCount)/dt*100:0;
-    setWrap('oa-donut-wrap','<canvas id="oa-donut-chart" aria-label="OA status donut" role="img"></canvas>');
-    mkChart('oa-donut-chart',{type:'doughnut',data:{labels:oaKeys.map(k=>OA_LABELS[k]),datasets:[{data:dc,backgroundColor:oaKeys.map(k=>OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} (${fmtP(c.raw/dt*100)})`}},title:{display:true,text:`${fmtP(oaPct)} Open Access`,font:{family:'Calibri, Carlito, sans-serif',size:16,weight:'700'},color:isDark()?'#5fb5e5':'#00305D'}},cutout:'60%'}});
-
-    setWrap('oa-trend-wrap','<canvas id="oa-trend-chart" aria-label="OA trend" role="img"></canvas>');
-    mkChart('oa-trend-chart',{type:'line',data:{labels:ty,datasets:oaKeys.map(k=>({label:OA_LABELS[k],data:ty.map((_,i)=>{const g=trend[i]?.group_by||[];const t=g.reduce((s,x)=>s+x.count,0);const c=g.find(x=>x.key===k)?.count||0;return t>0?c/t*100:0;}),fill:true,backgroundColor:OA_COLORS[k]+'cc',borderColor:OA_COLORS[k],borderWidth:1,tension:.3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtP(c.raw)}`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{stacked:true,min:0,max:100,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>v+'%'}}}}});
-    progressTick();
-  }catch(err){ setWrap('oa-donut-wrap',errBox(err.message,'loadOpenAccess')); progressTick(); }
-}
-
 /* ============================================================ 4 · TOPICS */
 async function loadTopics(){
   if(_sectionLoaded.topics) return; _sectionLoaded.topics=true;
@@ -890,13 +898,17 @@ function renderTreemap(nodes){
 }
 
 /* ============================================================ 6 · COLLABORATION */
+const COLLAB_YEAR_COLORS=['#00305D','#009FE3','#2e7d32','#FF8F00','#c1443c','#7a4fa3'];
 async function loadCollaboration(){
   if(_sectionLoaded.collaboration) return; _sectionLoaded.collaboration=true;
   try{
-    const [countryData,instData,nonDe]=await Promise.all([
+    const years=[]; for(let y=2015;y<=CURR_YEAR-1;y++) years.push(y);
+    const [countryData,instData,nonDe,countryByYear,instByYear]=await Promise.all([
       fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID}`,group_by:'authorships.institutions.country_code',per_page:'200'})),
       fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID}`,group_by:'authorships.institutions.id',per_page:'20',sort:'count:desc'})),
       fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},countries_distinct_count:>1`,per_page:'1'})),
+      Promise.all(years.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'authorships.institutions.country_code',per_page:'25',sort:'count:desc'})).catch(()=>null))),
+      Promise.all(years.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'authorships.institutions.id',per_page:'25',sort:'count:desc'})).catch(()=>null))),
     ]);
     const cg=(countryData.group_by||[]).filter(g=>g.key&&cc2(g.key)!=='UNKNOWN');
     const totalWorks=_instData?.works_count||1;
@@ -907,6 +919,24 @@ async function loadCollaboration(){
     const ig=(instData.group_by||[]).filter(g=>g.key&&!g.key.includes(INST_ID));
     const max=Math.max(...ig.map(g=>g.count),1);
     setWrap('collab-inst-wrap',`<table><thead><tr><th>#</th><th>Institution</th><th>Works</th><th></th></tr></thead><tbody>${ig.slice(0,20).map((g,i)=>{const id=g.key.replace('https://openalex.org/','');return `<tr><td>${i+1}</td><td><a href="https://explore.openalex.org/institutions/${id}" target="_blank" rel="noopener">${g.key_display_name||id}</a></td><td>${fmt(g.count)}</td><td><div class="mini-bar-wrap"><div class="mini-bar" style="width:${Math.round(g.count/max*100)}%"></div></div></td></tr>`;}).join('')}</tbody></table>`);
+
+    // Top countries by year (excludes Germany — the home country, not a "partner")
+    const cByYear=years.map(y=>(countryByYear[years.indexOf(y)]?.group_by||[]).filter(g=>g.key&&cc2(g.key)!=='UNKNOWN'&&cc2(g.key)!=='DE'));
+    const countryTotals={};
+    cByYear.forEach(yg=>yg.forEach(g=>{countryTotals[g.key]=(countryTotals[g.key]||0)+g.count;}));
+    const topCountryKeys=Object.entries(countryTotals).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k])=>k);
+    const countryName={}; cByYear.forEach(yg=>yg.forEach(g=>{countryName[g.key]=g.key_display_name||g.key;}));
+    setWrap('collab-countries-year-wrap','<canvas id="collab-countries-year-chart" aria-label="Top countries by year" role="img"></canvas>');
+    mkChart('collab-countries-year-chart',{type:'bar',data:{labels:years,datasets:topCountryKeys.map((k,i)=>({label:countryName[k]||k,data:years.map((y,yi)=>cByYear[yi].find(g=>g.key===k)?.count||0),backgroundColor:COLLAB_YEAR_COLORS[i%COLLAB_YEAR_COLORS.length]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
+
+    // Top collaborating institutions by year (excludes Münster itself)
+    const iByYear=years.map(y=>(instByYear[years.indexOf(y)]?.group_by||[]).filter(g=>g.key&&!g.key.includes(INST_ID)));
+    const instTotals={};
+    iByYear.forEach(yg=>yg.forEach(g=>{instTotals[g.key]=(instTotals[g.key]||0)+g.count;}));
+    const topInstKeys=Object.entries(instTotals).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k])=>k);
+    const instName={}; iByYear.forEach(yg=>yg.forEach(g=>{instName[g.key]=g.key_display_name||g.key;}));
+    setWrap('collab-inst-year-wrap','<canvas id="collab-inst-year-chart" aria-label="Top collaborating institutions by year" role="img"></canvas>');
+    mkChart('collab-inst-year-chart',{type:'bar',data:{labels:years,datasets:topInstKeys.map((k,i)=>({label:instName[k]||k,data:years.map((y,yi)=>iByYear[yi].find(g=>g.key===k)?.count||0),backgroundColor:COLLAB_YEAR_COLORS[i%COLLAB_YEAR_COLORS.length]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
     progressTick();
   }catch(err){ setWrap('worldmap-wrap',errBox(err.message,'loadCollaboration')); progressTick(); }
 }
@@ -984,6 +1014,65 @@ function setupAuthorSearch(){
   clr.addEventListener('click',()=>{inp.value='';clr.style.display='none';renderAuthorGrid(_topAuthors||[]);});
 }
 
+/* ============================================================ 8b · RETRACTIONS */
+const RW_NATURE_KEYS=['Retraction','Correction','Expression of Concern','Reinstatement','Other'];
+const RW_NATURE_COLORS={Retraction:'#c1443c',Correction:'#d9a521',['Expression of Concern']:'#FF8F00','Reinstatement':'#2e7d32',Other:'#9e9e9e'};
+function rwBadgeClass(nature){
+  return 'badge-'+(RW_NATURE_KEYS.includes(nature)?nature:'Other').toLowerCase().replace(/\s+/g,'-');
+}
+function rwParseDate(s){ const d=s?new Date(s):null; return d&&!isNaN(d)?d:null; }
+async function loadRetractions(){
+  if(_sectionLoaded.retractions) return; _sectionLoaded.retractions=true;
+  try{
+    const res=await fetch('data/retractions-muenster.json');
+    if(!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`),{url:res.url,status:res.status});
+    const data=await res.json();
+    const records=data.records||[];
+    document.getElementById('rw-updated').textContent = data.generatedAt ? new Date(data.generatedAt).toISOString().slice(0,10) : 'not yet crawled';
+
+    const natureCounts={}; RW_NATURE_KEYS.forEach(k=>natureCounts[k]=0);
+    const yearCounts={};
+    records.forEach(r=>{
+      const nat=RW_NATURE_KEYS.includes(r.retractionNature)?r.retractionNature:'Other';
+      natureCounts[nat]++;
+      const d=rwParseDate(r.retractionDate);
+      if(d){ const y=d.getFullYear(); yearCounts[y]=(yearCounts[y]||0)+1; }
+    });
+    const reasonTally={};
+    records.forEach(r=>(r.reason||[]).forEach(rs=>{reasonTally[rs]=(reasonTally[rs]||0)+1;}));
+    const topReason=Object.entries(reasonTally).sort((a,b)=>b[1]-a[1])[0];
+    const years=Object.keys(yearCounts).map(Number).sort((a,b)=>a-b);
+    const span=years.length?`${years[0]}–${years[years.length-1]}`:'—';
+
+    document.getElementById('rw-stat-cards').innerHTML=[
+      {v:fmt(records.length),l:'Matched notices'},
+      {v:fmt(natureCounts['Retraction']),l:'Retractions'},
+      {v:topReason?topReason[0]:'—',l:'Most cited reason'},
+      {v:span,l:'Years spanned'},
+    ].map(c=>`<div class="stat-card"><div class="stat-val">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('');
+
+    setWrap('rw-year-wrap','<canvas id="rw-year-chart" aria-label="Notices by year" role="img"></canvas>');
+    mkChart('rw-year-chart',{type:'bar',data:{labels:years,datasets:[{data:years.map(y=>yearCounts[y]||0),backgroundColor:'#00305D',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' notices'}}},scales:{x:{grid:{display:false},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),stepSize:1}}}}});
+
+    const natureLabels=RW_NATURE_KEYS.filter(k=>natureCounts[k]>0);
+    setWrap('rw-nature-wrap','<canvas id="rw-nature-chart" aria-label="Notice type" role="img"></canvas>');
+    mkChart('rw-nature-chart',{type:'doughnut',data:{labels:natureLabels,datasets:[{data:natureLabels.map(k=>natureCounts[k]),backgroundColor:natureLabels.map(k=>RW_NATURE_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:tickColor()}}},cutout:'60%'}});
+
+    const rows=[...records].sort((a,b)=>(rwParseDate(b.retractionDate)?.getTime()||0)-(rwParseDate(a.retractionDate)?.getTime()||0));
+    setWrap('rw-table-wrap',`<table><thead><tr><th>Title</th><th>Journal</th><th>Type</th><th>Date</th><th>Reason</th><th>Links</th></tr></thead><tbody>${rows.map(r=>{
+      const d=rwParseDate(r.retractionDate);
+      const dateStr=d?d.toISOString().slice(0,10):(r.retractionDate||'—');
+      const reasonStr=(r.reason||[]).slice(0,2).join(', ')+((r.reason||[]).length>2?', …':'');
+      const links=[
+        r.originalPaperDOI?`<a href="https://doi.org/${r.originalPaperDOI}" target="_blank" rel="noopener">Original</a>`:'',
+        r.retractionDOI?`<a href="https://doi.org/${r.retractionDOI}" target="_blank" rel="noopener">Notice</a>`:'',
+      ].filter(Boolean).join(' · ');
+      return `<tr><td>${r.title||'(untitled)'}</td><td>${r.journal||'—'}</td><td><span class="badge-oa ${rwBadgeClass(r.retractionNature)}">${r.retractionNature||'Other'}</span></td><td>${dateStr}</td><td>${reasonStr||'—'}</td><td>${links||'—'}</td></tr>`;
+    }).join('')}</tbody></table>`);
+    progressTick();
+  }catch(err){ setWrap('rw-table-wrap',errBox(err.message,'loadRetractions')); setWrap('rw-year-wrap',''); setWrap('rw-nature-wrap',''); progressTick(); }
+}
+
 /* ============================================================ 9 · HEP STRATEGY */
 async function loadStrategy(){
   if(_sectionLoaded.strategy) return; _sectionLoaded.strategy=true;
@@ -1037,6 +1126,7 @@ const PC_OA_KEYS = ['diamond','preprint','gold','hybrid','green','bronze','close
 const PC_TIER_COLORS = ['#2f8f5b','#d9a521','#c1443c','#8f2626'];
 let _pcDataset = null;
 let _pcProgress = null;
+let _pcOaDonutMode = 'works';
 // Underlying costs are stored in USD (OpenAlex's own value_usd); displayed in EUR by
 // default. Rate is fetched live once, falling back to a static approximate rate.
 let PC_RATE_EUR = 0.92;
@@ -1057,6 +1147,20 @@ function pcFilteredIndices(){
   const ds=_pcDataset, out=[];
   for(let i=0;i<ds.n;i++){ if(firstAuthorOnly && !ds.firstAuthorMuenster[i]) continue; out.push(i); }
   return out;
+}
+
+function renderOaDonut(ds, idx){
+  const byWorks=_pcOaDonutMode==='works';
+  const sums={}; PC_OA_KEYS.forEach(k=>sums[k]=0);
+  for(const i of idx){
+    const k=ds.oa[i]||'unknown';
+    if(byWorks){ sums[k]++; }
+    else { const c=ds.cost[i]; if(c==null) continue; sums[k]+=c; }
+  }
+  const data=byWorks?PC_OA_KEYS.map(k=>sums[k]):PC_OA_KEYS.map(k=>Math.round(pcToEUR(sums[k])));
+  const total=data.reduce((s,v)=>s+v,0);
+  setWrap('pc-oa-donut-wrap','<canvas id="pc-oa-donut-chart" aria-label="OA status distribution" role="img"></canvas>');
+  mkChart('pc-oa-donut-chart',{type:'doughnut',data:{labels:PC_OA_KEYS.map(k=>PC_OA_LABELS[k]),datasets:[{data,backgroundColor:PC_OA_KEYS.map(k=>PC_OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>byWorks?`${c.label}: ${fmt(c.raw)}${total?' ('+fmtP(c.raw/total*100)+')':''}`:`${c.label}: €${fmt(c.raw)}${total?' ('+fmtP(c.raw/total*100)+')':''}`}}},cutout:'60%'}});
 }
 
 function renderPublicationCosts(){
@@ -1097,12 +1201,18 @@ function renderPublicationCosts(){
   setWrap('pc-histogram-wrap','<canvas id="pc-histogram-chart" aria-label="Cost distribution" role="img"></canvas>');
   mkChart('pc-histogram-chart',{type:'bar',data:{labels:PC_TIER_LABELS,datasets:[{data:counts,backgroundColor:PC_TIER_COLORS,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' works'}}},scales:{x:{grid:{display:false},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
 
-  // OA type by cost (donut)
-  const sums={}; PC_OA_KEYS.forEach(k=>sums[k]=0);
-  for(const i of idx){ const c=ds.cost[i]; if(c==null) continue; const k=ds.oa[i]||'unknown'; sums[k]=(sums[k]||0)+c; }
-  const oaTotal=Object.values(sums).reduce((s,v)=>s+v,0);
-  setWrap('pc-oa-donut-wrap','<canvas id="pc-oa-donut-chart" aria-label="Cost by OA type" role="img"></canvas>');
-  mkChart('pc-oa-donut-chart',{type:'doughnut',data:{labels:PC_OA_KEYS.map(k=>PC_OA_LABELS[k]),datasets:[{data:PC_OA_KEYS.map(k=>Math.round(pcToEUR(sums[k]))),backgroundColor:PC_OA_KEYS.map(k=>PC_OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.label}: €${fmt(c.raw)}${oaTotal?' ('+fmtP(c.raw/oaTotal*100)+')':''}`}}},cutout:'60%'}});
+  // OA status donut — toggles between "by works" and "by cost" (merges what used
+  // to be two separate donuts in the old Open Access and APC sections)
+  renderOaDonut(ds, idx);
+
+  // OA share trend by year, built from this per-work dataset so the first-author
+  // filter applies here too (the old Open Access section's trend chart used an
+  // OpenAlex group_by aggregate that had no per-work / first-author breakdown)
+  const byYearOa={};
+  for(const i of idx){ const y=ds.year[i]; if(y==null) continue; const k=ds.oa[i]||'unknown'; if(!byYearOa[y])byYearOa[y]={}; byYearOa[y][k]=(byYearOa[y][k]||0)+1; }
+  const oaYears=Object.keys(byYearOa).map(Number).sort((a,b)=>a-b);
+  setWrap('oa-trend-wrap','<canvas id="oa-trend-chart" aria-label="OA share trend by year" role="img"></canvas>');
+  mkChart('oa-trend-chart',{type:'line',data:{labels:oaYears,datasets:PC_OA_KEYS.map(k=>({label:PC_OA_LABELS[k],data:oaYears.map(y=>{const g=byYearOa[y]||{};const t=Object.values(g).reduce((s,v)=>s+v,0);return t>0?(g[k]||0)/t*100:0;}),fill:true,backgroundColor:PC_OA_COLORS[k]+'cc',borderColor:PC_OA_COLORS[k],borderWidth:1,tension:.3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtP(c.raw)}`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{stacked:true,min:0,max:100,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>v+'%'}}}}});
 
   // Cost by year, stacked by OA type
   const byYear={};
@@ -1138,7 +1248,7 @@ function renderPublicationCosts(){
   topBy(ds.fieldDict, ds.field, 'pc-field');
 }
 
-const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','pc-year-oa-wrap','pc-scatter-wrap','pc-tier-wrap','pc-publisher-wrap','pc-field-wrap'];
+const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','oa-trend-wrap','pc-year-oa-wrap','pc-scatter-wrap','pc-tier-wrap','pc-publisher-wrap','pc-field-wrap'];
 async function loadPublicationCosts(){
   if(_sectionLoaded.pubcosts) return; _sectionLoaded.pubcosts=true;
   try{
@@ -1154,12 +1264,21 @@ async function loadPublicationCosts(){
     ]);
     renderPublicationCosts();
     document.getElementById('pc-first-author').addEventListener('change', renderPublicationCosts);
+    document.querySelectorAll('#oa-donut-toggle .mode-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(btn.classList.contains('active')) return;
+        document.querySelectorAll('#oa-donut-toggle .mode-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        _pcOaDonutMode = btn.dataset.mode;
+        renderOaDonut(_pcDataset, pcFilteredIndices());
+      });
+    });
     progressTick();
   }catch(err){ PC_WRAP_IDS.forEach(id=>setWrap(id,errBox(err.message,'loadPublicationCosts'))); progressTick(); }
 }
 
 /* ============================================================ LAZY / NAV */
-const SECTION_FNS={output:loadOutput,openaccess:loadOpenAccess,topics:loadTopics,collaboration:loadCollaboration,benchmarking:loadBenchmarking,authors:loadAuthors,strategy:loadStrategy,pubcosts:loadPublicationCosts};
+const SECTION_FNS={output:loadOutput,topics:loadTopics,collaboration:loadCollaboration,benchmarking:loadBenchmarking,authors:loadAuthors,retractions:loadRetractions,strategy:loadStrategy,pubcosts:loadPublicationCosts};
 function setupLazyLoad(){
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const fn=SECTION_FNS[e.target.id];if(fn){fn();io.unobserve(e.target);}}});},{rootMargin:'200px 0px'});
   document.querySelectorAll('section[data-lazy]').forEach(s=>io.observe(s));

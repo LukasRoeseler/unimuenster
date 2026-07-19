@@ -123,8 +123,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 .hcard.nd:hover{border-color:var(--border);box-shadow:none;transform:none}
 .hct{display:flex;align-items:center;justify-content:space-between;gap:8px}
 /* Logo in home cards: soft bg helps white-on-transparent logos */
-.hclogo{width:36px;height:36px;object-fit:contain;border-radius:0;flex-shrink:0;background:var(--bg-soft);padding:2px}
-.hclogofb{width:36px;height:36px;border-radius:0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;color:#fff}
+.hclogo{width:52px;height:52px;object-fit:contain;border-radius:0;flex-shrink:0;background:var(--bg-soft);padding:3px}
+.hclogofb{width:52px;height:52px;border-radius:0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:#fff}
+.doaj-badge{display:inline-flex;align-items:center;gap:3px;background:#0a6b3f;color:#fff;font-size:8.5px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:0;text-transform:uppercase}
+.hstats{font-size:10px;color:var(--textm);margin-top:2px}
 .htag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:0}
 .htag.ac{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
 .htag.in{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bdr)}
@@ -134,9 +136,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 
 /* ── JOURNAL VIEW HEADER ── */
 .jvh{padding:32px 0 22px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:flex-start;gap:20px;animation:fadeSlideIn .35s ease both}
-.jvh-logo-wrap{width:60px;height:60px;flex-shrink:0;position:relative}
-.jvh-logo{width:60px;height:60px;object-fit:contain;border-radius:0;border:1px solid var(--border);background:var(--bg-soft);padding:4px;display:none;position:absolute;inset:0}
-.jvh-logofb{width:60px;height:60px;border-radius:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;transition:transform .25s;position:absolute;inset:0}
+.jvh-logo-wrap{width:88px;height:88px;flex-shrink:0;position:relative}
+.jvh-logo{width:88px;height:88px;object-fit:contain;border-radius:0;border:1px solid var(--border);background:var(--bg-soft);padding:6px;display:none;position:absolute;inset:0}
+.jvh-logofb{width:88px;height:88px;border-radius:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:22px;font-weight:700;color:#fff;transition:transform .25s;position:absolute;inset:0}
 .jvh-logofb:hover{transform:scale(1.05)}
 .jvh-text{}
 .jvn{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);letter-spacing:-.015em;line-height:1.15;margin-bottom:7px}
@@ -186,6 +188,30 @@ select.fb-select:hover,select.fb-select:focus{border-color:var(--accent)}
 .fb-clear{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:600;padding:2px 4px;margin-left:2px;transition:color .12s}
 .fb-clear:hover{text-decoration:underline;color:var(--accent-dk)}
 .fb-count{font-size:11px;color:var(--textm);margin-left:auto;white-space:nowrap}
+.fb-search{font-size:12px;font-family:var(--sans);color:var(--text);background:var(--bg-soft);border:1px solid var(--border-mid);border-radius:0;padding:5px 10px;outline:none;transition:border-color .12s;width:220px}
+.fb-search:focus{border-color:var(--accent)}
+
+/* ── PUBLICATIONS TABLE ── */
+.pub-table-wrap{overflow-x:auto;border:1px solid var(--border);background:var(--bg-card)}
+table.pub-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.pub-table thead th{position:sticky;top:0;background:var(--bg-soft);text-align:left;font-size:10.5px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.06em;padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none}
+.pub-table thead th:hover{color:var(--text)}
+.pub-table thead th.sorted{color:var(--accent)}
+.pub-table thead th.sorted::after{content:'';display:inline-block;margin-left:5px;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid var(--accent);vertical-align:middle}
+.pub-table thead th.sorted.desc::after{border-bottom:none;border-top:5px solid var(--accent)}
+.pub-table thead th:last-child{cursor:default}
+.pub-table tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.pub-table tbody tr:hover{background:var(--bg-soft)}
+.pt-yr{font-family:var(--mono);color:var(--textm);white-space:nowrap}
+.pt-title{display:block;font-weight:600;color:var(--text);text-decoration:none;line-height:1.35;margin-bottom:3px}
+.pt-title:hover{color:var(--accent)}
+.pt-doi{font-family:var(--mono);font-size:10.5px;color:var(--textm);text-decoration:none}
+.pt-doi:hover{color:var(--accent)}
+.pt-auth{color:var(--textm);font-size:11.5px;max-width:220px}
+.pt-cite{font-weight:700;color:var(--navy);white-space:nowrap}
+.pt-links{display:flex;flex-direction:column;gap:3px;white-space:nowrap}
+.pt-links a{font-size:11px;color:var(--accent);text-decoration:none}
+.pt-links a:hover{text-decoration:underline}
 
 /* ── EXPORT BUTTON ── */
 .export-btn{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-lt);border:1px solid var(--accent-bdr);border-radius:0;padding:5px 12px;cursor:pointer;font-family:var(--sans);transition:background .15s,transform .15s,box-shadow .15s;white-space:nowrap}
@@ -379,6 +405,7 @@ select.fb-select:hover,select.fb-select:focus{border-color:var(--accent)}
       <div class="scell"><div class="snum" id="svp">—</div><div class="slbl">Publications</div></div>
       <div class="scell"><div class="snum" id="svc">—</div><div class="slbl">Total citations</div></div>
       <div class="scell"><div class="snum" id="svs">—</div><div class="slbl">Years active</div></div>
+      <div class="scell"><div class="snum" id="svm">—</div><div class="slbl">Mean citations/work</div></div>
       <div class="scell"><div class="snum">100%</div><div class="slbl">Open Access</div></div>
     </div>
 
@@ -394,22 +421,9 @@ select.fb-select:hover,select.fb-select:focus{border-color:var(--accent)}
     </div>
 
     <div class="filters-bar">
-      <span class="fb-label">Filter</span>
-      <div class="yr-filter-wrap" id="yr-filter-wrap">
-        <label class="yr-filter-label" for="yr-from">From</label>
-        <select class="fb-select" id="yr-from" onchange="onYrChange()"></select>
-        <span class="yr-filter-sep">–</span>
-        <label class="yr-filter-label" for="yr-to">To</label>
-        <select class="fb-select" id="yr-to" onchange="onYrChange()"></select>
-      </div>
-      <span class="fb-sep"></span>
-      <span class="fb-label">Sort</span>
-      <select class="fb-select" id="fb-sort" onchange="applySort()">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-        <option value="cites">Most cited</option>
-      </select>
-      <button class="fb-clear" onclick="clearFilter()">✕ Clear filter</button>
+      <span class="fb-label">Search</span>
+      <input class="fb-search" id="pt-search" type="text" placeholder="Title or author…" oninput="onPtSearch()">
+      <button class="fb-clear" onclick="clearFilter()">✕ Clear</button>
       <span class="fb-count" id="fb-count"></span>
       <button class="export-btn" onclick="exportCSV('journal')" style="margin-left:auto">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -418,7 +432,20 @@ select.fb-select:hover,select.fb-select:focus{border-color:var(--accent)}
     </div>
 
     <div class="statbar"><span class="sdot L" id="sdot"></span><span id="stxt">Loading…</span></div>
-    <div id="plist"></div>
+    <div class="table-wrap pub-table-wrap">
+      <table class="pub-table" id="pub-table">
+        <thead>
+          <tr>
+            <th data-col="yr" onclick="sortByColumn('yr')">Year</th>
+            <th data-col="title" onclick="sortByColumn('title')">Title</th>
+            <th data-col="auth" onclick="sortByColumn('auth')">Authors</th>
+            <th data-col="oa" onclick="sortByColumn('oa')">Citations</th>
+            <th>Links</th>
+          </tr>
+        </thead>
+        <tbody id="plist"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ══ ALL JOURNALS VIEW ══ -->
@@ -522,7 +549,7 @@ select.fb-select:hover,select.fb-select:focus{border-color:var(--accent)}
 var J=[
   {slug:'aods',           name:'Archive of Orofacial Data Science',                                    abbr:'AOD',  ac:1,issn:'2941-783X',dp:['aods']},
   {slug:'byzrev',         name:'The Byzantine Review',                                                  abbr:'BR',   ac:1,issn:'2700-0524',dp:['byzrev']},
-  {slug:'fnp',            name:'Free Neuropathology',                                                   abbr:'FN',   ac:1,issn:'2699-4445',dp:['fnp','freeneuropathology']},
+  {slug:'fnp',            name:'Free Neuropathology',                                                   abbr:'FN',   ac:1,issn:'2699-4445',dp:['fnp','freeneuropathology'],doaj:1},
   {slug:'ifgimpulse',     name:'IfG Impulse',                                                           abbr:'IFG',  ac:1,issn:'',         dp:['ifgimpulse']},
   {slug:'jcsw',           name:'Jahrbuch für Christliche Sozialwissenschaften',                         abbr:'JCS',  ac:1,issn:'0075-2592',dp:['jcsw']},
   {slug:'mittelalterdigi',name:'Mittelalter Digital',                                                   abbr:'MD',   ac:0,issn:'2702-9069',dp:['mittelalterdigi']},
@@ -557,20 +584,33 @@ J.forEach(function(j,i){j.col=JCOLS[i%JCOLS.length];j.ci=i});
 ═══════════════════════════════ */
 var LOGO_BASE='https://ejournals.uni-muenster.de/public/journals/';
 
+/* Every entry below was verified directly against the live OJS pages (image src,
+   not guessed) -- see the logo-scrape research this replaced LOGO_GUESSED with.
+   `file` overrides the default `pageHeaderLogoImage` filename for journals that
+   only have a `homepageImage` (aods). Journals with no working logo at all
+   (mwsca, mfiphs, zts) are omitted here entirely and fall straight back to the
+   text-abbreviation badge instead of wasting a locale/ext guessing cascade. */
 var LOGO_CONFIRMED={
   fnp:                {id:23,locale:'en_US',ext:'jpg'},
   sun:                {id:13,locale:'de_DE',ext:'jpg'},
   replicationresearch:{id:36,locale:'en_US',ext:'png'},
   ozean:              {id:21,locale:'de_DE',ext:'svg'},
-  zpth:               {id:5, locale:'de_DE',ext:'png'}
-};
-
-var LOGO_GUESSED={
-  thrv:3, jcsw:6, ZfK:8, zts:12, nn:17,
-  mwsca:19, tjo:20, tso:22, paradigma:24,
-  byzrev:29, satura:32, mittelalterdigi:33,
-  mfiphs:34, sbi:35, zkr:37, ifgimpulse:38,
-  aods:40, pop:11
+  zpth:               {id:5, locale:'de_DE',ext:'png'},
+  thrv:               {id:19,locale:'de_DE',ext:'png'},
+  jcsw:               {id:1, locale:'de_DE',ext:'svg'},
+  ZfK:                {id:7, locale:'de_DE',ext:'png'},
+  nn:                 {id:35,locale:'de_DE',ext:'png'},
+  tjo:                {id:26,locale:'en_US',ext:'jpg'},
+  tso:                {id:20,locale:'en_US',ext:'png'},
+  paradigma:          {id:33,locale:'de_DE',ext:'png'},
+  byzrev:             {id:22,locale:'de_DE',ext:'png'},
+  satura:             {id:25,locale:'en_US',ext:'png'},
+  mittelalterdigi:    {id:27,locale:'de_DE',ext:'png'},
+  sbi:                {id:37,locale:'de_DE',ext:'png'},
+  zkr:                {id:30,locale:'de_DE',ext:'png'},
+  ifgimpulse:         {id:34,locale:'de_DE',ext:'jpg'},
+  aods:               {id:31,locale:'en_US',ext:'jpg',file:'homepageImage'},
+  pop:                {id:3, locale:'de_DE',ext:'svg'}
 };
 
 /* Per-journal candidate list cache and current index for home grid */
@@ -579,18 +619,9 @@ var LOGO_IDX={};
 
 function logoCandidates(j){
   var conf=LOGO_CONFIRMED[j.slug];
-  var id=conf?conf.id:(LOGO_GUESSED[j.slug]||null);
-  if(!id)return[];
-  var seen={},cands=[];
-  function add(loc,ext){
-    var u=LOGO_BASE+id+'/pageHeaderLogoImage_'+loc+'.'+ext;
-    if(!seen[u]){seen[u]=1;cands.push(u)}
-  }
-  if(conf)add(conf.locale,conf.ext); /* confirmed URL first */
-  ['en_US','de_DE'].forEach(function(loc){
-    ['png','jpg','svg'].forEach(function(ext){add(loc,ext)});
-  });
-  return cands;
+  if(!conf)return[];
+  var file=conf.file||'pageHeaderLogoImage';
+  return[LOGO_BASE+conf.id+'/'+file+'_'+conf.locale+'.'+conf.ext];
 }
 
 /* Called from inline onerror in home grid img tags */
@@ -625,8 +656,9 @@ function tryLogo(cands,onSuccess,onFail){
 /* ═══════════════════════════════
    STATE
 ═══════════════════════════════ */
-var PUBS=[],CJ=null,RID=0,CSORT='newest';
-var YR_FROM='',YR_TO='';
+var PUBS=[],CJ=null,RID=0;
+var CSORT={col:'yr',dir:'desc'};
+var PT_SEARCH='';
 var AV_YR_FROM='',AV_YR_TO='';
 var AV_CACHE={};
 var AV_RID=0;
@@ -710,36 +742,6 @@ function progHide(){
   document.getElementById('prog-bar').style.width='0%';
 }
 
-/* ── YEAR SELECTS: journal view ── */
-function buildYrSelects(pubs){
-  var seen={},years=[];
-  pubs.forEach(function(p){if(p.yr&&!seen[p.yr]){seen[p.yr]=1;years.push(+p.yr)}});
-  years.sort(function(a,b){return a-b});
-  var wrap=document.getElementById('yr-filter-wrap');
-  if(!years.length){wrap.style.display='none';return}
-  wrap.style.display='flex';
-  var fOpts='<option value="">Earliest</option>';
-  var tOpts='<option value="">Latest</option>';
-  years.forEach(function(yr){
-    fOpts+='<option value="'+yr+'">'+yr+'</option>';
-    tOpts+='<option value="'+yr+'">'+yr+'</option>';
-  });
-  document.getElementById('yr-from').innerHTML=fOpts;
-  document.getElementById('yr-to').innerHTML=tOpts;
-  if(YR_FROM)document.getElementById('yr-from').value=YR_FROM;
-  if(YR_TO)document.getElementById('yr-to').value=YR_TO;
-}
-function onYrChange(){
-  var f=document.getElementById('yr-from').value;
-  var t=document.getElementById('yr-to').value;
-  if(f&&t&&+f>+t){
-    document.getElementById('yr-from').value=t;
-    document.getElementById('yr-to').value=f;
-    YR_FROM=t;YR_TO=f;
-  }else{YR_FROM=f;YR_TO=t}
-  render();
-}
-
 /* ── YEAR SELECTS: all journals view ── */
 function buildAvYrSelects(pubs){
   var seen={},years=[];
@@ -787,11 +789,18 @@ function buildGrid(){
     }else{
       logoHtml='<div class="hclogofb" style="background:'+j.col+'">'+e(j.abbr)+'</div>';
     }
+    var pubs=STATIC_PUBS[j.slug];
+    var statsLine='';
+    if(pubs&&pubs.length){
+      var totalCites=pubs.reduce(function(s,p){return s+(p.oa||0)},0);
+      statsLine='<div class="hstats">'+fn(pubs.length)+' works · '+(totalCites/pubs.length).toFixed(1)+' cites/work</div>';
+    }
     return'<button class="hcard'+(j.nd?' nd':'')+'"'+click+' type="button"'
       +' style="--jc:'+j.col+';animation-delay:'+(idx*.03)+'s">'
       +'<div class="hct">'+logoHtml+'<span class="htag '+st+'">'+stl+'</span></div>'
-      +'<div class="hnm">'+e(j.name)+'</div>'
+      +'<div class="hnm">'+e(j.name)+(j.doaj?' <span class="doaj-badge" title="Indexed in the Directory of Open Access Journals">DOAJ</span>':'')+'</div>'
       +'<div class="hsl">'+e(j.slug)+(j.issn?' · '+e(j.issn):'')+'</div>'
+      +statsLine
       +'</button>';
   }).join('');
 }
@@ -865,7 +874,7 @@ function pick(slug){
   ['hs','js','as'].forEach(function(id){document.getElementById(id).style.display='none'});
   document.getElementById('js').style.display='block';
   setTab('');
-  document.getElementById('jvn').textContent=j.name;
+  document.getElementById('jvn').innerHTML=e(j.name)+(j.doaj?' <span class="doaj-badge" title="Indexed in the Directory of Open Access Journals">DOAJ</span>':'');
   document.getElementById('jvi').textContent=j.issn?'ISSN '+j.issn:'';
   document.getElementById('jvl').href='https://ejournals.uni-muenster.de/'+j.slug;
 
@@ -881,10 +890,10 @@ function pick(slug){
   );
 
   buildDD('');
-  YR_FROM='';YR_TO='';
-  document.getElementById('yr-filter-wrap').style.display='none';
-  CSORT='newest';
-  var ss=document.getElementById('fb-sort');if(ss)ss.value='newest';
+  PT_SEARCH='';
+  var si=document.getElementById('pt-search');if(si)si.value='';
+  CSORT={col:'yr',dir:'desc'};
+  updateSortHeaders();
   load(j);
 }
 
@@ -893,15 +902,15 @@ async function load(j){
   var rid=++RID;PUBS=[];
   st('L','Loading…');
   document.getElementById('plist').innerHTML='';
-  ['svp','svc','svs'].forEach(function(id){document.getElementById(id).textContent='—'});
+  ['svp','svc','svs','svm'].forEach(function(id){document.getElementById(id).textContent='—'});
   clearCharts();
 
   if(j.nd){
     progHide();
     st('D','No DOI registration for this journal.');
-    document.getElementById('plist').innerHTML='<div class="note info"><strong>No DOIs registered</strong>'
+    document.getElementById('plist').innerHTML='<tr><td colspan="5"><div class="note info"><strong>No DOIs registered</strong>'
       +'<p>'+e(j.name)+' does not register DOIs with DataCite.</p>'
-      +'<p>Browse at <a href="https://ejournals.uni-muenster.de/'+e(j.slug)+'" target="_blank">ejournals.uni-muenster.de/'+e(j.slug)+'</a>.</p></div>';
+      +'<p>Browse at <a href="https://ejournals.uni-muenster.de/'+e(j.slug)+'" target="_blank">ejournals.uni-muenster.de/'+e(j.slug)+'</a>.</p></div></td></tr>';
     return;
   }
 
@@ -913,13 +922,12 @@ async function load(j){
   if(!cached||!cached.length){
     progHide();
     st('E','No cached records for this journal yet.');
-    document.getElementById('plist').innerHTML='<div class="note err"><strong>No publications found</strong>'
-      +'<p>The monthly data refresh has not cached any records for <code>'+e(j.slug)+'</code> yet. It updates on the 1st of each month.</p></div>';
+    document.getElementById('plist').innerHTML='<tr><td colspan="5"><div class="note err"><strong>No publications found</strong>'
+      +'<p>The monthly data refresh has not cached any records for <code>'+e(j.slug)+'</code> yet. It updates on the 1st of each month.</p></div></td></tr>';
     return;
   }
 
   PUBS=cached.map(function(p){return Object.assign({},p)});
-  buildYrSelects(PUBS);
   render();drawCharts();summ();
   if(rid!==RID)return;
   st('D','Loaded '+fn(PUBS.length)+' publications · DataCite + OpenAlex (monthly cache)');
@@ -927,41 +935,84 @@ async function load(j){
   AV_CACHE[j.slug]=PUBS.slice();
 }
 
-/* ── FILTER + SORT (journal view) ── */
-function applySort(){CSORT=document.getElementById('fb-sort').value;render()}
+/* ── FILTER + SORT (journal view, table) ── */
+function onPtSearch(){PT_SEARCH=document.getElementById('pt-search').value.trim().toLowerCase();render()}
 function clearFilter(){
-  YR_FROM='';YR_TO='';
-  document.getElementById('yr-from').value='';
-  document.getElementById('yr-to').value='';
+  PT_SEARCH='';
+  document.getElementById('pt-search').value='';
   render();
 }
-function filteredSorted(pubs,sort){
+function sortByColumn(col){
+  if(CSORT.col===col)CSORT.dir=CSORT.dir==='asc'?'desc':'asc';
+  else CSORT={col:col,dir:(col==='title'||col==='auth')?'asc':'desc'};
+  updateSortHeaders();
+  render();
+}
+function updateSortHeaders(){
+  document.querySelectorAll('#pub-table thead th[data-col]').forEach(function(th){
+    var active=th.getAttribute('data-col')===CSORT.col;
+    th.classList.toggle('sorted',active);
+    th.classList.toggle('desc',active&&CSORT.dir==='desc');
+  });
+}
+function filteredSorted(pubs){
   var out=pubs.slice();
-  if(YR_FROM||YR_TO){
+  if(PT_SEARCH){
     out=out.filter(function(p){
-      if(!p.yr)return false;
-      if(YR_FROM&&p.yr<+YR_FROM)return false;
-      if(YR_TO&&p.yr>+YR_TO)return false;
-      return true;
+      var hay=(p.title||'')+' '+(p.auth?p.auth.map(function(a){return a.n}).join(' '):'');
+      return hay.toLowerCase().indexOf(PT_SEARCH)!==-1;
     });
   }
-  if(sort==='newest')out.sort(function(a,b){return b.key-a.key});
-  else if(sort==='oldest')out.sort(function(a,b){return a.key-b.key});
-  else if(sort==='cites')out.sort(function(a,b){return(b.oa||0)-(a.oa||0)});
+  var col=CSORT.col,dir=CSORT.dir,mul=dir==='asc'?1:-1;
+  out.sort(function(a,b){
+    if(col==='yr')return mul*((a.key||0)-(b.key||0));
+    if(col==='oa')return mul*((a.oa||0)-(b.oa||0));
+    if(col==='title')return mul*String(a.title||'').localeCompare(String(b.title||''));
+    if(col==='auth'){
+      var an=a.auth&&a.auth.length?a.auth[0].n:'',bn=b.auth&&b.auth.length?b.auth[0].n:'';
+      return mul*an.localeCompare(bn);
+    }
+    return 0;
+  });
   return out;
 }
 
 function render(){
-  var s=filteredSorted(PUBS,CSORT);
+  var s=filteredSorted(PUBS);
   var fc=document.getElementById('fb-count');
-  if(fc)fc.textContent=(YR_FROM||YR_TO)?s.length+' of '+PUBS.length+' shown':'';
+  if(fc)fc.textContent=PT_SEARCH?s.length+' of '+PUBS.length+' shown':'';
   if(!s.length&&PUBS.length){
-    document.getElementById('plist').innerHTML='<div class="note info"><strong>No publications match the filter.</strong><p>Try a different year range or clear the filter.</p></div>';
+    document.getElementById('plist').innerHTML='<tr><td colspan="5"><div class="note info"><strong>No publications match the search.</strong><p>Try a different search term or clear it.</p></div></td></tr>';
     return;
   }
   if(!s.length)return;
-  document.getElementById('plist').innerHTML=s.map(function(p,i){return card(p,i,CJ,false)}).join('');
+  document.getElementById('plist').innerHTML=s.map(function(p,i){return rowHtml(p,i)}).join('');
   if(typeof window._altmetric_embed_init==='function')window._altmetric_embed_init();
+}
+
+function rowHtml(p,i){
+  var doiUrl='https://doi.org/'+p.doi;
+  var gsUrl='https://scholar.google.com/scholar?q='+encodeURIComponent('doi:'+p.doi);
+  var auth='—';
+  if(p.auth&&p.auth.length){
+    auth=p.auth.slice(0,3).map(function(a){
+      if(a.o)return'<a class="orc" href="https://orcid.org/'+e(a.o)+'" target="_blank">'+e(a.n)+'</a>';
+      return e(a.n);
+    }).join(', ')+(p.auth.length>3?' +'+(p.auth.length-3):'');
+  }
+  var cite=p.oa!==null?fn(p.oa):'—';
+  return'<tr>'
+    +'<td class="pt-yr">'+(p.yr||'—')+'</td>'
+    +'<td><a class="pt-title" href="'+doiUrl+'" target="_blank">'+e(p.title||p.doi)+'</a>'
+    +'<a class="pt-doi" href="'+doiUrl+'" target="_blank">↗ '+e(p.doi)+'</a></td>'
+    +'<td class="pt-auth">'+auth+'</td>'
+    +'<td class="pt-cite">'+cite+'</td>'
+    +'<td><div class="pt-links">'
+    +'<a href="https://openalex.org/works?filter=doi:'+p.doi+'" target="_blank">OpenAlex</a>'
+    +'<a href="'+gsUrl+'" target="_blank">Google Scholar</a>'
+    +'<div class="altmetric-embed" data-badge-type="donut" data-badge-details="right" data-doi="'+p.doi+'" data-hide-no-mentions="false"></div>'
+    +'</div></td>'
+    +'</tr>';
 }
 
 function card(p,i,j,showJBadge){
@@ -1024,7 +1075,7 @@ function exportCSV(mode){
   var rows,filename;
   if(mode==='journal'){
     if(!PUBS||!PUBS.length){alert('No publications loaded yet.');return}
-    rows=filteredSorted(PUBS,CSORT).map(function(p){
+    rows=filteredSorted(PUBS).map(function(p){
       return[csvEscape(p.doi),csvEscape(p.title),
         csvEscape(p.auth?p.auth.map(function(a){return a.n}).join('; '):''),
         csvEscape(p.yr||''),csvEscape(p.oa!==null?p.oa:''),
@@ -1109,8 +1160,10 @@ function barChart(wrapId,axId,yaxId,obj,col,kind){
 
 /* ── SUMMARY ── */
 function summ(){
+  var totalCites=PUBS.reduce(function(s,p){return s+(p.oa||0)},0);
   document.getElementById('svp').textContent=fn(PUBS.length);
-  document.getElementById('svc').textContent=fn(PUBS.reduce(function(s,p){return s+(p.oa||0)},0));
+  document.getElementById('svc').textContent=fn(totalCites);
+  document.getElementById('svm').textContent=PUBS.length?(totalCites/PUBS.length).toFixed(1):'—';
   var yrs=PUBS.map(function(p){return p.yr}).filter(Boolean).map(Number);
   if(yrs.length){
     var mn=Math.min.apply(null,yrs),mx=Math.max.apply(null,yrs);
@@ -1358,7 +1411,9 @@ function avSt(cls,msg){
 /* ── INIT ── */
 buildGrid();buildDD('');
 document.getElementById('hs').style.display='block';
-loadStaticCache(); /* kick off in the background so it's usually ready before the first click */
+loadStaticCache().then(function(){
+  if(document.getElementById('hs').style.display!=='none')buildGrid(); /* refresh with per-journal works/citations now cached */
+});
 </script>
 <script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
 </body>

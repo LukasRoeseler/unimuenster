@@ -49,6 +49,11 @@ jobs:
           OA_API_KEY: ${{ secrets.OA_API_KEY }}
         run: node scripts/crawl-publication-costs.js
 
+      - name: Refresh Retraction Watch data (Retractions & Editorial Notices section)
+        id: retractions
+        continue-on-error: true
+        run: node scripts/crawl-retractions.js
+
       - name: Commit updated data
         if: always()
         run: |
@@ -62,6 +67,6 @@ jobs:
             git push
           fi
 
-      - name: Fail the job if either crawl step failed
-        if: steps.aggregates.outcome == 'failure' || steps.pubcosts.outcome == 'failure'
+      - name: Fail the job if any crawl step failed
+        if: steps.aggregates.outcome == 'failure' || steps.pubcosts.outcome == 'failure' || steps.retractions.outcome == 'failure'
         run: exit 1

@@ -109,6 +109,14 @@ download "collab_institutions" \
 download "collab_intl" \
   "${API}/works?filter=institutions.id:${INST},countries_distinct_count:>1&per_page=1"
 
+for year in $(seq 2015 $(( CURR_YEAR - 1 ))); do
+  download "collab_countries_${year}" \
+    "${API}/works?filter=institutions.id:${INST},publication_year:${year}&group_by=authorships.institutions.country_code&per_page=25&sort=count:desc"
+
+  download "collab_institutions_${year}" \
+    "${API}/works?filter=institutions.id:${INST},publication_year:${year}&group_by=authorships.institutions.id&per_page=25&sort=count:desc"
+done
+
 # ── Section 6 — Benchmarking ──────────────────────────────────────────────────
 
 echo "▸ Benchmarking (U15)"
