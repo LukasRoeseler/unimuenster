@@ -557,6 +557,17 @@ footer p{font-size:.8rem;color:var(--c-muted)}
       <div class="card"><div class="card-header"><h3>Notice Type</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="rw-nature-wrap"><div class="skeleton skel-chart"></div></div></div></div>
     </div>
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>All Matched Notices</h3></div><div class="card-body"><div class="table-wrap" id="rw-table-wrap"><div class="skeleton skel-table" style="height:320px"></div></div></div></div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-header"><h3>Authors with Retractions</h3></div>
+      <div class="card-body">
+        <div class="filter-bar" id="rw-author-filter-bar" style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--c-muted)"><input type="checkbox" id="rw-first-author"> Only count authors as first author</label>
+          <span id="rw-author-count" style="font-size:.8rem;color:var(--c-muted);margin-left:auto"></span>
+        </div>
+        <div class="table-wrap" id="rw-author-table-wrap"><div class="skeleton skel-table" style="height:280px"></div></div>
+        <div id="rw-author-pagination" style="display:flex;align-items:center;justify-content:center;gap:.75rem;margin-top:.85rem;font-size:.85rem;color:var(--c-muted)"></div>
+      </div>
+    </div>
     <div class="callout">
       <strong>How matches are found.</strong> The Retraction Watch Database's Institution and Country fields are free text, not linked to OpenAlex or any other institution registry, so records here are matched by searching for a "Münster" name variant in the institution field (guarding against the unrelated Irish province of the same name). This can both miss records where Münster isn't named in that field and, rarely, include a false positive. Data via the <a href="https://gitlab.com/crossref/retraction-watch-data" target="_blank" rel="noopener">Retraction Watch Database</a>, hosted by Crossref and refreshed weekly — see <span id="rw-updated">—</span> for when this data was last refreshed.
     </div>
@@ -1021,6 +1032,39 @@ function rwBadgeClass(nature){
   return 'badge-'+(RW_NATURE_KEYS.includes(nature)?nature:'Other').toLowerCase().replace(/\s+/g,'-');
 }
 function rwParseDate(s){ const d=s?new Date(s):null; return d&&!isNaN(d)?d:null; }
+let _rwRecords=[]; let _rwAuthorPage=0;
+const RW_AUTHORS_PER_PAGE=10;
+function rwParseAuthors(authorField){ return (authorField||'').split(';').map(s=>s.trim()).filter(Boolean); }
+function rwComputeAuthorStats(records,firstOnly){
+  const map=new Map();
+  records.forEach(r=>{
+    const names=rwParseAuthors(r.author);
+    if(!names.length) return;
+    const list=firstOnly?names.slice(0,1):names;
+    list.forEach(name=>{
+      if(!map.has(name)) map.set(name,{name,count:0,titles:[]});
+      const entry=map.get(name);
+      entry.count++;
+      entry.titles.push(r.title||'(untitled)');
+    });
+  });
+  return Array.from(map.values()).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name));
+}
+function rwRenderAuthorsPage(){
+  const firstOnly=document.getElementById('rw-first-author').checked;
+  const stats=rwComputeAuthorStats(_rwRecords,firstOnly);
+  const totalPages=Math.max(1,Math.ceil(stats.length/RW_AUTHORS_PER_PAGE));
+  if(_rwAuthorPage>=totalPages) _rwAuthorPage=totalPages-1;
+  if(_rwAuthorPage<0) _rwAuthorPage=0;
+  const start=_rwAuthorPage*RW_AUTHORS_PER_PAGE;
+  const pageItems=stats.slice(start,start+RW_AUTHORS_PER_PAGE);
+  document.getElementById('rw-author-count').textContent=`${fmt(stats.length)} author${stats.length===1?'':'s'}${firstOnly?' (as first author)':''}`;
+  setWrap('rw-author-table-wrap',`<table><thead><tr><th>#</th><th>Author</th><th>${firstOnly?'First-author retractions':'Retractions'}</th><th>Titles</th></tr></thead><tbody>${pageItems.map((a,i)=>`<tr><td>${start+i+1}</td><td>${a.name}</td><td>${fmt(a.count)}</td><td>${a.titles.slice(0,2).join('; ')}${a.titles.length>2?', …':''}</td></tr>`).join('')||'<tr><td colspan="4">No authors match.</td></tr>'}</tbody></table>`);
+  const pag=document.getElementById('rw-author-pagination');
+  pag.innerHTML=`<button class="btn btn-secondary" id="rw-author-prev"${_rwAuthorPage===0?' disabled':''}>← Prev</button><span>Page ${_rwAuthorPage+1} of ${totalPages}</span><button class="btn btn-secondary" id="rw-author-next"${_rwAuthorPage>=totalPages-1?' disabled':''}>Next →</button>`;
+  document.getElementById('rw-author-prev').addEventListener('click',()=>{ _rwAuthorPage--; rwRenderAuthorsPage(); });
+  document.getElementById('rw-author-next').addEventListener('click',()=>{ _rwAuthorPage++; rwRenderAuthorsPage(); });
+}
 async function loadRetractions(){
   if(_sectionLoaded.retractions) return; _sectionLoaded.retractions=true;
   try{
@@ -1043,6 +1087,7 @@ async function loadRetractions(){
     const topReason=Object.entries(reasonTally).sort((a,b)=>b[1]-a[1])[0];
     const years=Object.keys(yearCounts).map(Number).sort((a,b)=>a-b);
     const span=years.length?`${years[0]}–${years[years.length-1]}`:'—';
+    const yearRange=[]; if(years.length) for(let y=years[0]; y<=years[years.length-1]; y++) yearRange.push(y);
 
     document.getElementById('rw-stat-cards').innerHTML=[
       {v:fmt(records.length),l:'Matched notices'},
@@ -1052,7 +1097,7 @@ async function loadRetractions(){
     ].map(c=>`<div class="stat-card"><div class="stat-val">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('');
 
     setWrap('rw-year-wrap','<canvas id="rw-year-chart" aria-label="Notices by year" role="img"></canvas>');
-    mkChart('rw-year-chart',{type:'bar',data:{labels:years,datasets:[{data:years.map(y=>yearCounts[y]||0),backgroundColor:'#00305D',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' notices'}}},scales:{x:{grid:{display:false},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),stepSize:1}}}}});
+    mkChart('rw-year-chart',{type:'bar',data:{labels:yearRange,datasets:[{data:yearRange.map(y=>yearCounts[y]||0),backgroundColor:'#00305D',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' notices'}}},scales:{x:{grid:{display:false},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),stepSize:1},beginAtZero:true}}}});
 
     const natureLabels=RW_NATURE_KEYS.filter(k=>natureCounts[k]>0);
     setWrap('rw-nature-wrap','<canvas id="rw-nature-chart" aria-label="Notice type" role="img"></canvas>');
@@ -1069,8 +1114,13 @@ async function loadRetractions(){
       ].filter(Boolean).join(' · ');
       return `<tr><td>${r.title||'(untitled)'}</td><td>${r.journal||'—'}</td><td><span class="badge-oa ${rwBadgeClass(r.retractionNature)}">${r.retractionNature||'Other'}</span></td><td>${dateStr}</td><td>${reasonStr||'—'}</td><td>${links||'—'}</td></tr>`;
     }).join('')}</tbody></table>`);
+
+    _rwRecords=records;
+    _rwAuthorPage=0;
+    rwRenderAuthorsPage();
+    document.getElementById('rw-first-author').addEventListener('change',()=>{ _rwAuthorPage=0; rwRenderAuthorsPage(); });
     progressTick();
-  }catch(err){ setWrap('rw-table-wrap',errBox(err.message,'loadRetractions')); setWrap('rw-year-wrap',''); setWrap('rw-nature-wrap',''); progressTick(); }
+  }catch(err){ setWrap('rw-table-wrap',errBox(err.message,'loadRetractions')); setWrap('rw-year-wrap',''); setWrap('rw-nature-wrap',''); setWrap('rw-author-table-wrap',errBox(err.message,'loadRetractions')); progressTick(); }
 }
 
 /* ============================================================ 9 · HEP STRATEGY */
