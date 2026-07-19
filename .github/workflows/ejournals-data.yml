@@ -6,7 +6,7 @@ on:
     # refresh (different data source -- DataCite + a separate OpenAlex batch
     # citation lookup, not the institution-wide crawl those use) and off the
     # top of the hour to avoid GitHub's documented scheduling delays.
-    - cron: "0 6 1 * *"
+    - cron: "17 6 1 * *"
   workflow_dispatch: {}
 
 permissions:

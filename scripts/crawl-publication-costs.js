@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Crawls OpenAlex for every work affiliated with the University of Munster
+// Crawls OpenAlex for every work affiliated with the University of Münster
 // (same institution, I22465464, that download-data.sh already queries) and
 // estimates each work's APC cost, powering the "Publication Costs" section of
 // the Citations and Topics dashboard.

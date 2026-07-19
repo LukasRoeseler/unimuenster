@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Münster Research Intelligence — live bibliometric dashboard for the University of Münster powered by OpenAlex, aligned to the Hochschulentwicklungsplan 2024–2028.">
 <title>Münster Research Intelligence</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2300305D'/%3E%3Cpath d='M3 3 L18 3 L3 18 Z' fill='%23009FE3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Carlito = metric-compatible open clone of Calibri (fallback when Calibri isn't installed locally) -->
@@ -257,7 +258,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
 /* ── Triangular corporate header ───────────────────────────── */
 .hero{position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;top:0;left:0;width:46%;height:72px;background:var(--c-accent);clip-path:polygon(0 0,0 100%,82% 0);pointer-events:none}
+.hero::before{content:"";position:absolute;top:0;left:0;width:46%;height:54px;background:var(--c-accent);clip-path:polygon(0 0,0 100%,82% 0);pointer-events:none}
 .hero::after{content:"";position:absolute;bottom:0;right:0;width:55%;height:5px;background:var(--c-accent);clip-path:polygon(100% 100%,0 100%,100% 0);pointer-events:none;opacity:.9}
 .hero-inner{position:relative;z-index:1}
 
@@ -566,7 +567,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     </div>
 
     <div class="callout">
-      <strong>How costs are estimated.</strong> A recorded paid APC (via <a href="https://openapc.net" target="_blank" rel="noopener">OpenAPC</a>) is trusted whenever present. Preprints and diamond OA works are treated as free. Gold/hybrid works without a paid record fall back to the journal's list price (an estimate, not necessarily what was actually paid). Green/bronze/closed/unknown works carry no direct APC by this route, though they may still cost the library via a subscription, which OpenAlex does not expose per work. Crawled incrementally and resumably from OpenAlex — see <span id="pc-updated">—</span> for when this data was last refreshed. Uses the same methodology as the standalone <a href="publication-costs/index.html">Publication Cost Calculator</a>, which anyone can run against their own reference list.
+      <strong>How costs are estimated.</strong> A recorded paid APC (via <a href="https://openapc.net" target="_blank" rel="noopener">OpenAPC</a>) is trusted whenever present. Preprints and diamond OA works are treated as free. Gold/hybrid works without a paid record fall back to the journal's list price (an estimate, not necessarily what was actually paid). Green/bronze/closed/unknown works carry no direct APC by this route, though they may still cost the library via a subscription, which OpenAlex does not expose per work. Crawled incrementally and resumably from OpenAlex — see <span id="pc-updated">—</span> for when this data was last refreshed. Uses the same methodology as the standalone <a href="../publication-costs/index.html">Publication Cost Calculator</a>, which anyone can run against their own reference list.
     </div>
   </div>
 </section>
@@ -1212,16 +1213,18 @@ function renderPublicationCosts(){
   topBy(ds.fieldDict, ds.field, 'pc-field');
 }
 
+const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','pc-year-oa-wrap','pc-scatter-wrap','pc-tier-wrap','pc-publisher-wrap','pc-field-wrap'];
 async function loadPublicationCosts(){
   if(_sectionLoaded.pubcosts) return; _sectionLoaded.pubcosts=true;
   try{
     const res=await fetch('data/publication-costs-dataset.json');
+    if(!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`),{url:res.url,status:res.status});
     _pcDataset = await res.json();
     document.getElementById('pc-updated').textContent = _pcDataset.generatedAt ? new Date(_pcDataset.generatedAt).toISOString().slice(0,10) : 'not yet crawled';
     renderPublicationCosts();
     document.getElementById('pc-first-author').addEventListener('change', renderPublicationCosts);
     progressTick();
-  }catch(err){ setWrap('pc-histogram-wrap', errBox(err.message,'loadPublicationCosts')); progressTick(); }
+  }catch(err){ PC_WRAP_IDS.forEach(id=>setWrap(id,errBox(err.message,'loadPublicationCosts'))); progressTick(); }
 }
 
 /* ============================================================ LAZY / NAV */

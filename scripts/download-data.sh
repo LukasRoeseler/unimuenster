@@ -141,10 +141,14 @@ download "collab_intl" \
 # ── Section 6 — Benchmarking ──────────────────────────────────────────────────
 
 echo "▸ Benchmarking (U15)"
+# Must match the `U15` array's institution ids in citations-topics/index.html exactly --
+# localFilePath() there maps each id to data/bench_${id}.json, so a mismatch here means
+# these downloads are wasted and the dashboard silently falls back to 15 live API calls
+# per visitor instead of using the committed snapshot.
 for id in \
-  I22465464 I1292875679 I45335783 I112057170 I55449684 \
-  I16951967 I1278002445 I202697675 I14961990 I55249678 \
-  I43489663 I51556381 I179430786 I74977 I66743132
+  I22465464 I75951250 I39343248 I135140700 I114090438 \
+  I161046081 I74656192 I159176309 I223822909 I180923762 \
+  I8204097 I62916508 I100066346 I8087733 I25974101
 do
   download "bench_${id}" \
     "${API}/institutions/${id}?select=id,display_name,works_count,cited_by_count,summary_stats"
