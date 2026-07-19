@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Münster Research Intelligence — live bibliometric dashboard for the University of Münster powered by OpenAlex, aligned to the Hochschulentwicklungsplan 2024–2028.">
-<title>Münster Research Intelligence</title>
+<meta name="description" content="Münster Bibliometric Dashboard — live research-output dashboard for the University of Münster powered by OpenAlex, aligned to the Hochschulentwicklungsplan 2024–2028.">
+<title>Münster Bibliometric Dashboard</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2300305D'/%3E%3Cpath d='M3 3 L18 3 L3 18 Z' fill='%23009FE3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,6 +70,8 @@ h1,h2,h3,.num{font-family:var(--font-h)}
 /* ── Navigation ────────────────────────────────────────────── */
 #navbar{position:fixed;top:3px;left:0;right:0;z-index:900;height:var(--nav-h);background:var(--c-bg);border-bottom:1px solid var(--c-border);display:flex;align-items:center;padding:0 1.5rem;gap:1rem}
 .nav-brand{display:flex;align-items:center;gap:.6rem;flex-shrink:0;color:var(--c-primary)}
+.back-link{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--c-card);border:1px solid var(--c-border);color:var(--c-muted);font-size:1rem;font-weight:700;text-decoration:none;transition:color .15s,border-color .15s}
+.back-link:hover{color:var(--c-accent);border-color:var(--c-accent)}
 .nav-brand .wordmark{font-family:var(--font-h);font-size:1rem;font-weight:700;white-space:nowrap;letter-spacing:.01em}
 .nav-links{display:flex;gap:.1rem;flex:1;overflow-x:auto;scrollbar-width:none}
 .nav-links::-webkit-scrollbar{display:none}
@@ -134,6 +136,11 @@ a.chip:hover{border-color:var(--c-accent);color:var(--c-accent);text-decoration:
 .card-body{padding:1.25rem}
 .chart-wrap{position:relative;width:100%}
 .chart-wrap canvas{max-height:360px}
+/* U15 benchmark charts list all 15 universities by name on the y-axis; the
+   default 360px cap only leaves room for ~8 legible rows before Chart.js
+   starts auto-skipping labels, so these three get a taller allowance. */
+#bench-works-wrap,#bench-cites-wrap,#bench-hindex-wrap{height:520px}
+#bench-works-wrap canvas,#bench-cites-wrap canvas,#bench-hindex-wrap canvas{max-height:520px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
@@ -212,15 +219,6 @@ tr.highlight-row{border-left:3px solid var(--c-accent);font-weight:700;backgroun
 .rank-dot{width:24px;height:24px;border-radius:50%;background:var(--c-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
 [data-theme="dark"] .rank-dot{color:#08121f}
 
-/* ── Faculties ─────────────────────────────────────────────── */
-.fac-controls{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem}
-.fac-controls select{padding:.6rem .9rem;border:1.5px solid var(--c-border);border-radius:6px;font-size:.92rem;background:var(--c-card);color:var(--c-text);min-width:280px;font-family:var(--font-b)}
-.fac-chip-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.fac-chip{padding:.3rem .65rem;border-radius:6px;font-size:.76rem;font-weight:600;background:var(--c-card);border:1px solid var(--c-border);color:var(--c-muted);cursor:pointer;transition:all .12s}
-.fac-chip:hover{border-color:var(--c-accent);color:var(--c-text)}
-.fac-chip.active{background:var(--c-primary);color:#fff;border-color:var(--c-primary)}
-[data-theme="dark"] .fac-chip.active{color:#08121f}
-
 /* ── Strategy / HEP ────────────────────────────────────────── */
 .hep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-bottom:1.5rem}
 .hep-card{background:var(--c-card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--c-border);border-top:4px solid var(--c-accent);padding:1.25rem 1.4rem}
@@ -275,7 +273,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
 /* ── Print ─────────────────────────────────────────────────── */
 @media print{
-  #navbar,#progress-bar,#api-modal,.modal-overlay,.btn,.search-wrap,.fac-controls,.fac-chip-row{display:none!important}
+  #navbar,#progress-bar,#api-modal,.modal-overlay,.btn,.search-wrap{display:none!important}
   main{padding-top:0}
   section{page-break-before:always;border:none}
   section:first-child{page-break-before:auto}
@@ -320,6 +318,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 <!-- Navigation -->
 <nav id="navbar" aria-label="Main navigation">
   <div class="nav-brand">
+    <a href="../index.html" class="back-link" aria-label="Back to tool selection" title="Back to tool selection">&larr;</a>
     <img class="nav-logo only-light" src="data/logo-um.svg" alt="Universität Münster">
     <img class="nav-logo only-dark"  src="data/logo-um-white.svg" alt="Universität Münster">
   </div>
@@ -328,13 +327,12 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     <a href="#methods">Methods</a>
     <a href="#output">Scholarly Output</a>
     <a href="#openaccess">Open Access</a>
+    <a href="#pubcosts">Article&nbsp;Processing&nbsp;Charges</a>
     <a href="#topics">Research Topics</a>
-    <a href="#faculties">Faculties</a>
     <a href="#collaboration">Collaboration</a>
     <a href="#benchmarking">Benchmarking</a>
     <a href="#authors">Authors</a>
     <a href="#strategy">HEP&nbsp;Strategy</a>
-    <a href="#pubcosts">Publication&nbsp;Costs</a>
   </nav>
   <div class="nav-right">
     <span id="last-updated" aria-live="polite"></span>
@@ -392,7 +390,6 @@ footer p{font-size:.8rem;color:var(--c-muted)}
           <li><strong>Metrics ≠ quality.</strong> Counts capture volume and attention, never significance or rigour.</li>
           <li><strong>Coverage gaps.</strong> OpenAlex indexes works with a discoverable record; books, reports, non-English and pre-2000 output are under-represented.</li>
           <li><strong>Classification is algorithmic.</strong> Topic, field and SDG tags are machine-assigned and occasionally wrong.</li>
-          <li><strong>Faculty figures are a proxy.</strong> Faculties are mapped to OpenAlex research fields, so related faculties sharing a field show similar numbers.</li>
           <li><strong>Author disambiguation</strong> is automated and can merge or split people.</li>
         </ul>
       </div></div>
@@ -446,36 +443,53 @@ footer p{font-size:.8rem;color:var(--c-muted)}
   </div>
 </section>
 
-<!-- ════════ 4. RESEARCH TOPICS ════════ -->
+<!-- ════════ 4. ARTICLE PROCESSING CHARGES ════════ -->
+<section id="pubcosts" aria-labelledby="s10-heading" data-lazy="true">
+  <div class="container">
+    <div class="section-header"><div class="section-eyebrow">Section 04</div><h2 id="s10-heading">Article Processing Charges</h2><p>Estimated article processing charges (APCs) across the institution's recorded output, broken down by open access route, publisher, discipline and year.</p></div>
+
+    <div class="callout" id="pc-progress-banner" style="margin-bottom:1rem"></div>
+
+    <div class="filter-bar" id="pc-filter-bar" style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--c-muted)"><input type="checkbox" id="pc-first-author"> Only works where the first author is Münster-affiliated</label>
+      <span id="pc-count" style="font-size:.8rem;color:var(--c-muted);margin-left:auto"></span>
+    </div>
+
+    <div class="stat-cards" id="pc-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
+
+    <div class="grid-2" style="margin:1.25rem 0">
+      <div class="card"><div class="card-header"><h3>Cost Distribution</h3></div><div class="card-body"><div class="chart-wrap" id="pc-histogram-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Open Access Type (by cost)</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="pc-oa-donut-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Cost by Publication Year, by Open Access Type</h3></div><div class="card-body"><div class="chart-wrap" id="pc-year-oa-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+
+    <div class="grid-2" style="margin-bottom:1.25rem">
+      <div class="card"><div class="card-header"><h3>Cost vs. Citations</h3></div><div class="card-body"><div class="chart-wrap" id="pc-scatter-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Citations by Cost Tier</h3></div><div class="card-body"><div class="chart-wrap" id="pc-tier-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1.25rem">
+      <div class="card"><div class="card-header"><h3>Top Publishers by Total Cost</h3></div><div class="card-body"><div class="chart-wrap" id="pc-publisher-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Top Disciplines by Total Cost</h3></div><div class="card-body"><div class="chart-wrap" id="pc-field-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+    </div>
+
+    <div class="callout">
+      <strong>How costs are estimated.</strong> A recorded paid APC (via <a href="https://openapc.net" target="_blank" rel="noopener">OpenAPC</a>) is trusted whenever present. Preprints and diamond OA works are treated as free. Gold/hybrid works without a paid record fall back to the journal's list price (an estimate, not necessarily what was actually paid). Green/bronze/closed/unknown works carry no direct APC by this route, though they may still cost the library via a subscription, which OpenAlex does not expose per work. Crawled incrementally and resumably from OpenAlex — see <span id="pc-updated">—</span> for when this data was last refreshed. Uses the same methodology as the standalone <a href="https://lukasroeseler.github.io/pcc/" target="_blank" rel="noopener">Publication Cost Calculator</a>, which anyone can run against their own reference list.
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 5. RESEARCH TOPICS ════════ -->
 <section id="topics" aria-labelledby="s4-heading" data-lazy="true">
   <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 04</div><h2 id="s4-heading">Research Topics</h2><p>Thematic landscape, disciplinary balance, SDG alignment, and emerging areas.</p></div>
+    <div class="section-header"><div class="section-eyebrow">Section 05</div><h2 id="s4-heading">Research Topics</h2><p>Thematic landscape, disciplinary balance, SDG alignment, and emerging areas.</p></div>
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Topic Landscape — Top 25 Topics</h3></div><div class="card-body"><div id="treemap-wrap"><div class="skeleton skel-chart" style="height:420px"></div></div></div></div>
     <div class="grid-2" style="margin-bottom:1.25rem">
       <div class="card"><div class="card-header"><h3>Research Domain Profile</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:360px;width:100%" id="domain-radar-wrap"><div class="skeleton skel-chart"></div></div></div></div>
       <div class="card"><div class="card-header"><h3>Emerging Topics (2019–21 vs 2022–24)</h3></div><div class="card-body"><div id="emerging-topics-wrap"><div class="skeleton skel-chart"></div></div></div></div>
     </div>
     <div class="card"><div class="card-header"><h3>SDG Alignment</h3></div><div class="card-body"><div class="chart-wrap" id="sdg-chart-wrap"><div class="skeleton skel-chart" style="height:400px"></div></div></div></div>
-  </div>
-</section>
-
-<!-- ════════ 5. FACULTIES ════════ -->
-<section id="faculties" aria-labelledby="s5-heading" data-lazy="true">
-  <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 05</div><h2 id="s5-heading">Faculty Profiles</h2><p>Per-faculty research overview across all 15 faculties (Fachbereiche). Each faculty is mapped to its OpenAlex research field(s) — see the note below.</p></div>
-    <div class="fac-controls">
-      <label for="fac-select" style="font-weight:600;font-size:.9rem">Select a faculty:</label>
-      <select id="fac-select" aria-label="Select faculty"></select>
-    </div>
-    <div class="fac-chip-row" id="fac-chip-row"></div>
-    <div class="stat-cards" id="fac-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
-    <div class="grid-2">
-      <div class="card"><div class="card-header"><h3>Faculty Output by Year</h3></div><div class="card-body"><div class="chart-wrap" id="fac-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Leading Topics in this Faculty</h3></div><div class="card-body"><div id="fac-topics-wrap"><div class="skeleton skel-table"></div></div></div></div>
-    </div>
-    <div class="callout">
-      <strong>Methodology.</strong> OpenAlex does not expose Münster's internal faculty structure, so each faculty is approximated by its primary OpenAlex research <em>field(s)</em>. Closely related faculties that share a field (e.g. the two theology faculties, or History/Philosophy and Philology under Arts &amp; Humanities) will therefore show similar figures. Treat these as field-level proxies, not official faculty statistics.
-    </div>
   </div>
 </section>
 
@@ -537,52 +551,17 @@ footer p{font-size:.8rem;color:var(--c-muted)}
   </div>
 </section>
 
-<!-- ════════ 10. PUBLICATION COSTS ════════ -->
-<section id="pubcosts" aria-labelledby="s10-heading" data-lazy="true">
-  <div class="container">
-    <div class="section-header"><div class="section-eyebrow">Section 10</div><h2 id="s10-heading">Publication Costs</h2><p>Estimated article processing charges (APCs) across the institution's recorded output, broken down by open access route, publisher, discipline and year.</p></div>
-
-    <div class="filter-bar" id="pc-filter-bar" style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--c-muted)"><input type="checkbox" id="pc-first-author"> Only works where the first author is Münster-affiliated</label>
-      <span id="pc-count" style="font-size:.8rem;color:var(--c-muted);margin-left:auto"></span>
-    </div>
-
-    <div class="stat-cards" id="pc-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
-
-    <div class="grid-2" style="margin:1.25rem 0">
-      <div class="card"><div class="card-header"><h3>Cost Distribution</h3></div><div class="card-body"><div class="chart-wrap" id="pc-histogram-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Open Access Type (by cost)</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="pc-oa-donut-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-    </div>
-
-    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Cost by Publication Year, by Open Access Type</h3></div><div class="card-body"><div class="chart-wrap" id="pc-year-oa-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-
-    <div class="grid-2" style="margin-bottom:1.25rem">
-      <div class="card"><div class="card-header"><h3>Cost vs. Citations</h3></div><div class="card-body"><div class="chart-wrap" id="pc-scatter-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Citations by Cost Tier</h3></div><div class="card-body"><div class="chart-wrap" id="pc-tier-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-    </div>
-
-    <div class="grid-2" style="margin-bottom:1.25rem">
-      <div class="card"><div class="card-header"><h3>Top Publishers by Total Cost</h3></div><div class="card-body"><div class="chart-wrap" id="pc-publisher-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Top Disciplines by Total Cost</h3></div><div class="card-body"><div class="chart-wrap" id="pc-field-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-    </div>
-
-    <div class="callout">
-      <strong>How costs are estimated.</strong> A recorded paid APC (via <a href="https://openapc.net" target="_blank" rel="noopener">OpenAPC</a>) is trusted whenever present. Preprints and diamond OA works are treated as free. Gold/hybrid works without a paid record fall back to the journal's list price (an estimate, not necessarily what was actually paid). Green/bronze/closed/unknown works carry no direct APC by this route, though they may still cost the library via a subscription, which OpenAlex does not expose per work. Crawled incrementally and resumably from OpenAlex — see <span id="pc-updated">—</span> for when this data was last refreshed. Uses the same methodology as the standalone <a href="../publication-costs/index.html">Publication Cost Calculator</a>, which anyone can run against their own reference list.
-    </div>
-  </div>
-</section>
-
 </main>
 
 <footer>
   <div class="container">
     <div class="brand-bar">
-      <span class="wl-wordmark">wissen.<b>leben</b></span>
+      <span class="wl-wordmark">living.<b>knowledge</b></span>
       <img class="mucos-logo" src="data/logo-mucos.jpg" alt="MüCOS — Münster Center for Open Science">
     </div>
     <p>Data source: <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> (openalex.org) — CC0 licence. Dashboard built for the University of Münster.</p>
     <p>Strategic indicators reference the <em>Hochschulentwicklungsplan der Universität Münster 2024–2028</em>.</p>
-    <p>Last data refresh: <span id="footer-refresh"></span></p>
+    <p>Last data refresh: <span id="footer-refresh"></span> &middot; v0.2</p>
   </div>
 </footer>
 
@@ -594,7 +573,6 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 const INST_ID  = 'I22465464';
 const API_BASE = 'https://api.openalex.org';
 const CURR_YEAR = 2026;
-const FIELD_BASE = 'fields/';   /* OpenAlex filter wants the short form, not a full URL */
 
 /* OpenAlex institution IDs verified against the live API (June 2026). */
 const U15 = [
@@ -614,26 +592,6 @@ const U15 = [
   { name: "Universität Tübingen",   id: "I8087733"   },
   { name: "Universität Würzburg",   id: "I25974101"  },
 ];
-
-/* Faculty → OpenAlex field-id proxy. code is used for the cache filename. */
-const FACULTIES = [
-  { code:'FB1',  name:'FB 1 · Protestant Theology',                fields:[12] },
-  { code:'FB2',  name:'FB 2 · Catholic Theology',                  fields:[12] },
-  { code:'FB3',  name:'FB 3 · Law',                                fields:[33] },
-  { code:'FB4',  name:'FB 4 · Business and Economics',             fields:[20,14] },
-  { code:'FB5',  name:'FB 5 · Medicine',                           fields:[27,13,24] },
-  { code:'FB6',  name:'FB 6 · Educational and Social Sciences',    fields:[33] },
-  { code:'FB7',  name:'FB 7 · Psychology / Sport and Exercise',    fields:[32] },
-  { code:'FB8',  name:'FB 8 · History and Philosophy',             fields:[12] },
-  { code:'FB9',  name:'FB 9 · Philology',                          fields:[12] },
-  { code:'FB10', name:'FB 10 · Mathematics and Computer Science',  fields:[26,17] },
-  { code:'FB11', name:'FB 11 · Physics',                           fields:[31] },
-  { code:'FB12', name:'FB 12 · Chemistry and Pharmacy',            fields:[16,30] },
-  { code:'FB13', name:'FB 13 · Biology',                           fields:[11,13] },
-  { code:'FB14', name:'FB 14 · Geosciences',                       fields:[19,23] },
-  { code:'FB15', name:'FB 15 · University of Music',               fields:[12] },
-];
-const facFieldFilter = f => 'topics.field.id:' + f.fields.map(n => FIELD_BASE + n).join('|');
 
 /* HEP four Impact Areas → OpenAlex field numbers */
 const IMPACT_AREAS = [
@@ -662,8 +620,8 @@ const SVG = {
 
 /* ============================================================ STATE */
 let _instData=null, _benchData=null, _worldTopo=null;
-let _chartRegistry={}, _sectionLoaded={}, _topAuthors=null, _facCurrent='FB5';
-const _sectionsTotal=10; let _sectionsLoaded=0;
+let _chartRegistry={}, _sectionLoaded={}, _topAuthors=null;
+const _sectionsTotal=9; let _sectionsLoaded=0;
 
 /* ============================================================ API */
 function apiKey(){ return localStorage.getItem('openalex_api_key')||''; }
@@ -679,17 +637,6 @@ function localFilePath(url){
     const u=new URL(url), p=u.pathname;
     const gb=u.searchParams.get('group_by')||'', filter=u.searchParams.get('filter')||'', sort=u.searchParams.get('sort')||'';
 
-    // Faculty queries (filter carries topics.field.id) — match the field-set to a faculty code
-    if(p==='/works' && filter.includes('topics.field.id:')){
-      const m=filter.match(/topics\.field\.id:([^,&]+)/);
-      const fieldStr=m?m[1]:'';
-      const fac=FACULTIES.find(f=>f.fields.map(n=>FIELD_BASE+n).join('|')===fieldStr);
-      if(fac){
-        if(gb==='publication_year')        return `data/faculty_${fac.code}_year.json`;
-        if(gb==='open_access.oa_status')   return `data/faculty_${fac.code}_oa.json`;
-        if(gb==='topics.id')               return `data/faculty_${fac.code}_topics.json`;
-      }
-    }
     if(p===`/institutions/${INST_ID}` && !u.searchParams.get('select')) return 'data/institution.json';
     if(p==='/works' && gb==='publication_year')              return 'data/works_by_year.json';
     if(p==='/works' && gb==='type')                          return 'data/works_by_type.json';
@@ -942,55 +889,6 @@ function renderTreemap(nodes){
   cells.on('mouseenter',(e,d)=>{tt.style.opacity='1';tt.innerHTML=`<strong>${d.data.name}</strong><br>${fmt(d.data.value)} works · ${fmtP(d.data.value/total*100)}<br><small style="color:var(--c-muted)">${d.data.domainName}</small>`;}).on('mousemove',e=>{tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-32)+'px';}).on('mouseleave',()=>tt.style.opacity='0');
 }
 
-/* ============================================================ 5 · FACULTIES */
-function loadFaculties(){
-  if(_sectionLoaded.faculties) return; _sectionLoaded.faculties=true;
-  const sel=document.getElementById('fac-select');
-  sel.innerHTML=FACULTIES.map(f=>`<option value="${f.code}">${f.name}</option>`).join('');
-  sel.value=_facCurrent;
-  sel.addEventListener('change',()=>{ _facCurrent=sel.value; renderFacChips(); loadFacultyData(_facCurrent); });
-  renderFacChips();
-  loadFacultyData(_facCurrent);
-  progressTick();
-}
-function renderFacChips(){
-  document.getElementById('fac-chip-row').innerHTML=FACULTIES.map(f=>`<button class="fac-chip${f.code===_facCurrent?' active':''}" data-code="${f.code}">${f.code}</button>`).join('');
-  document.querySelectorAll('#fac-chip-row .fac-chip').forEach(b=>b.addEventListener('click',()=>{_facCurrent=b.dataset.code;document.getElementById('fac-select').value=_facCurrent;renderFacChips();loadFacultyData(_facCurrent);}));
-}
-async function loadFacultyData(code){
-  const fac=FACULTIES.find(f=>f.code===code); if(!fac) return;
-  const filter=`institutions.id:${INST_ID},${facFieldFilter(fac)}`;
-  setWrap('fac-year-wrap','<div class="skeleton skel-chart"></div>');
-  setWrap('fac-topics-wrap','<div class="skeleton skel-table"></div>');
-  document.getElementById('fac-stat-cards').innerHTML='<div class="stat-card skeleton skel-kpi"></div>'.repeat(3);
-  try{
-    const [yearData,oaData,topicsData]=await Promise.all([
-      fetchAPI(buildUrl('/works',{filter,group_by:'publication_year',per_page:'200'})),
-      fetchAPI(buildUrl('/works',{filter,group_by:'open_access.oa_status'})),
-      fetchAPI(buildUrl('/works',{filter,group_by:'topics.id',per_page:'10',sort:'count:desc'})),
-    ]);
-    const yg=yearData.group_by||[];
-    const total=yg.reduce((s,g)=>s+g.count,0);
-    const og=oaData.group_by||[]; const oat=og.reduce((s,g)=>s+g.count,0);
-    const oaOpen=og.filter(g=>g.key!=='closed').reduce((s,g)=>s+g.count,0);
-    const oaRate=oat>0?oaOpen/oat*100:0;
-    const recent=yg.filter(g=>+g.key>=CURR_YEAR-5&&+g.key<CURR_YEAR).reduce((s,g)=>s+g.count,0);
-    document.getElementById('fac-stat-cards').innerHTML=[
-      {v:fmt(total),l:'Works in field (all time)'},
-      {v:fmtP(oaRate),l:'Open Access rate'},
-      {v:fmt(recent),l:'Works last 5 years'},
-    ].map(c=>`<div class="stat-card"><div class="stat-val">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('');
-
-    const years=[]; for(let y=2005;y<=CURR_YEAR-1;y++) years.push(y);
-    const ym={}; yg.forEach(g=>ym[+g.key]=g.count);
-    setWrap('fac-year-wrap','<canvas id="fac-year-chart" aria-label="Faculty output by year" role="img"></canvas>');
-    mkChart('fac-year-chart',{type:'bar',data:{labels:years,datasets:[{label:'Works',data:years.map(y=>ym[y]||0),backgroundColor:'#00305D',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' works'}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:9},maxTicksLimit:12}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)}}}}});
-
-    const tg=(topicsData.group_by||[]).slice(0,10);
-    setWrap('fac-topics-wrap',`<table><thead><tr><th>#</th><th>Topic</th><th>Works</th></tr></thead><tbody>${tg.map((g,i)=>`<tr><td>${i+1}</td><td>${g.key_display_name||g.key}</td><td>${fmt(g.count)}</td></tr>`).join('')||'<tr><td colspan="3">No data.</td></tr>'}</tbody></table>`);
-  }catch(err){ setWrap('fac-year-wrap',errBox(err.message,'loadFaculties')); }
-}
-
 /* ============================================================ 6 · COLLABORATION */
 async function loadCollaboration(){
   if(_sectionLoaded.collaboration) return; _sectionLoaded.collaboration=true;
@@ -1049,7 +947,7 @@ function renderBenchCharts(data){
   const colors=sorted.map(r=>r.highlight?'#00305D':'rgba(0,48,93,.28)');
   [{w:'bench-works-wrap',c:'bench-works-chart',k:'works'},{w:'bench-cites-wrap',c:'bench-cites-chart',k:'cites'},{w:'bench-hindex-wrap',c:'bench-hindex-chart',k:'hIndex'}].forEach(({w,c,k})=>{
     setWrap(w,`<canvas id="${c}" aria-label="Benchmark ${k}" role="img"></canvas>`);
-    mkChart(c,{type:'bar',data:{labels,datasets:[{data:sorted.map(r=>r[k]),backgroundColor:colors,borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>fmt(x.raw)}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)}},y:{grid:{display:false},ticks:{color:tickColor(),font:{size:9}}}}}});
+    mkChart(c,{type:'bar',data:{labels,datasets:[{data:sorted.map(r=>r[k]),backgroundColor:colors,borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>fmt(x.raw)}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)}},y:{grid:{display:false},ticks:{color:tickColor(),font:{size:10},autoSkip:false}}}}});
   });
 }
 function renderBenchCallout(data){
@@ -1138,8 +1036,21 @@ const PC_OA_COLORS = Object.assign({ preprint:'#7a9c3f', unknown:'#9e9e9e' }, OA
 const PC_OA_KEYS = ['diamond','preprint','gold','hybrid','green','bronze','closed','unknown'];
 const PC_TIER_COLORS = ['#2f8f5b','#d9a521','#c1443c','#8f2626'];
 let _pcDataset = null;
-function pcTierIndex(usd){ if(usd===0) return 0; if(usd<=400) return 1; if(usd<=2500) return 2; return 3; }
-const PC_TIER_LABELS = ['$0','$0–$400','$400–$2,500','> $2,500'];
+let _pcProgress = null;
+// Underlying costs are stored in USD (OpenAlex's own value_usd); displayed in EUR by
+// default. Rate is fetched live once, falling back to a static approximate rate.
+let PC_RATE_EUR = 0.92;
+function pcToEUR(usd){ return usd*PC_RATE_EUR; }
+async function pcFetchRate(){
+  try{
+    const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
+    if(r.ok){ const d=await r.json(); if(d.rates && d.rates.EUR) PC_RATE_EUR=d.rates.EUR; }
+  }catch{}
+}
+// Tier thresholds are defined in EUR (matching the standalone calculator), so a work's
+// tier never changes if the USD/EUR rate moves slightly between visits.
+function pcTierIndex(usd){ const eur=pcToEUR(usd); if(eur===0) return 0; if(eur<=400) return 1; if(eur<=2500) return 2; return 3; }
+const PC_TIER_LABELS = ['€0','€0–€400','€400–€2,500','> €2,500'];
 
 function pcFilteredIndices(){
   const firstAuthorOnly = document.getElementById('pc-first-author').checked;
@@ -1150,7 +1061,20 @@ function pcFilteredIndices(){
 
 function renderPublicationCosts(){
   const ds=_pcDataset, idx=pcFilteredIndices();
-  document.getElementById('pc-count').textContent = `Showing ${fmt(idx.length)} of ${fmt(ds.n)} loaded works`;
+  document.getElementById('pc-count').textContent = `${fmt(idx.length)} of ${fmt(ds.n)} crawled works shown here match the current filter`;
+
+  const prog=_pcProgress;
+  const banner=document.getElementById('pc-progress-banner');
+  if(banner){
+    if(prog && prog.totalCount){
+      const pct=Math.max(1,Math.min(100,Math.round(ds.n/prog.totalCount*100)));
+      banner.innerHTML = prog.done
+        ? `<strong>Crawl complete.</strong> All ${fmt(ds.n)} works this institution has in OpenAlex are loaded below.`
+        : `<strong>Crawl in progress:</strong> ${fmt(ds.n)} of an estimated ${fmt(prog.totalCount)} works loaded so far (${pct}%). This section grows automatically as the daily crawl continues; the figures below reflect only what has been loaded, not the institution's full output yet.`;
+    }else{
+      banner.innerHTML = `<strong>${fmt(ds.n)} works loaded so far.</strong> The crawl that populates this section is ongoing; figures below reflect only what has been loaded, not the institution's full output.`;
+    }
+  }
 
   let totalCost=0, determined=0, citations=0, openCount=0;
   for(const i of idx){
@@ -1159,10 +1083,11 @@ function renderPublicationCosts(){
     citations+=ds.citations[i]||0;
     if(ds.oa[i] && ds.oa[i]!=='closed' && ds.oa[i]!=='unknown') openCount++;
   }
+  const totalCostEur=pcToEUR(totalCost);
   document.getElementById('pc-stat-cards').innerHTML=[
-    {v:'$'+fmt(Math.round(totalCost)),l:'Total estimated APC spending'},
-    {v:determined?'$'+fmt(Math.round(totalCost/determined)):'—',l:'Average per article with a determined cost'},
-    {v:citations?'$'+(totalCost/citations).toFixed(2):'—',l:'Cost per citation'},
+    {v:'€'+fmt(Math.round(totalCostEur)),l:'Total estimated APC spending'},
+    {v:determined?'€'+fmt(Math.round(totalCostEur/determined)):'—',l:'Average per article with a determined cost'},
+    {v:citations?'€'+(totalCostEur/citations).toFixed(2):'—',l:'Cost per citation'},
     {v:idx.length?fmtP(openCount/idx.length*100):'—',l:'Freely readable (any OA route)'},
   ].map(c=>`<div class="stat-card"><div class="stat-val">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('');
 
@@ -1177,22 +1102,22 @@ function renderPublicationCosts(){
   for(const i of idx){ const c=ds.cost[i]; if(c==null) continue; const k=ds.oa[i]||'unknown'; sums[k]=(sums[k]||0)+c; }
   const oaTotal=Object.values(sums).reduce((s,v)=>s+v,0);
   setWrap('pc-oa-donut-wrap','<canvas id="pc-oa-donut-chart" aria-label="Cost by OA type" role="img"></canvas>');
-  mkChart('pc-oa-donut-chart',{type:'doughnut',data:{labels:PC_OA_KEYS.map(k=>PC_OA_LABELS[k]),datasets:[{data:PC_OA_KEYS.map(k=>Math.round(sums[k])),backgroundColor:PC_OA_KEYS.map(k=>PC_OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.label}: $${fmt(c.raw)}${oaTotal?' ('+fmtP(c.raw/oaTotal*100)+')':''}`}}},cutout:'60%'}});
+  mkChart('pc-oa-donut-chart',{type:'doughnut',data:{labels:PC_OA_KEYS.map(k=>PC_OA_LABELS[k]),datasets:[{data:PC_OA_KEYS.map(k=>Math.round(pcToEUR(sums[k]))),backgroundColor:PC_OA_KEYS.map(k=>PC_OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.label}: €${fmt(c.raw)}${oaTotal?' ('+fmtP(c.raw/oaTotal*100)+')':''}`}}},cutout:'60%'}});
 
   // Cost by year, stacked by OA type
   const byYear={};
   for(const i of idx){ const y=ds.year[i], c=ds.cost[i]; if(y==null||c==null) continue; const k=ds.oa[i]||'unknown'; if(!byYear[y])byYear[y]={}; byYear[y][k]=(byYear[y][k]||0)+c; }
   const years=Object.keys(byYear).map(Number).sort((a,b)=>a-b);
   setWrap('pc-year-oa-wrap','<canvas id="pc-year-oa-chart" style="max-height:320px" aria-label="Cost by year by OA type" role="img"></canvas>');
-  mkChart('pc-year-oa-chart',{type:'bar',data:{labels:years,datasets:PC_OA_KEYS.map(k=>({label:PC_OA_LABELS[k],data:years.map(y=>Math.round(byYear[y][k]||0)),backgroundColor:PC_OA_COLORS[k]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: $${fmt(c.raw)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>'$'+fmtK(v)}}}}});
+  mkChart('pc-year-oa-chart',{type:'bar',data:{labels:years,datasets:PC_OA_KEYS.map(k=>({label:PC_OA_LABELS[k],data:years.map(y=>Math.round(pcToEUR(byYear[y][k]||0))),backgroundColor:PC_OA_COLORS[k]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: €${fmt(c.raw)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>'€'+fmtK(v)}}}}});
 
   // Cost vs citations scatter (sampled)
   const candidates=idx.filter(i=>ds.cost[i]!=null && ds.citations[i]!=null);
   const cap=2500, stride=candidates.length>cap?Math.ceil(candidates.length/cap):1;
   const sampled=[]; for(let i=0;i<candidates.length;i+=stride) sampled.push(candidates[i]);
-  const points=sampled.map(i=>({x:ds.cost[i],y:ds.citations[i],title:ds.title[i]||'(untitled)'}));
+  const points=sampled.map(i=>({x:pcToEUR(ds.cost[i]),y:ds.citations[i],title:ds.title[i]||'(untitled)'}));
   setWrap('pc-scatter-wrap','<canvas id="pc-scatter-chart" aria-label="Cost vs citations" role="img"></canvas>');
-  mkChart('pc-scatter-chart',{type:'scatter',data:{datasets:[{data:points,backgroundColor:'rgba(0,159,227,.5)',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0]?.raw?.title||'',label:c=>[`Cost: $${fmt(c.parsed.x)}`,`Citations: ${fmt(c.parsed.y)}`]}}},scales:{x:{title:{display:true,text:'APC cost (USD)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}},y:{title:{display:true,text:'Citations',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
+  mkChart('pc-scatter-chart',{type:'scatter',data:{datasets:[{data:points,backgroundColor:'rgba(0,159,227,.5)',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0]?.raw?.title||'',label:c=>[`Cost: €${fmt(c.parsed.x)}`,`Citations: ${fmt(c.parsed.y)}`]}}},scales:{x:{title:{display:true,text:'APC cost (EUR)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}},y:{title:{display:true,text:'Citations',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
 
   // Citations by cost tier
   const tierSums=[0,0,0,0], tierCounts=[0,0,0,0];
@@ -1205,9 +1130,9 @@ function renderPublicationCosts(){
   function topBy(dictArr, idxArr, canvasId){
     const sums=new Array(dictArr.length).fill(0);
     for(const i of idx){ const c=ds.cost[i]; if(c==null) continue; sums[idxArr[i]]+=c; }
-    const top=dictArr.map((name,j)=>({name:name||'(unknown)',value:Math.round(sums[j])})).filter(d=>d.value>0).sort((a,b)=>b.value-a.value).slice(0,10);
+    const top=dictArr.map((name,j)=>({name:name||'(unknown)',value:Math.round(pcToEUR(sums[j]))})).filter(d=>d.value>0).sort((a,b)=>b.value-a.value).slice(0,10);
     setWrap(canvasId+'-wrap',`<canvas id="${canvasId}-chart" aria-label="Top by cost" role="img"></canvas>`);
-    mkChart(canvasId+'-chart',{type:'bar',data:{labels:top.map(d=>d.name),datasets:[{data:top.map(d=>d.value),backgroundColor:'#009FE3',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+fmt(c.raw)}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>'$'+fmtK(v)}},y:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}}}});
+    mkChart(canvasId+'-chart',{type:'bar',data:{labels:top.map(d=>d.name),datasets:[{data:top.map(d=>d.value),backgroundColor:'#009FE3',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'€'+fmt(c.raw)}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>'€'+fmtK(v)}},y:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}}}});
   }
   topBy(ds.publisherDict, ds.publisher, 'pc-publisher');
   topBy(ds.fieldDict, ds.field, 'pc-field');
@@ -1221,6 +1146,12 @@ async function loadPublicationCosts(){
     if(!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`),{url:res.url,status:res.status});
     _pcDataset = await res.json();
     document.getElementById('pc-updated').textContent = _pcDataset.generatedAt ? new Date(_pcDataset.generatedAt).toISOString().slice(0,10) : 'not yet crawled';
+    // Best-effort: neither the crawl-progress total nor the live EUR rate should block
+    // rendering if unavailable (falls back to no total-count banner / the static rate).
+    await Promise.all([
+      fetch('data/publication-costs-progress.json').then(r=>r.ok?r.json():null).then(d=>{_pcProgress=d;}).catch(()=>{_pcProgress=null;}),
+      pcFetchRate(),
+    ]);
     renderPublicationCosts();
     document.getElementById('pc-first-author').addEventListener('change', renderPublicationCosts);
     progressTick();
@@ -1228,7 +1159,7 @@ async function loadPublicationCosts(){
 }
 
 /* ============================================================ LAZY / NAV */
-const SECTION_FNS={output:loadOutput,openaccess:loadOpenAccess,topics:loadTopics,faculties:loadFaculties,collaboration:loadCollaboration,benchmarking:loadBenchmarking,authors:loadAuthors,strategy:loadStrategy,pubcosts:loadPublicationCosts};
+const SECTION_FNS={output:loadOutput,openaccess:loadOpenAccess,topics:loadTopics,collaboration:loadCollaboration,benchmarking:loadBenchmarking,authors:loadAuthors,strategy:loadStrategy,pubcosts:loadPublicationCosts};
 function setupLazyLoad(){
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const fn=SECTION_FNS[e.target.id];if(fn){fn();io.unobserve(e.target);}}});},{rootMargin:'200px 0px'});
   document.querySelectorAll('section[data-lazy]').forEach(s=>io.observe(s));

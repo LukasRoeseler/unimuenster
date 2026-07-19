@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>University of Münster: Research Intelligence</title>
+<title>University of Münster: Open Science Tools</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2300305D'/%3E%3Cpath d='M3 3 L18 3 L3 18 Z' fill='%23009FE3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,8 +38,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:56px 2
 .hero h1{font-size:34px;font-weight:700;line-height:1.2;letter-spacing:-.01em;color:var(--c-primary);margin-bottom:14px;text-wrap:balance}
 .hero p{font-size:16px;color:var(--c-muted);line-height:1.7}
 
-.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:980px;width:100%}
-@media (max-width:820px){.choices{grid-template-columns:1fr}}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:680px;width:100%}
+@media (max-width:600px){.choices{grid-template-columns:1fr}}
 
 .choice{background:var(--c-card);border:1px solid var(--c-border);border-radius:12px;padding:28px 24px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
 .choice:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.12);border-color:var(--c-accent)}
@@ -57,23 +57,16 @@ footer .sep{margin:0 6px}
 <body>
 
 <div class="hdr">
-  <span class="title">University of Münster &middot; Research Intelligence</span>
+  <span class="title">University of Münster &middot; Open Science</span>
 </div>
 
 <main>
   <div class="hero">
-    <h1>Three views into Münster's research</h1>
-    <p>Independent, openly built tools covering what the University of Münster publishes, what it costs, and where its e-journals stand.</p>
+    <h1>Two views into Münster's research</h1>
+    <p>Independent, openly built tools covering the University of Münster's open access e-journals and its institution-wide research output.</p>
   </div>
 
   <div class="choices">
-    <a class="choice" href="publication-costs/index.html">
-      <div class="icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 15V8M8 15V4M13 15v-6M17 15V2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-      <h2>Publication Costs</h2>
-      <p>Paste your own reference list, upload a file, or enter an ORCID iD to estimate article processing charges for your publications.</p>
-      <span class="go">Open the calculator &rarr;</span>
-    </a>
-
     <a class="choice" href="ejournals/index.html">
       <div class="icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 3h8a2 2 0 0 1 2 2v12l-6-3-6 3V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
       <h2>E-Journals</h2>
@@ -83,8 +76,8 @@ footer .sep{margin:0 6px}
 
     <a class="choice" href="citations-topics/index.html">
       <div class="icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M10 5.5v5l3.5 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-      <h2>Citations and Topics</h2>
-      <p>Institution-wide research output: scholarly output, open access, research topics, faculties, collaboration, benchmarking, authors, and publication costs.</p>
+      <h2>Bibliometric Dashboard</h2>
+      <p>Institution-wide research output: scholarly output, open access, research topics, article processing charges, collaboration, benchmarking, and authors.</p>
       <span class="go">Open the dashboard &rarr;</span>
     </a>
   </div>
@@ -93,9 +86,11 @@ footer .sep{margin:0 6px}
 <footer>
   <span>An independent project for the University of Münster</span>
   <span class="sep">&middot;</span>
-  <span>Data: OpenAlex + DataCite + Crossref + ORCID + Unpaywall + DOAJ + Altmetric</span>
+  <span>Data: OpenAlex + DataCite + Altmetric</span>
   <span class="sep">&middot;</span>
   <span><a href="https://github.com/LukasRoeseler/unimuenster" target="_blank" rel="noopener">Source on GitHub</a></span>
+  <span class="sep">&middot;</span>
+  <span>v0.2</span>
 </footer>
 
 </body>

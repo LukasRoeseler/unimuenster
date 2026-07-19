@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Crawls OpenAlex for every work affiliated with the University of Münster
 // (same institution, I22465464, that download-data.sh already queries) and
-// estimates each work's APC cost, powering the "Publication Costs" section of
-// the Citations and Topics dashboard.
+// estimates each work's APC cost, powering the "Article Processing Charges"
+// section of the Bibliometric Dashboard.
 //
 // This used to be a second, independent crawler (in a different repo) that
 // separately hit OpenAlex for the same institution's works. It now runs from
