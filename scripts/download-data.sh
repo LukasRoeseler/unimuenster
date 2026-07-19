@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Downloads all OpenAlex endpoints used by the dashboard to data/*.json.
+# Downloads all OpenAlex endpoints used by the dashboard to citations-topics/data/*.json.
 # Each file is written atomically (tmp → final) so a partial run always
 # leaves previously-succeeded files intact.
 set -euo pipefail
 
 API="https://api.openalex.org"
 INST="I22465464"
-OUT="data"
+OUT="citations-topics/data"
 mkdir -p "$OUT"
 
 PASS=0

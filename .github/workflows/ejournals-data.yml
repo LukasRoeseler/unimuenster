@@ -1,0 +1,47 @@
+name: Update Ejournals data
+
+on:
+  schedule:
+    # Monthly on the 1st at 06:00 UTC. Offset from the Monday 03:23 OpenAlex
+    # refresh (different data source -- DataCite + a separate OpenAlex batch
+    # citation lookup, not the institution-wide crawl those use) and off the
+    # top of the hour to avoid GitHub's documented scheduling delays.
+    - cron: "0 6 1 * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Crawl DataCite + OpenAlex for all journals
+        id: crawl
+        # Continue past a crawl failure so the commit step below still saves
+        # whatever journals succeeded before the failure.
+        continue-on-error: true
+        run: node scripts/crawl-ejournals.js
+
+      - name: Commit updated data
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ejournals/data
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update ejournals data"
+            git push
+          fi
+
+      - name: Fail the job if the crawl step failed
+        if: steps.crawl.outcome == 'failure'
+        run: exit 1

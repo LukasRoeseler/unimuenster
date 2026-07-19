@@ -5,11 +5,16 @@ on:
     # Every Monday at 03:23 UTC. Off the top of the hour: GitHub's own docs warn
     # that :00 schedules are the most likely to be delayed or dropped under load
     # (this file previously had no .yml extension, so it never actually ran at all).
+    #
+    # Runs both the aggregate dashboard refresh AND the per-work publication-costs
+    # crawl in the same job, since both query OpenAlex for the same institution --
+    # this is the one and only scheduled trigger that does so, instead of two
+    # independent crawlers in two separate repos hitting OpenAlex redundantly.
     - cron: '23 3 * * 1'
   workflow_dispatch:       # Allow manual trigger from the Actions tab
 
 permissions:
-  contents: write          # Needed to push data/ back to the repo
+  contents: write          # Needed to push citations-topics/data/ back to the repo
 
 concurrency:
   group: refresh-data
@@ -22,19 +27,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download OpenAlex data
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Download OpenAlex aggregate data (dashboard sections 1-9)
+        id: aggregates
+        continue-on-error: true
         env:
           OA_API_KEY: ${{ secrets.OA_API_KEY }}
         run: bash scripts/download-data.sh
 
+      - name: Crawl per-work publication costs (Section 10, resumable)
+        id: pubcosts
+        # Continue past a crawl failure so the commit step below still saves
+        # whatever was fetched before the failure -- see crawl-publication-costs.js,
+        # which checkpoints progress after every page and always rebuilds its
+        # dataset from disk before exiting, success or not.
+        continue-on-error: true
+        env:
+          OA_API_KEY: ${{ secrets.OA_API_KEY }}
+        run: node scripts/crawl-publication-costs.js
+
       - name: Commit updated data
+        if: always()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/
+          git add citations-topics/data
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
             git commit -m "chore: refresh OpenAlex data $(date -u '+%Y-%m-%d') [skip ci]"
             git push
           fi
+
+      - name: Fail the job if either crawl step failed
+        if: steps.aggregates.outcome == 'failure' || steps.pubcosts.outcome == 'failure'
+        run: exit 1

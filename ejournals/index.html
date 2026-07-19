@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bibliometrics Dashboard for the e-Journals Münster</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%230d2137'/%3E%3Crect x='3' y='20' width='6' height='9' rx='1' fill='%232e7dc4'/%3E%3Crect x='11' y='14' width='6' height='15' rx='1' fill='%232e7dc4'/%3E%3Crect x='19' y='8' width='6' height='21' rx='1' fill='%232e7dc4'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Aligned to the Uni Münster corporate design used by the unimuenster dashboard: */
+  --navy:#00305D;--navy2:#0a3f70;--navy3:#155184;--navy-bdr:#1f6396;
+  --accent:#009FE3;--accent-lt:#e5f6fd;--accent-bdr:#9adcf5;--accent-dk:#00729f;
+  --bg:#f5f7fa;--bg-card:#fff;--bg-soft:#eef1f6;--bg-chip:#e2e7f0;
+  --border:#d0d7e3;--border-mid:#b0bacb;
+  --text:#0f1923;--text2:#374455;--textm:#6b7a8d;
+  --green:#15803d;--green-bg:#f0fdf4;--green-bdr:#86efac;
+  --amber:#b45309;--amber-bg:#fffbeb;--amber-bdr:#fde68a;
+  --red:#dc2626;--red-bg:#fef2f2;--red-bdr:#fecaca;
+  --serif:Calibri,Carlito,'Segoe UI',system-ui,sans-serif;
+  --sans:Calibri,Carlito,'Segoe UI',system-ui,sans-serif;
+  --mono:Consolas,'Courier New',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+@keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(46,125,196,.35)}70%{box-shadow:0 0 0 8px rgba(46,125,196,0)}100%{box-shadow:0 0 0 0 rgba(46,125,196,0)}}
+@keyframes countUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes progressPulse{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:0 36px;display:flex;align-items:stretch;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.35);min-height:56px;animation:fadeIn .3s ease;overflow:hidden}
+/* Decorative corner triangle, matching the unimuenster dashboard's hero accent.
+   Sized to sit fully behind the header's left padding, with the wordmark given
+   matching clearance below so the two never overlap regardless of title length. */
+.hdr::before{content:"";position:absolute;top:0;left:0;width:70px;height:100%;background:var(--accent);clip-path:polygon(0 0,0 100%,70% 0);pointer-events:none;opacity:.9}
+.wordmark{display:flex;align-items:center;gap:12px;text-decoration:none;cursor:pointer;padding:10px 0;margin-left:44px}
+.wm-title{font-family:var(--sans);font-size:15px;font-weight:700;color:#fff;letter-spacing:.01em;line-height:1}
+.hdr-nav{display:flex;align-items:center;gap:2px;padding:8px 0}
+.hdr-tab{padding:6px 14px;border:none;background:transparent;color:rgba(255,255,255,.65);font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border-radius:5px;transition:all .2s;white-space:nowrap}
+.hdr-tab:hover{background:rgba(255,255,255,.1);color:#fff;transform:translateY(-1px)}
+.hdr-tab.on{background:var(--accent);color:#fff}
+
+/* ── JOURNAL PICKER ── */
+.jsel{position:relative;display:flex;align-items:center;margin-left:8px}
+.jsel-btn{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:12.5px;color:#fff;font-weight:500;transition:background .15s,transform .15s;min-width:200px;max-width:320px}
+.jsel-btn:hover{background:rgba(255,255,255,.18);transform:translateY(-1px)}
+.jabbr{width:24px;height:24px;border-radius:4px;flex-shrink:0;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:var(--mono)}
+.jabbr.none{background:rgba(255,255,255,.15);color:rgba(255,255,255,.6)}
+.jlbl{flex:1;text-align:left;line-height:1.2;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jlbl small{display:block;font-size:9.5px;color:rgba(255,255,255,.5);font-weight:400}
+.chev{color:rgba(255,255,255,.6);flex-shrink:0;transition:transform .22s cubic-bezier(.4,0,.2,1)}
+.jsel-btn.open .chev{transform:rotate(180deg)}
+.jdd{position:absolute;top:calc(100% + 6px);right:0;width:380px;max-height:440px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.18);z-index:500;overflow:hidden;opacity:0;transform:translateY(-8px) scaleY(.95);pointer-events:none;transition:opacity .18s cubic-bezier(.4,0,.2,1),transform .18s cubic-bezier(.4,0,.2,1);transform-origin:top right}
+.jdd.open{opacity:1;transform:none;pointer-events:all}
+.dd-sw{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg-soft)}
+.dd-sw svg{color:var(--textm);flex-shrink:0}
+.dd-si{flex:1;border:none;outline:none;font-family:var(--sans);font-size:13px;color:var(--text);background:transparent}
+.dd-list{overflow-y:auto;max-height:370px;padding:5px 0}
+.dd-list::-webkit-scrollbar{width:4px}
+.dd-list::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px}
+.dd-gl{padding:8px 14px 3px;font-size:9px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.12em}
+.dd-it{display:flex;align-items:center;gap:9px;padding:7px 12px;cursor:pointer;border-left:3px solid transparent;transition:background .12s,transform .1s}
+.dd-it:hover{background:var(--bg-soft);transform:translateX(2px)}
+.dd-it.sel{background:var(--accent-lt);border-left-color:var(--accent)}
+.dd-ab{width:26px;height:26px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:var(--mono)}
+.dd-tx{flex:1;min-width:0}
+.dd-nm{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.dd-sl{font-size:10px;color:var(--textm);font-family:var(--mono)}
+.dd-bg{font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.dd-bg.ac{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
+.dd-bg.in{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bdr)}
+.dd-bg.nd{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr)}
+.dd-em{padding:24px;text-align:center;font-size:13px;color:var(--textm)}
+
+/* ── PROGRESS BAR ── */
+.prog-bar-wrap{position:fixed;top:56px;left:0;right:0;z-index:199;height:3px;pointer-events:none;opacity:0;transition:opacity .2s}
+.prog-bar-wrap.visible{opacity:1}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),#5ba8e8,var(--accent));background-size:200% 100%;width:0%;transition:width .4s ease;animation:progressPulse 1.5s ease infinite}
+.prog-bar-wrap.done .prog-bar{background:var(--green);animation:none}
+
+/* ── FETCH PANEL ── */
+.fetch-panel{position:fixed;bottom:20px;right:20px;z-index:300;min-width:280px;max-width:360px;background:var(--navy);border:1px solid var(--navy-bdr);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.35);padding:14px 16px;opacity:0;transform:translateY(12px) scale(.97);pointer-events:none;transition:opacity .22s,transform .22s;font-family:var(--sans)}
+.fetch-panel.show{opacity:1;transform:none;pointer-events:all}
+.fp-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.fp-status{font-size:12px;color:#fff;margin-bottom:10px;line-height:1.5;min-height:18px}
+.fp-track{height:4px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;margin-bottom:8px}
+.fp-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .35s ease;width:0%}
+.fp-fill.oa{background:#27ae60}
+.fp-steps{display:flex;flex-direction:column;gap:4px}
+.fp-step{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(255,255,255,.55);transition:color .2s}
+.fp-step.active{color:#fff}
+.fp-step.done{color:rgba(255,255,255,.7)}
+.fp-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;transition:background .2s}
+.fp-step.active .fp-dot{background:var(--accent);animation:pulseRing .9s ease infinite}
+.fp-step.done .fp-dot{background:var(--green);animation:none}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1200px;margin:0 auto;padding:0 36px 80px}
+#hs,#js,#as{display:none}
+
+/* ── HOME ── */
+.hero{padding:52px 0 40px;border-bottom:1px solid var(--border);margin-bottom:36px;animation:fadeSlideIn .45s ease both}
+.hero h1{font-family:var(--serif);font-size:38px;font-weight:700;line-height:1.12;letter-spacing:-.02em;color:var(--navy);margin-bottom:14px}
+.hero h1 em{color:var(--accent);font-style:normal;border-bottom:3px solid var(--accent-bdr)}
+.hero p{font-size:15px;color:var(--text2);max-width:540px;line-height:1.72;margin-bottom:22px}
+.hint{display:inline-flex;align-items:center;gap:8px;background:var(--accent-lt);border:1px solid var(--accent-bdr);border-radius:7px;padding:9px 14px;font-size:12.5px;color:var(--accent-dk);font-weight:500;animation:fadeIn .6s .3s both}
+.hgl{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--navy);margin-bottom:18px;letter-spacing:-.01em;animation:fadeSlideIn .4s .15s both}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.hcard{border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;background:var(--bg-card);display:flex;flex-direction:column;gap:6px;text-align:left;font-family:var(--sans);position:relative;overflow:hidden;animation:fadeSlideIn .4s both}
+.hcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--jc)}
+.hcard:hover{border-color:var(--accent);box-shadow:0 4px 20px rgba(46,125,196,.15);transform:translateY(-3px)}
+.hcard.nd{opacity:.55;cursor:default}
+.hcard.nd:hover{border-color:var(--border);box-shadow:none;transform:none}
+.hct{display:flex;align-items:center;justify-content:space-between;gap:8px}
+/* Logo in home cards — soft bg helps white-on-transparent logos */
+.hclogo{width:36px;height:36px;object-fit:contain;border-radius:4px;flex-shrink:0;background:var(--bg-soft);padding:2px}
+.hclogofb{width:36px;height:36px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;color:#fff}
+.htag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px}
+.htag.ac{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
+.htag.in{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bdr)}
+.htag.nd{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr)}
+.hnm{font-size:13px;font-weight:600;color:var(--text);line-height:1.35;padding-left:4px}
+.hsl{font-size:10px;color:var(--textm);font-family:var(--mono);padding-left:4px}
+
+/* ── JOURNAL VIEW HEADER ── */
+.jvh{padding:32px 0 22px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:flex-start;gap:20px;animation:fadeSlideIn .35s ease both}
+.jvh-logo-wrap{width:60px;height:60px;flex-shrink:0;position:relative}
+.jvh-logo{width:60px;height:60px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);padding:4px;display:none;position:absolute;inset:0}
+.jvh-logofb{width:60px;height:60px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;transition:transform .25s;position:absolute;inset:0}
+.jvh-logofb:hover{transform:scale(1.05)}
+.jvh-text{}
+.jvn{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);letter-spacing:-.015em;line-height:1.15;margin-bottom:7px}
+.jvm{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.jvi{font-family:var(--mono);font-size:10.5px;color:var(--textm)}
+.jvl{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-lt);border:1px solid var(--accent-bdr);border-radius:5px;padding:3px 9px;text-decoration:none;transition:background .15s,transform .15s}
+.jvl:hover{background:#d1e8f8;transform:translateY(-1px)}
+
+/* ── STATS STRIP ── */
+.sstrip{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;background:var(--bg-card);animation:scaleIn .35s .1s ease both}
+.scell{flex:1;padding:16px 18px;text-align:center;border-right:1px solid var(--border)}
+.scell:last-child{border-right:none}
+.snum{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);line-height:1;margin-bottom:3px;font-variant-numeric:tabular-nums;animation:countUp .4s .2s both}
+.slbl{font-size:9.5px;color:var(--textm);font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+
+/* ── CHARTS ── */
+.crow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;animation:fadeSlideIn .4s .15s both}
+.ccard{border:1px solid var(--border);border-radius:10px;padding:16px 18px;background:var(--bg-card);transition:box-shadow .2s}
+.ccard:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+.ctitle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ctitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--textm)}
+.chart-toggle{display:flex;gap:2px;background:var(--bg-chip);border-radius:5px;padding:2px}
+.ct-btn{font-size:10px;font-weight:600;padding:3px 9px;border:none;background:transparent;color:var(--textm);cursor:pointer;border-radius:4px;font-family:var(--sans);transition:all .15s}
+.ct-btn:hover{color:var(--text)}
+.ct-btn.on{background:var(--bg-card);color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.chart-area{display:flex;gap:0;align-items:flex-end}
+.y-axis{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding-right:6px;flex-shrink:0;height:110px}
+.y-tick{font-size:8.5px;color:var(--textm);font-family:var(--mono);line-height:1;white-space:nowrap}
+.chart-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.cbody{width:100%;height:110px;position:relative}
+.cbody svg{width:100%;height:100%;display:block}
+.cax{display:flex;justify-content:space-between;font-size:8.5px;color:var(--textm);font-family:var(--mono)}
+.chart-tt{position:fixed;background:var(--navy);color:#fff;font-size:11px;font-family:var(--sans);font-weight:600;padding:5px 9px;border-radius:5px;pointer-events:none;white-space:nowrap;z-index:9999;opacity:0;transition:opacity .1s;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.chart-tt.show{opacity:1}
+
+/* ── YEAR FILTER SELECTS ── */
+.yr-filter-wrap{display:none;align-items:center;gap:6px}
+.yr-filter-label{font-size:10.5px;color:var(--textm);font-weight:600;white-space:nowrap}
+.yr-filter-sep{font-size:12px;color:var(--border-mid);margin:0 1px}
+
+/* ── FILTERS BAR ── */
+.filters-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:9px;animation:fadeIn .35s .2s both}
+.fb-label{font-size:10.5px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.07em;margin-right:4px;white-space:nowrap}
+.fb-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+select.fb-select{font-size:12px;font-family:var(--sans);color:var(--text);background:var(--bg-soft);border:1px solid var(--border-mid);border-radius:5px;padding:4px 28px 4px 9px;cursor:pointer;outline:none;transition:border-color .12s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7a8d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+select.fb-select:hover,select.fb-select:focus{border-color:var(--accent)}
+.fb-clear{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:600;padding:2px 4px;margin-left:2px;transition:color .12s}
+.fb-clear:hover{text-decoration:underline;color:var(--accent-dk)}
+.fb-count{font-size:11px;color:var(--textm);margin-left:auto;white-space:nowrap}
+
+/* ── EXPORT BUTTON ── */
+.export-btn{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-lt);border:1px solid var(--accent-bdr);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:var(--sans);transition:background .15s,transform .15s,box-shadow .15s;white-space:nowrap}
+.export-btn:hover{background:#d1e8f8;transform:translateY(-1px);box-shadow:0 3px 10px rgba(46,125,196,.2)}
+.export-btn svg{flex-shrink:0}
+
+/* ── PUB CARDS ── */
+.pit{display:grid;grid-template-columns:1fr 80px;gap:18px;align-items:start;padding:20px 0;border-bottom:1px solid var(--border);opacity:0;transform:translateY(6px);animation:fup .28s forwards}
+@keyframes fup{to{opacity:1;transform:none}}
+.pyr{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--textm);background:var(--bg-chip);border:1px solid var(--border);border-radius:3px;padding:2px 7px;margin-bottom:7px}
+.pj-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#fff;border-radius:3px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.ptitle{font-family:var(--serif);font-size:16.5px;font-weight:600;line-height:1.35;color:var(--text);text-decoration:none;display:block;margin-bottom:4px;transition:color .15s}
+.ptitle:hover{color:var(--accent)}
+.pauth{font-size:12px;color:var(--text2);margin-bottom:11px;line-height:1.55}
+.orc{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:3px;transition:color .12s}
+.orc:hover{color:var(--accent)}
+.oid{width:11px;height:11px;vertical-align:-1px}
+.mrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.mb{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid var(--border-mid);border-radius:4px;font-size:11px;font-weight:600;color:var(--text2);background:var(--bg-card);white-space:nowrap}
+.mb.hi{background:var(--green-bg);border-color:var(--green-bdr);color:var(--green)}
+.mb .mv{font-weight:700;font-variant-numeric:tabular-nums;color:var(--green)}
+.ds{width:6px;height:6px;border-radius:50%;display:inline-block}
+.spark-wrap{margin-top:4px;margin-bottom:2px}
+.spark-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--textm);margin-bottom:2px}
+.spl{stroke-dasharray:800;stroke-dashoffset:800;animation:draw .8s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.pfoot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.doi-chip{font-size:10px;font-family:var(--mono);color:var(--accent);font-weight:500;background:var(--accent-lt);border:1px solid var(--accent-bdr);padding:2px 7px;border-radius:4px;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px;transition:background .12s}
+.doi-chip:hover{background:#d1e8f8}
+.el{font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;border-bottom:1px solid transparent;transition:border-color .12s,color .12s}
+.el:hover{border-bottom-color:var(--accent);color:var(--accent-dk)}
+.lsep{width:1px;height:10px;background:var(--border-mid);display:inline-block}
+.pdnt{display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:2px}
+.dlbl{font-size:8.5px;color:var(--textm);text-align:center;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+/* ── STATUS BAR ── */
+.statbar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--textm);padding:8px 0 12px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--textm);flex-shrink:0}
+.sdot.L{background:var(--accent);animation:blink 1s ease-in-out infinite}
+.sdot.D{background:var(--green)}
+.sdot.E{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── ALL JOURNALS VIEW ── */
+.av-hdr{padding:32px 0 22px;border-bottom:1px solid var(--border);margin-bottom:24px;animation:fadeSlideIn .35s ease both}
+.av-title{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.av-sub{font-size:14px;color:var(--text2)}
+.av-stats{display:flex;gap:28px;margin-top:14px;flex-wrap:wrap}
+.av-stat{text-align:center}
+.av-snum{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums;animation:countUp .4s both}
+.av-slbl{font-size:10px;color:var(--textm);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.av-statbar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--textm);padding:8px 0 12px}
+
+/* ── LEGEND ── */
+.jlegend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.jleg-it{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-card);transition:all .15s}
+.jleg-it:hover{border-color:var(--accent);transform:translateY(-1px)}
+.jleg-it.off{opacity:.35}
+.jleg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── NOTICES ── */
+.note{padding:20px 24px;border-radius:10px;margin:18px 0;background:var(--bg-card);border:1px solid var(--border);animation:fadeSlideIn .3s ease both}
+.note.info{border-left:4px solid var(--accent)}
+.note.err{border-left:4px solid var(--red)}
+.note strong{font-weight:700;font-size:14px;display:block;margin-bottom:5px}
+.note p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px}
+.note code{font-family:var(--mono);font-size:11px;background:var(--bg-chip);padding:1px 5px;border-radius:3px}
+.note a{color:var(--accent);font-weight:600}
+
+/* ── FOOTER ── */
+.ft{border-top:1px solid var(--border);padding:16px 36px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--textm);max-width:1200px;margin:0 auto}
+.ft a{color:var(--accent);text-decoration:none}
+.ft a:hover{text-decoration:underline}
+.fts{color:var(--border-mid)}
+.ft-warning{width:100%;margin-top:8px;padding:8px 12px;background:var(--amber-bg);border:1px solid var(--amber-bdr);border-radius:6px;font-size:11px;color:var(--amber);display:flex;align-items:flex-start;gap:7px;line-height:1.55}
+.ft-warning svg{flex-shrink:0;margin-top:1px}
+.spn{display:inline-block;width:8px;height:8px;border:1.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skel{background:linear-gradient(90deg,var(--bg-chip) 25%,var(--bg-soft) 50%,var(--bg-chip) 75%);background-size:400px 100%;animation:shimmer 1.4s infinite;border-radius:4px}
+
+@media(max-width:760px){
+  .hdr,.ft{padding:0 14px}
+  .hdr::before{display:none}
+  .wordmark{margin-left:0}
+  .wrap{padding:0 14px 60px}
+  .jsel-btn{min-width:140px}
+  .jdd{width:calc(100vw - 20px);right:-10px}
+  .crow{grid-template-columns:1fr}
+  .sstrip{flex-wrap:wrap}
+  .scell{border-right:none;border-bottom:1px solid var(--border);min-width:50%}
+  .pit{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+  .hgrid{grid-template-columns:1fr}
+  .hdr-nav{display:none}
+  .fetch-panel{left:10px;right:10px;min-width:unset}
+}
+</style>
+</head>
+<body>
+<div class="chart-tt" id="ctt"></div>
+
+<div class="prog-bar-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+
+<div class="fetch-panel" id="fetch-panel">
+  <div class="fp-title">Data Loading</div>
+  <div class="fp-status" id="fp-status">Initialising…</div>
+  <div class="fp-track"><div class="fp-fill" id="fp-fill"></div></div>
+  <div class="fp-steps">
+    <div class="fp-step" id="fps-dc"><div class="fp-dot"></div><span>DataCite — DOI records</span></div>
+    <div class="fp-step" id="fps-oa"><div class="fp-dot"></div><span>OpenAlex — citation data</span></div>
+    <div class="fp-step" id="fps-done"><div class="fp-dot"></div><span>Complete</span></div>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="wordmark" onclick="showHome()">
+    <span class="wm-title">Bibliometrics Dashboard for the e-Journals Münster</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px">
+    <nav class="hdr-nav">
+      <button class="hdr-tab" id="tab-home" onclick="showHome()">Home</button>
+      <button class="hdr-tab" id="tab-all"  onclick="showAll()">All Journals</button>
+    </nav>
+    <div class="jsel" id="jsel">
+      <button class="jsel-btn" id="jbtn" onclick="toggleDD()" aria-haspopup="listbox" aria-expanded="false">
+        <div class="jabbr none" id="jicon">—</div>
+        <div class="jlbl" id="jlbl">Choose a journal<small>23 journals</small></div>
+        <svg class="chev" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="jdd" id="jdd" role="listbox">
+        <div class="dd-sw">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M9 9L11.5 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <input class="dd-si" id="dsi" placeholder="Search journals…" oninput="filterDD(this.value)" autocomplete="off">
+        </div>
+        <div class="dd-list" id="ddl"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ══ HOME ══ -->
+  <div id="hs">
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <h1>Open access journals<br>from <em>University of Münster</em></h1>
+          <p>Bibliometrics and citation data for all e-journals hosted by the Universitäts- und Landesbibliothek Münster — powered by DataCite and OpenAlex.</p>
+          <div class="hint">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v4l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Select a journal from the dropdown above or click any card — or view <button onclick="showAll()" style="background:none;border:none;color:inherit;text-decoration:underline;cursor:pointer;font:inherit;padding:0">all journals combined</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hgl">All journals — alphabetical</div>
+    <div class="hgrid" id="hgrid"></div>
+  </div>
+
+  <!-- ══ JOURNAL VIEW ══ -->
+  <div id="js">
+    <div class="jvh">
+      <div class="jvh-logo-wrap">
+        <img class="jvh-logo" id="jvh-logo" src="" alt="">
+        <div class="jvh-logofb" id="jvh-logofb" style="background:var(--accent)">?</div>
+      </div>
+      <div class="jvh-text">
+        <div class="jvn" id="jvn">—</div>
+        <div class="jvm">
+          <span class="jvi" id="jvi"></span>
+          <a class="jvl" id="jvl" href="#" target="_blank">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 8.5L8.5 1.5M8.5 1.5H4.5M8.5 1.5v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Visit journal
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="sstrip">
+      <div class="scell"><div class="snum" id="svp">—</div><div class="slbl">Publications</div></div>
+      <div class="scell"><div class="snum" id="svc">—</div><div class="slbl">Total citations</div></div>
+      <div class="scell"><div class="snum" id="svs">—</div><div class="slbl">Years active</div></div>
+      <div class="scell"><div class="snum">100%</div><div class="slbl">Open Access</div></div>
+    </div>
+
+    <div class="crow">
+      <div class="ccard">
+        <div class="ctitle">Publications per year</div>
+        <div class="chart-area"><div class="y-axis" id="yap"></div><div class="chart-right"><div class="cbody" id="cpw"></div><div class="cax" id="cpa"></div></div></div>
+      </div>
+      <div class="ccard">
+        <div class="ctitle">Citations per year (OpenAlex)</div>
+        <div class="chart-area"><div class="y-axis" id="yac"></div><div class="chart-right"><div class="cbody" id="ccw"></div><div class="cax" id="cca"></div></div></div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <span class="fb-label">Filter</span>
+      <div class="yr-filter-wrap" id="yr-filter-wrap">
+        <label class="yr-filter-label" for="yr-from">From</label>
+        <select class="fb-select" id="yr-from" onchange="onYrChange()"></select>
+        <span class="yr-filter-sep">–</span>
+        <label class="yr-filter-label" for="yr-to">To</label>
+        <select class="fb-select" id="yr-to" onchange="onYrChange()"></select>
+      </div>
+      <span class="fb-sep"></span>
+      <span class="fb-label">Sort</span>
+      <select class="fb-select" id="fb-sort" onchange="applySort()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="cites">Most cited</option>
+      </select>
+      <button class="fb-clear" onclick="clearFilter()">✕ Clear filter</button>
+      <span class="fb-count" id="fb-count"></span>
+      <button class="export-btn" onclick="exportCSV('journal')" style="margin-left:auto">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <div class="statbar"><span class="sdot L" id="sdot"></span><span id="stxt">Loading…</span></div>
+    <div id="plist"></div>
+  </div>
+
+  <!-- ══ ALL JOURNALS VIEW ══ -->
+  <div id="as">
+    <div class="av-hdr">
+      <div class="av-title">All Journals — Combined Overview</div>
+      <div class="av-sub">Publications and citations aggregated across all ULB Münster e-journals with DOI registration</div>
+      <div class="av-stats">
+        <div class="av-stat"><div class="av-snum" id="av-j">—</div><div class="av-slbl">Journals</div></div>
+        <div class="av-stat"><div class="av-snum" id="av-p">—</div><div class="av-slbl">Publications</div></div>
+        <div class="av-stat"><div class="av-snum" id="av-c">—</div><div class="av-slbl">Citations</div></div>
+        <div class="av-stat"><div class="av-snum" id="av-y">—</div><div class="av-slbl">Years span</div></div>
+      </div>
+    </div>
+
+    <div class="crow">
+      <div class="ccard">
+        <div class="ctitle-row">
+          <span class="ctitle">Publications per year (all journals)</span>
+          <div class="chart-toggle" id="ct-pub">
+            <button class="ct-btn on" onclick="setChartMode('stacked')">Stacked</button>
+            <button class="ct-btn" onclick="setChartMode('grouped')">Grouped</button>
+          </div>
+        </div>
+        <div class="chart-area"><div class="y-axis" id="yaa"></div><div class="chart-right"><div class="cbody" id="acpw"></div><div class="cax" id="acpa"></div></div></div>
+      </div>
+      <div class="ccard">
+        <div class="ctitle-row">
+          <span class="ctitle">Citations per year (all journals)</span>
+          <div class="chart-toggle" id="ct-cite">
+            <button class="ct-btn on" onclick="setChartMode('stacked')">Stacked</button>
+            <button class="ct-btn" onclick="setChartMode('grouped')">Grouped</button>
+          </div>
+        </div>
+        <div class="chart-area"><div class="y-axis" id="yab"></div><div class="chart-right"><div class="cbody" id="accw"></div><div class="cax" id="acca"></div></div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:10px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.07em">Journals shown in charts</span>
+      <button class="fb-clear" style="margin-left:0" onclick="selectAllJournals()">✓ Select all</button>
+      <button class="fb-clear" onclick="selectNoneJournals()">✕ Select none</button>
+    </div>
+    <div class="jlegend" id="jlegend"></div>
+
+    <div class="filters-bar">
+      <span class="fb-label">Filter</span>
+      <div class="yr-filter-wrap" id="av-yr-filter-wrap">
+        <label class="yr-filter-label" for="av-yr-from">From</label>
+        <select class="fb-select" id="av-yr-from" onchange="onAvYrChange()"></select>
+        <span class="yr-filter-sep">–</span>
+        <label class="yr-filter-label" for="av-yr-to">To</label>
+        <select class="fb-select" id="av-yr-to" onchange="onAvYrChange()"></select>
+      </div>
+      <span class="fb-sep"></span>
+      <span class="fb-label">Sort</span>
+      <select class="fb-select" id="av-sort" onchange="applyAllFilter()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="cites">Most cited</option>
+        <option value="journal">By journal</option>
+      </select>
+      <button class="fb-clear" onclick="clearAllFilter()">✕ Clear</button>
+      <span class="fb-count" id="av-count"></span>
+      <button class="export-btn" onclick="exportCSV('all')" style="margin-left:auto">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <div class="av-statbar"><span class="sdot" id="av-sdot" style="background:var(--textm)"></span><span id="av-stxt">Loading journals…</span></div>
+    <div id="avlist"></div>
+  </div>
+</div>
+
+<footer class="ft">
+  <span>Bibliometrics Dashboard for the e-Journals Münster</span>
+  <span class="fts">·</span><span>v0.1</span>
+  <span class="fts">·</span>
+  <span>An independent project by <a href="https://lukasroeseler.github.io" target="_blank">Lukas Röseler</a></span>
+  <span class="fts">·</span>
+  <span>Data: <a href="https://datacite.org" target="_blank">DataCite</a> + <a href="https://openalex.org" target="_blank">OpenAlex</a> + <a href="https://www.altmetric.com" target="_blank">Altmetric</a> (DOI and citation data refreshed monthly)</span>
+  <span class="fts">·</span>
+  <span><a href="https://ejournals.uni-muenster.de" target="_blank">ULB Münster ↗</a></span>
+  <span class="fts">·</span>
+  <span>Updated: <span id="ftu">—</span></span>
+  <div class="ft-warning">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 12H1L7 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 5.5v3M7 10v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span><strong>Important notice:</strong> Citation metrics must not be used as a proxy for research quality. They reflect usage patterns and are subject to field-specific biases, self-citation, and other confounds. Please interpret all metrics with appropriate caution.</span>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════
+   JOURNAL REGISTRY
+═══════════════════════════════ */
+var J=[
+  {slug:'aods',           name:'Archive of Orofacial Data Science',                                    abbr:'AOD',  ac:1,issn:'2941-783X',dp:['aods']},
+  {slug:'byzrev',         name:'The Byzantine Review',                                                  abbr:'BR',   ac:1,issn:'2700-0524',dp:['byzrev']},
+  {slug:'fnp',            name:'Free Neuropathology',                                                   abbr:'FN',   ac:1,issn:'2699-4445',dp:['fnp','freeneuropathology']},
+  {slug:'ifgimpulse',     name:'IfG Impulse',                                                           abbr:'IFG',  ac:1,issn:'',         dp:['ifgimpulse']},
+  {slug:'jcsw',           name:'Jahrbuch für Christliche Sozialwissenschaften',                         abbr:'JCS',  ac:1,issn:'0075-2592',dp:['jcsw']},
+  {slug:'mittelalterdigi',name:'Mittelalter Digital',                                                   abbr:'MD',   ac:0,issn:'2702-9069',dp:['mittelalterdigi']},
+  {slug:'mfiphs',         name:'Münstersche Fachzeitschrift für islamische und philosophische Studien', abbr:'MFI',  ac:1,issn:'2749-4330',dp:['mjiphs','mfiphs']},
+  {slug:'mwsca',          name:'Münster Working Paper Series in Social and Cultural Anthropology',      abbr:'MWP',  ac:1,issn:'',         dp:['mwsca']},
+  {slug:'nn',             name:'nachbarsprache niederländisch',                                         abbr:'NN',   ac:1,issn:'',         dp:['nn']},
+  {slug:'ozean',          name:'Online Zeitschrift zur Antiken Numismatik',                            abbr:'OZeAN',ac:1,issn:'2698-3079',dp:['ozean']},
+  {slug:'paradigma',      name:'Paradigma',                                                             abbr:'PAR',  ac:1,issn:'',         dp:['paradigma']},
+  {slug:'pop',            name:'POP. Kultur & Kritik',                                                 abbr:'POP',  ac:1,issn:'2192-9408',dp:[],nd:1},
+  {slug:'replicationresearch',name:'Replication Research',                                             abbr:'RR',   ac:1,issn:'',         dp:['replicationresearch']},
+  {slug:'satura',         name:'Satura',                                                               abbr:'SAT',  ac:1,issn:'2700-2640',dp:['satura']},
+  {slug:'sbi',            name:'Schule. Bildung. Inklusion',                                           abbr:'SBI',  ac:1,issn:'',         dp:[],nd:1},
+  {slug:'sun',            name:'Soziologie und Nachhaltigkeit',                                        abbr:'SuN',  ac:1,issn:'2364-1282',dp:['sun']},
+  {slug:'tjo',            name:'Teiresias Journal Online',                                              abbr:'TJO',  ac:1,issn:'',         dp:['tjo']},
+  {slug:'tso',            name:'Teiresias Supplements Online',                                          abbr:'TSO',  ac:1,issn:'',         dp:['tso']},
+  {slug:'thrv',           name:'Theologische Revue',                                                    abbr:'TR',   ac:1,issn:'0040-568X',dp:['thrv']},
+  {slug:'ZfK',            name:'Zeitschrift für Kulturwissenschaften',                                 abbr:'ZfK',  ac:0,issn:'1862-8060',dp:[],nd:1},
+  {slug:'zkr',            name:'Zeitschrift für Kanonisches Recht',                                   abbr:'ZKR',  ac:1,issn:'',         dp:['zkr']},
+  {slug:'zpth',           name:'Zeitschrift für Pastoraltheologie',                                   abbr:'ZPTh', ac:1,issn:'0555-9308',dp:['zpth']},
+  {slug:'zts',            name:'Zeitschrift für Theoretische Soziologie',                             abbr:'ZTS',  ac:1,issn:'2195-0695',dp:['zts']}
+];
+
+var JCOLS=['#2e7dc4','#c0392b','#27ae60','#8e44ad','#d68910','#16a085','#e74c3c','#2980b9',
+           '#8d6e63','#00838f','#6d4c41','#558b2f','#4527a0','#00695c','#ad1457','#37474f',
+           '#f57f17','#283593','#00897b','#e65100','#1565c0','#33691e','#880e4f'];
+J.forEach(function(j,i){j.col=JCOLS[i%JCOLS.length];j.ci=i});
+
+/* ═══════════════════════════════
+   LOGO CASCADE
+   Confirmed: verified from real URLs.
+   Guessed: sequential ID estimates; cascade tries all locale+ext combos.
+═══════════════════════════════ */
+var LOGO_BASE='https://ejournals.uni-muenster.de/public/journals/';
+
+var LOGO_CONFIRMED={
+  fnp:                {id:23,locale:'en_US',ext:'jpg'},
+  sun:                {id:13,locale:'de_DE',ext:'jpg'},
+  replicationresearch:{id:36,locale:'en_US',ext:'png'},
+  ozean:              {id:21,locale:'de_DE',ext:'svg'},
+  zpth:               {id:5, locale:'de_DE',ext:'png'}
+};
+
+var LOGO_GUESSED={
+  thrv:3, jcsw:6, ZfK:8, zts:12, nn:17,
+  mwsca:19, tjo:20, tso:22, paradigma:24,
+  byzrev:29, satura:32, mittelalterdigi:33,
+  mfiphs:34, sbi:35, zkr:37, ifgimpulse:38,
+  aods:40, pop:11
+};
+
+/* Per-journal candidate list cache and current index for home grid */
+var LOGO_CANDS_MAP={};
+var LOGO_IDX={};
+
+function logoCandidates(j){
+  var conf=LOGO_CONFIRMED[j.slug];
+  var id=conf?conf.id:(LOGO_GUESSED[j.slug]||null);
+  if(!id)return[];
+  var seen={},cands=[];
+  function add(loc,ext){
+    var u=LOGO_BASE+id+'/pageHeaderLogoImage_'+loc+'.'+ext;
+    if(!seen[u]){seen[u]=1;cands.push(u)}
+  }
+  if(conf)add(conf.locale,conf.ext); /* confirmed URL first */
+  ['en_US','de_DE'].forEach(function(loc){
+    ['png','jpg','svg'].forEach(function(ext){add(loc,ext)});
+  });
+  return cands;
+}
+
+/* Called from inline onerror in home grid img tags */
+function nextLogoCandidate(imgEl,slug){
+  var cands=LOGO_CANDS_MAP[slug]||[];
+  var idx=(LOGO_IDX[slug]||0)+1;
+  LOGO_IDX[slug]=idx;
+  if(idx>=cands.length){
+    imgEl.style.display='none';
+    var fb=imgEl.nextElementSibling;
+    if(fb)fb.style.display='flex';
+    return;
+  }
+  imgEl.onerror=function(){nextLogoCandidate(imgEl,slug)};
+  imgEl.src=cands[idx];
+}
+
+/* Used in pick() for the journal header logo — async probe */
+function tryLogo(cands,onSuccess,onFail){
+  if(!cands||!cands.length){if(onFail)onFail();return}
+  var idx=0;
+  function attempt(){
+    if(idx>=cands.length){if(onFail)onFail();return}
+    var img=new Image();
+    img.onload=function(){onSuccess(cands[idx])};
+    img.onerror=function(){idx++;attempt()};
+    img.src=cands[idx];
+  }
+  attempt();
+}
+
+/* ═══════════════════════════════
+   STATE
+═══════════════════════════════ */
+var PUBS=[],CJ=null,RID=0,CSORT='newest';
+var YR_FROM='',YR_TO='';
+var AV_YR_FROM='',AV_YR_TO='';
+var AV_CACHE={};
+var AV_RID=0;
+var AV_PUBS=[];
+var AV_SORT='newest';
+var AV_HIDDEN={};
+var AV_CHART_MODE='stacked';
+
+/* Publications are no longer fetched live from DataCite/OpenAlex on every visit --
+   a monthly GitHub Action (scripts/crawl-ejournals.js) does that once and commits
+   the results here, so opening the dashboard just reads two small static files. */
+var STATIC_PUBS={},STATIC_META={};
+var staticCacheReady=null;
+function loadStaticCache(){
+  if(!staticCacheReady){
+    staticCacheReady=Promise.all([fj('data/publications.json',20000),fj('data/meta.json',10000)]).then(function(r){
+      if(r[0])STATIC_PUBS=r[0];
+      if(r[1])STATIC_META=r[1];
+      var ftu=document.getElementById('ftu');
+      if(ftu)ftu.textContent=STATIC_META.generatedAt?STATIC_META.generatedAt.slice(0,10):'—';
+    });
+  }
+  return staticCacheReady;
+}
+
+/* ── HELPERS ── */
+function e(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function sp(){return'<span class="spn"></span>'}
+function fn(n){return(n===null||n===undefined)?'—':Number(n).toLocaleString('en')}
+function dk(doi){var m=doi.match(/(\d{4})[-\/](\d+)/);if(m)return+m[1]*1e6+ +m[2];var m2=doi.match(/(\d+)$/);return m2?+m2[1]:0}
+function fj(url,ms){
+  ms=ms||15000;
+  return Promise.race([
+    fetch(url).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}),
+    new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},ms)})
+  ]).catch(function(){return null});
+}
+
+/* ── TOOLTIP ── */
+var TT=document.getElementById('ctt');
+function showTT(ev,txt){TT.textContent=txt;TT.className='chart-tt show';moveTT(ev)}
+function moveTT(ev){TT.style.left=(ev.clientX+14)+'px';TT.style.top=(ev.clientY-28)+'px'}
+function hideTT(){TT.className='chart-tt'}
+
+/* ── PROGRESS / FETCH PANEL ── */
+function progShow(pct,status,phase){
+  var wrap=document.getElementById('prog-wrap'),bar=document.getElementById('prog-bar');
+  wrap.classList.add('visible');wrap.classList.remove('done');
+  bar.style.width=Math.min(pct,100)+'%';
+  document.getElementById('fetch-panel').classList.add('show');
+  if(status)document.getElementById('fp-status').textContent=status;
+  ['fps-dc','fps-oa','fps-done'].forEach(function(id,i){
+    var el=document.getElementById(id);el.classList.remove('active','done');
+    if(phase===i)el.classList.add('active');else if(phase>i)el.classList.add('done');
+  });
+  var fill=document.getElementById('fp-fill');
+  fill.style.width=Math.min(pct,100)+'%';
+  fill.className='fp-fill'+(phase===1?' oa':'');
+}
+function progDone(status){
+  document.getElementById('prog-wrap').classList.add('visible','done');
+  document.getElementById('prog-bar').style.width='100%';
+  document.getElementById('fp-status').textContent=status||'Done';
+  document.getElementById('fp-fill').style.width='100%';
+  ['fps-dc','fps-oa'].forEach(function(id){
+    var el=document.getElementById(id);el.classList.remove('active');el.classList.add('done');
+  });
+  document.getElementById('fps-done').classList.remove('active');
+  document.getElementById('fps-done').classList.add('done');
+  setTimeout(function(){
+    document.getElementById('fetch-panel').classList.remove('show');
+    setTimeout(function(){
+      document.getElementById('prog-wrap').classList.remove('visible','done');
+      document.getElementById('prog-bar').style.width='0%';
+    },400);
+  },2000);
+}
+function progHide(){
+  document.getElementById('fetch-panel').classList.remove('show');
+  document.getElementById('prog-wrap').classList.remove('visible','done');
+  document.getElementById('prog-bar').style.width='0%';
+}
+
+/* ── YEAR SELECTS — journal view ── */
+function buildYrSelects(pubs){
+  var seen={},years=[];
+  pubs.forEach(function(p){if(p.yr&&!seen[p.yr]){seen[p.yr]=1;years.push(+p.yr)}});
+  years.sort(function(a,b){return a-b});
+  var wrap=document.getElementById('yr-filter-wrap');
+  if(!years.length){wrap.style.display='none';return}
+  wrap.style.display='flex';
+  var fOpts='<option value="">Earliest</option>';
+  var tOpts='<option value="">Latest</option>';
+  years.forEach(function(yr){
+    fOpts+='<option value="'+yr+'">'+yr+'</option>';
+    tOpts+='<option value="'+yr+'">'+yr+'</option>';
+  });
+  document.getElementById('yr-from').innerHTML=fOpts;
+  document.getElementById('yr-to').innerHTML=tOpts;
+  if(YR_FROM)document.getElementById('yr-from').value=YR_FROM;
+  if(YR_TO)document.getElementById('yr-to').value=YR_TO;
+}
+function onYrChange(){
+  var f=document.getElementById('yr-from').value;
+  var t=document.getElementById('yr-to').value;
+  if(f&&t&&+f>+t){
+    document.getElementById('yr-from').value=t;
+    document.getElementById('yr-to').value=f;
+    YR_FROM=t;YR_TO=f;
+  }else{YR_FROM=f;YR_TO=t}
+  render();
+}
+
+/* ── YEAR SELECTS — all journals view ── */
+function buildAvYrSelects(pubs){
+  var seen={},years=[];
+  pubs.forEach(function(p){if(p.yr&&!seen[p.yr]){seen[p.yr]=1;years.push(+p.yr)}});
+  years.sort(function(a,b){return a-b});
+  var wrap=document.getElementById('av-yr-filter-wrap');
+  if(!years.length){wrap.style.display='none';return}
+  wrap.style.display='flex';
+  var fOpts='<option value="">Earliest</option>';
+  var tOpts='<option value="">Latest</option>';
+  years.forEach(function(yr){
+    fOpts+='<option value="'+yr+'">'+yr+'</option>';
+    tOpts+='<option value="'+yr+'">'+yr+'</option>';
+  });
+  document.getElementById('av-yr-from').innerHTML=fOpts;
+  document.getElementById('av-yr-to').innerHTML=tOpts;
+  if(AV_YR_FROM)document.getElementById('av-yr-from').value=AV_YR_FROM;
+  if(AV_YR_TO)document.getElementById('av-yr-to').value=AV_YR_TO;
+}
+function onAvYrChange(){
+  var f=document.getElementById('av-yr-from').value;
+  var t=document.getElementById('av-yr-to').value;
+  if(f&&t&&+f>+t){
+    document.getElementById('av-yr-from').value=t;
+    document.getElementById('av-yr-to').value=f;
+    AV_YR_FROM=t;AV_YR_TO=f;
+  }else{AV_YR_FROM=f;AV_YR_TO=t}
+  applyAllFilter();
+}
+
+/* ── HOME GRID ── */
+function buildGrid(){
+  document.getElementById('hgrid').innerHTML=J.map(function(j,idx){
+    var st=j.nd?'nd':(j.ac?'ac':'in');
+    var stl=j.nd?'No DOIs':(j.ac?'Active':'Discontinued');
+    var click=j.nd?'':' onclick="pick(\''+j.slug+'\')"';
+    var cands=logoCandidates(j);
+    LOGO_CANDS_MAP[j.slug]=cands;
+    LOGO_IDX[j.slug]=0;
+    var logoHtml;
+    if(cands.length){
+      logoHtml='<img class="hclogo" src="'+cands[0]+'" alt=""'
+        +' onerror="nextLogoCandidate(this,\''+j.slug+'\')">'
+        +'<div class="hclogofb" style="display:none;background:'+j.col+'">'+e(j.abbr)+'</div>';
+    }else{
+      logoHtml='<div class="hclogofb" style="background:'+j.col+'">'+e(j.abbr)+'</div>';
+    }
+    return'<button class="hcard'+(j.nd?' nd':'')+'"'+click+' type="button"'
+      +' style="--jc:'+j.col+';animation-delay:'+(idx*.03)+'s">'
+      +'<div class="hct">'+logoHtml+'<span class="htag '+st+'">'+stl+'</span></div>'
+      +'<div class="hnm">'+e(j.name)+'</div>'
+      +'<div class="hsl">'+e(j.slug)+(j.issn?' · '+e(j.issn):'')+'</div>'
+      +'</button>';
+  }).join('');
+}
+
+function showHome(){
+  CJ=null;RID++;AV_RID++;progHide();
+  ['hs','js','as'].forEach(function(id){document.getElementById(id).style.display='none'});
+  document.getElementById('hs').style.display='block';
+  setTab('home');
+  var ic=document.getElementById('jicon');ic.textContent='—';ic.className='jabbr none';ic.style.background='';
+  document.getElementById('jlbl').innerHTML='Choose a journal<small>'+J.length+' journals</small>';
+}
+function setTab(t){
+  ['home','all'].forEach(function(x){
+    var el=document.getElementById('tab-'+x);if(el)el.classList.toggle('on',x===t);
+  });
+}
+
+/* ── DROPDOWN ── */
+var ddO=false;
+function buildDD(f){
+  f=(f||'').toLowerCase();
+  var shown=J.filter(function(j){return!f||j.name.toLowerCase().includes(f)||j.slug.includes(f)});
+  if(!shown.length){document.getElementById('ddl').innerHTML='<div class="dd-em">No matches.</div>';return}
+  var ac=[],in_=[],nd=[];
+  shown.forEach(function(j){j.nd?nd.push(j):j.ac?ac.push(j):in_.push(j)});
+  function grp(lbl,arr){
+    if(!arr.length)return'';
+    return'<div class="dd-gl">'+lbl+'</div>'+arr.map(function(j){
+      var sel=CJ&&CJ.slug===j.slug?' sel':'';
+      var st=j.nd?'nd':(j.ac?'ac':'in');
+      var stl=j.nd?'No DOIs':(j.ac?'Active':'Discontinued');
+      return'<div class="dd-it'+sel+'" onclick="pick(\''+j.slug+'\')">'
+        +'<div class="dd-ab" style="background:'+j.col+'">'+e(j.abbr)+'</div>'
+        +'<div class="dd-tx"><div class="dd-nm">'+e(j.name)+'</div><div class="dd-sl">'+e(j.slug)+'</div></div>'
+        +'<span class="dd-bg '+st+'">'+stl+'</span></div>';
+    }).join('');
+  }
+  document.getElementById('ddl').innerHTML=grp('Active',ac)+grp('Discontinued',in_)+grp('No DOI registration',nd);
+}
+function toggleDD(){
+  ddO=!ddO;
+  document.getElementById('jbtn').classList.toggle('open',ddO);
+  document.getElementById('jdd').classList.toggle('open',ddO);
+  document.getElementById('jbtn').setAttribute('aria-expanded',''+ddO);
+  if(ddO){document.getElementById('dsi').focus();buildDD('')}
+}
+function filterDD(v){buildDD(v)}
+document.addEventListener('click',function(ev){
+  if(ddO&&!document.getElementById('jsel').contains(ev.target)){
+    ddO=false;
+    document.getElementById('jbtn').classList.remove('open');
+    document.getElementById('jdd').classList.remove('open');
+    document.getElementById('jbtn').setAttribute('aria-expanded','false');
+  }
+});
+
+/* ── SELECT JOURNAL ── */
+function pick(slug){
+  var j=J.find(function(x){return x.slug===slug});
+  if(!j)return;
+  CJ=j;
+  ddO=false;
+  document.getElementById('jbtn').classList.remove('open');
+  document.getElementById('jdd').classList.remove('open');
+  document.getElementById('jbtn').setAttribute('aria-expanded','false');
+  document.getElementById('dsi').value='';
+  var ic=document.getElementById('jicon');
+  ic.textContent=j.abbr;ic.className='jabbr';ic.style.background=j.col;
+  document.getElementById('jlbl').innerHTML=e(j.name)+'<small>'+e(j.slug)+'</small>';
+  ['hs','js','as'].forEach(function(id){document.getElementById(id).style.display='none'});
+  document.getElementById('js').style.display='block';
+  setTab('');
+  document.getElementById('jvn').textContent=j.name;
+  document.getElementById('jvi').textContent=j.issn?'ISSN '+j.issn:'';
+  document.getElementById('jvl').href='https://ejournals.uni-muenster.de/'+j.slug;
+
+  /* Journal header logo — async cascade */
+  var logoImg=document.getElementById('jvh-logo');
+  var logoFb=document.getElementById('jvh-logofb');
+  logoFb.textContent=j.abbr;logoFb.style.background=j.col;
+  logoImg.style.display='none';logoFb.style.display='flex';
+  tryLogo(
+    logoCandidates(j),
+    function(url){logoImg.src=url;logoImg.style.display='block';logoFb.style.display='none'},
+    function(){logoImg.style.display='none';logoFb.style.display='flex'}
+  );
+
+  buildDD('');
+  YR_FROM='';YR_TO='';
+  document.getElementById('yr-filter-wrap').style.display='none';
+  CSORT='newest';
+  var ss=document.getElementById('fb-sort');if(ss)ss.value='newest';
+  load(j);
+}
+
+/* ── LOAD JOURNAL ── */
+async function load(j){
+  var rid=++RID;PUBS=[];
+  st('L','Loading…');
+  document.getElementById('plist').innerHTML='';
+  ['svp','svc','svs'].forEach(function(id){document.getElementById(id).textContent='—'});
+  clearCharts();
+
+  if(j.nd){
+    progHide();
+    st('D','No DOI registration for this journal.');
+    document.getElementById('plist').innerHTML='<div class="note info"><strong>No DOIs registered</strong>'
+      +'<p>'+e(j.name)+' does not register DOIs with DataCite.</p>'
+      +'<p>Browse at <a href="https://ejournals.uni-muenster.de/'+e(j.slug)+'" target="_blank">ejournals.uni-muenster.de/'+e(j.slug)+'</a>.</p></div>';
+    return;
+  }
+
+  progShow(20,'Loading from monthly cache…',0);
+  await loadStaticCache();
+  if(rid!==RID)return;
+
+  var cached=STATIC_PUBS[j.slug];
+  if(!cached||!cached.length){
+    progHide();
+    st('E','No cached records for this journal yet.');
+    document.getElementById('plist').innerHTML='<div class="note err"><strong>No publications found</strong>'
+      +'<p>The monthly data refresh has not cached any records for <code>'+e(j.slug)+'</code> yet. It updates on the 1st of each month.</p></div>';
+    return;
+  }
+
+  PUBS=cached.map(function(p){return Object.assign({},p)});
+  buildYrSelects(PUBS);
+  render();drawCharts();summ();
+  if(rid!==RID)return;
+  st('D','Loaded '+fn(PUBS.length)+' publications · DataCite + OpenAlex (monthly cache)');
+  progDone('Loaded '+fn(PUBS.length)+' publications');
+  AV_CACHE[j.slug]=PUBS.slice();
+}
+
+/* ── FILTER + SORT (journal view) ── */
+function applySort(){CSORT=document.getElementById('fb-sort').value;render()}
+function clearFilter(){
+  YR_FROM='';YR_TO='';
+  document.getElementById('yr-from').value='';
+  document.getElementById('yr-to').value='';
+  render();
+}
+function filteredSorted(pubs,sort){
+  var out=pubs.slice();
+  if(YR_FROM||YR_TO){
+    out=out.filter(function(p){
+      if(!p.yr)return false;
+      if(YR_FROM&&p.yr<+YR_FROM)return false;
+      if(YR_TO&&p.yr>+YR_TO)return false;
+      return true;
+    });
+  }
+  if(sort==='newest')out.sort(function(a,b){return b.key-a.key});
+  else if(sort==='oldest')out.sort(function(a,b){return a.key-b.key});
+  else if(sort==='cites')out.sort(function(a,b){return(b.oa||0)-(a.oa||0)});
+  return out;
+}
+
+function render(){
+  var s=filteredSorted(PUBS,CSORT);
+  var fc=document.getElementById('fb-count');
+  if(fc)fc.textContent=(YR_FROM||YR_TO)?s.length+' of '+PUBS.length+' shown':'';
+  if(!s.length&&PUBS.length){
+    document.getElementById('plist').innerHTML='<div class="note info"><strong>No publications match the filter.</strong><p>Try a different year range or clear the filter.</p></div>';
+    return;
+  }
+  if(!s.length)return;
+  document.getElementById('plist').innerHTML=s.map(function(p,i){return card(p,i,CJ,false)}).join('');
+  if(typeof window._altmetric_embed_init==='function')window._altmetric_embed_init();
+}
+
+function card(p,i,j,showJBadge){
+  var doiUrl='https://doi.org/'+p.doi;
+  var gsUrl='https://scholar.google.com/scholar?q='+encodeURIComponent('doi:'+p.doi);
+  var auth='';
+  if(p.auth&&p.auth.length){
+    auth='<div class="pauth">'+p.auth.slice(0,6).map(function(a){
+      if(a.o)return'<a class="orc" href="https://orcid.org/'+e(a.o)+'" target="_blank">'+e(a.n)
+        +'<svg class="oid" viewBox="0 0 256 256"><circle cx="128" cy="128" r="128" fill="#A6CE39"/>'
+        +'<path fill="#fff" d="M86.3 186.2H70.9V79.1h15.4v107.1zm22.6-107.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.6-56.8 53.6h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.9-26.5 42.9-39.7C191.7 111.2 178 93 148 93h-23.7v79.4zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1c0-5.6 4.5-10.1 10.1-10.1s10.1 4.6 10.1 10.1z"/></svg></a>';
+      return'<span>'+e(a.n)+'</span>';
+    }).join(', ')+(p.auth.length>6?', <span style="color:var(--textm)">+'+(p.auth.length-6)+' more</span>':'')+'</div>';
+  }
+  var jBadge=showJBadge&&j?'<span class="pj-badge" style="background:'+j.col+'">'+e(j.abbr)+'</span>':'';
+  var cite=p.oa!==null
+    ?'<span class="mb hi"><span class="ds" style="background:#27ae60"></span>Cited <span class="mv">'+fn(p.oa)+'</span></span>'
+    :'<span class="mb"><span class="ds" style="background:#27ae60"></span>Cited '+sp()+'</span>';
+  var spark='';
+  if(p.cby&&p.cby.length){
+    var sy=p.cby.slice().sort(function(a,b){return a.year-b.year});
+    var sv=sy.map(function(d){return d.cited_by_count||0});
+    var smx=Math.max.apply(null,sv)||1;
+    var W=180,H=26,pad=2,n=sv.length,xs=n>1?(W-pad*2)/(n-1):0;
+    var pts=sv.map(function(v,i){return(pad+i*xs).toFixed(1)+','+(H-pad-((v/smx)*(H-pad*2))).toFixed(1)}).join(' ');
+    var circles=sy.map(function(d,i){
+      var x=(pad+i*xs).toFixed(1),yy=(H-pad-((sv[i]/smx)*(H-pad*2))).toFixed(1);
+      return'<circle cx="'+x+'" cy="'+yy+'" r="3" fill="var(--accent)" fill-opacity=".85"'
+        +' onmouseenter="showTT(event,\''+d.year+': '+sv[i]+' citation'+(sv[i]!==1?'s':'')+'\')"'
+        +' onmouseleave="hideTT()" onmousemove="moveTT(event)" style="cursor:default"/>';
+    }).join('');
+    spark='<div class="spark-wrap"><div class="spark-lbl">Citations by year</div>'
+      +'<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">'
+      +'<polyline class="spl" points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>'
+      +circles+'</svg></div>';
+  }
+  return'<div class="pit" style="animation-delay:'+(Math.min(i,15)*.04)+'s">'
+    +'<div class="pit-left"><span class="pyr">'+(p.yr||'—')+'</span>'+jBadge
+    +'<a class="ptitle" href="'+doiUrl+'" target="_blank">'+e(p.title||p.doi)+'</a>'
+    +auth
+    +'<div class="mrow">'+cite+'</div>'+spark
+    +'<div class="pfoot"><a class="doi-chip" href="'+doiUrl+'" target="_blank">↗ '+e(p.doi)+'</a>'
+    +'<span style="flex:1"></span>'
+    +'<a class="el" href="https://openalex.org/works?filter=doi:'+p.doi+'" target="_blank">OpenAlex</a>'
+    +'<span class="lsep"></span>'
+    +'<a class="el" href="'+gsUrl+'" target="_blank">Google Scholar</a>'
+    +'</div></div>'
+    +'<div class="pdnt"><div class="altmetric-embed" data-badge-type="donut" data-doi="'+p.doi
+    +'" data-hide-no-mentions="false" data-badge-popover="left"></div><div class="dlbl">Altmetric</div></div>'
+    +'</div>';
+}
+
+/* ── CSV EXPORT ── */
+function csvEscape(v){
+  var s=String(v===null||v===undefined?'':v);
+  if(s.includes(',')||s.includes('"')||s.includes('\n'))return'"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+function exportCSV(mode){
+  var rows,filename;
+  if(mode==='journal'){
+    if(!PUBS||!PUBS.length){alert('No publications loaded yet.');return}
+    rows=filteredSorted(PUBS,CSORT).map(function(p){
+      return[csvEscape(p.doi),csvEscape(p.title),
+        csvEscape(p.auth?p.auth.map(function(a){return a.n}).join('; '):''),
+        csvEscape(p.yr||''),csvEscape(p.oa!==null?p.oa:''),
+        csvEscape('https://doi.org/'+p.doi),
+        csvEscape(CJ?CJ.name:''),csvEscape(CJ?CJ.slug:'')].join(',');
+    });
+    filename=(CJ?CJ.slug:'journal')+'-publications.csv';
+  }else{
+    if(!AV_PUBS||!AV_PUBS.length){alert('No publications loaded yet.');return}
+    var pubs=_filteredAVPubs();
+    if(AV_SORT==='newest')pubs.sort(function(a,b){return b.key-a.key});
+    else if(AV_SORT==='oldest')pubs.sort(function(a,b){return a.key-b.key});
+    else if(AV_SORT==='cites')pubs.sort(function(a,b){return(b.oa||0)-(a.oa||0)});
+    else if(AV_SORT==='journal')pubs.sort(function(a,b){return(a.j?a.j.name:'').localeCompare(b.j?b.j.name:'')});
+    rows=pubs.map(function(p){
+      return[csvEscape(p.doi),csvEscape(p.title),
+        csvEscape(p.auth?p.auth.map(function(a){return a.n}).join('; '):''),
+        csvEscape(p.yr||''),csvEscape(p.oa!==null?p.oa:''),
+        csvEscape('https://doi.org/'+p.doi),
+        csvEscape(p.j?p.j.name:''),csvEscape(p.j?p.j.slug:'')].join(',');
+    });
+    filename='all-journals-publications.csv';
+  }
+  var header='DOI,Title,Authors,Year,Citations (OpenAlex),URL,Journal Name,Journal Slug';
+  var csv='\uFEFF'+header+'\n'+rows.join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},200);
+}
+
+/* ── CHARTS ── */
+function clearCharts(){
+  ['cpw','ccw'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=''});
+  ['cpa','cca','yap','yac'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=''});
+}
+function drawCharts(){
+  var pb={},cb={};
+  PUBS.forEach(function(p){
+    if(p.yr)pb[p.yr]=(pb[p.yr]||0)+1;
+    (p.cby||[]).forEach(function(cy){
+      if(cy.year&&cy.cited_by_count)cb[cy.year]=(cb[cy.year]||0)+cy.cited_by_count;
+    });
+  });
+  barChart('cpw','cpa','yap',pb,'var(--accent)','pub');
+  barChart('ccw','cca','yac',cb,'#27ae60','cite');
+}
+function barChart(wrapId,axId,yaxId,obj,col,kind){
+  var wrap=document.getElementById(wrapId),ax=document.getElementById(axId),yax=document.getElementById(yaxId);
+  var keys=Object.keys(obj).map(Number).sort(function(a,b){return a-b});
+  if(!keys.length){if(wrap)wrap.innerHTML='';if(ax)ax.innerHTML='';if(yax)yax.innerHTML='';return}
+  var vals=keys.map(function(k){return obj[k]});
+  var maxV=Math.max.apply(null,vals)||1;
+  var W=400,H=110,pT=4,pB=2,pL=2,pR=2;
+  var n=keys.length,slot=(W-pL-pR)/n,bw=Math.max(2,slot*.7);
+  if(yax){
+    yax.innerHTML=[1,.75,.5,.25,0].map(function(t){
+      return'<span class="y-tick">'+fn(Math.round(maxV*t))+'</span>';
+    }).join('');
+  }
+  var out='<svg viewBox="0 0 '+W+' '+(H+pT+pB)+'" preserveAspectRatio="none" width="100%" height="100%" style="display:block">';
+  [0,.25,.5,.75,1].forEach(function(t){
+    var y=(pT+H*(1-t)).toFixed(1);
+    out+='<line x1="'+pL+'" y1="'+y+'" x2="'+(W-pR)+'" y2="'+y+'" stroke="#e2e7f0" stroke-width="1"/>';
+  });
+  out+='<line x1="'+pL+'" y1="'+(pT+H)+'" x2="'+(W-pR)+'" y2="'+(pT+H)+'" stroke="var(--border-mid)" stroke-width="1"/>';
+  vals.forEach(function(v,i){
+    var x=(pL+i*slot+(slot-bw)/2).toFixed(1);
+    var bh=Math.max(2,(v/maxV)*(H-2)).toFixed(1);
+    var y=(pT+H-bh).toFixed(1);
+    var lbl=kind==='pub'?'Publication'+(v!==1?'s':''):'citation'+(v!==1?'s':'');
+    out+='<rect x="'+x+'" y="'+y+'" width="'+bw.toFixed(1)+'" height="'+bh+'" rx="2" fill="'+col+'" fill-opacity=".85"'
+      +' onmouseenter="showTT(event,\''+keys[i]+': '+v+' '+lbl+'\')"'
+      +' onmouseleave="hideTT()" onmousemove="moveTT(event)" style="cursor:default"/>';
+  });
+  out+='</svg>';
+  if(wrap)wrap.innerHTML=out;
+  var step=Math.max(1,Math.ceil(n/7));
+  if(ax)ax.innerHTML=keys.map(function(k,i){return'<span>'+(i%step===0||i===n-1?k:'')+'</span>'}).join('');
+}
+
+/* ── SUMMARY ── */
+function summ(){
+  document.getElementById('svp').textContent=fn(PUBS.length);
+  document.getElementById('svc').textContent=fn(PUBS.reduce(function(s,p){return s+(p.oa||0)},0));
+  var yrs=PUBS.map(function(p){return p.yr}).filter(Boolean).map(Number);
+  if(yrs.length){
+    var mn=Math.min.apply(null,yrs),mx=Math.max.apply(null,yrs);
+    document.getElementById('svs').textContent=mn===mx?''+mn:mn+'–'+mx;
+  }
+}
+function st(cls,msg){
+  document.getElementById('sdot').className='sdot '+cls;
+  document.getElementById('stxt').textContent=msg;
+}
+
+/* ═══════════════════════════════
+   ALL JOURNALS VIEW
+═══════════════════════════════ */
+function setChartMode(mode){
+  AV_CHART_MODE=mode;
+  ['ct-pub','ct-cite'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.querySelectorAll('.ct-btn').forEach(function(b){
+      b.classList.toggle('on',b.textContent.toLowerCase()===mode);
+    });
+  });
+  drawAllCharts();
+}
+function selectAllJournals(){
+  J.filter(function(j){return!j.nd&&j.dp.length}).forEach(function(j){
+    AV_HIDDEN[j.slug]=false;
+    var el=document.getElementById('leg-'+j.slug);if(el)el.classList.remove('off');
+  });
+  applyAllFilter();
+}
+function selectNoneJournals(){
+  J.filter(function(j){return!j.nd&&j.dp.length}).forEach(function(j){
+    AV_HIDDEN[j.slug]=true;
+    var el=document.getElementById('leg-'+j.slug);if(el)el.classList.add('off');
+  });
+  applyAllFilter();
+}
+
+async function showAll(){
+  ++AV_RID;var rid=AV_RID;RID++;CJ=null;
+  ['hs','js','as'].forEach(function(id){document.getElementById(id).style.display='none'});
+  document.getElementById('as').style.display='block';
+  setTab('all');
+  var ic=document.getElementById('jicon');ic.textContent='—';ic.className='jabbr none';ic.style.background='';
+  document.getElementById('jlbl').innerHTML='Choose a journal<small>'+J.length+' journals</small>';
+
+  var leg=document.getElementById('jlegend');
+  leg.innerHTML=J.filter(function(j){return!j.nd&&j.dp.length}).map(function(j){
+    return'<div class="jleg-it" id="leg-'+j.slug+'" onclick="toggleLegend(\''+j.slug+'\')">'
+      +'<span class="jleg-dot" style="background:'+j.col+'"></span>'+e(j.abbr)+'</div>';
+  }).join('');
+
+  avSt('L','Loading all journals…');
+  AV_PUBS=[];AV_YR_FROM='';AV_YR_TO='';
+  document.getElementById('av-yr-filter-wrap').style.display='none';
+
+  progShow(20,'Loading from monthly cache…',0);
+  await loadStaticCache();
+  if(rid!==AV_RID)return;
+
+  var trackableJ=J.filter(function(j){return!j.nd&&j.dp.length});
+  var loaded=0;
+
+  for(var ji=0;ji<trackableJ.length;ji++){
+    if(rid!==AV_RID)return;
+    var j=trackableJ[ji];
+    var jPubs=(STATIC_PUBS[j.slug]||[]).map(function(p){return Object.assign({},p)});
+    if(!jPubs.length)continue;
+    AV_CACHE[j.slug]=jPubs;
+
+    jPubs.forEach(function(p){p.j=j});
+    AV_PUBS=AV_PUBS.concat(jPubs);
+    loaded++;
+    buildAvYrSelects(AV_PUBS);
+  }
+  applyAllFilter();
+
+  if(rid!==AV_RID)return;
+  avSt('D','Loaded '+fn(AV_PUBS.length)+' publications from '+loaded+' journals');
+  progDone('Loaded '+fn(AV_PUBS.length)+' publications from '+loaded+' journals');
+}
+
+function toggleLegend(slug){
+  AV_HIDDEN[slug]=!AV_HIDDEN[slug];
+  var el=document.getElementById('leg-'+slug);
+  if(el)el.classList.toggle('off',!!AV_HIDDEN[slug]);
+  applyAllFilter();
+}
+
+function applyAllFilter(){
+  AV_SORT=document.getElementById('av-sort').value||'newest';
+  _updateAll();
+}
+function clearAllFilter(){
+  AV_SORT='newest';AV_YR_FROM='';AV_YR_TO='';
+  var f=document.getElementById('av-yr-from'),t=document.getElementById('av-yr-to');
+  if(f)f.value='';if(t)t.value='';
+  document.getElementById('av-sort').value='newest';
+  _updateAll();
+}
+
+function _filteredAVPubs(){
+  return AV_PUBS.filter(function(p){
+    if(AV_HIDDEN[p.j&&p.j.slug])return false;
+    if(AV_YR_FROM&&p.yr&&p.yr<+AV_YR_FROM)return false;
+    if(AV_YR_TO&&p.yr&&p.yr>+AV_YR_TO)return false;
+    return true;
+  });
+}
+
+function _updateAll(){
+  var pubs=_filteredAVPubs();
+  if(AV_SORT==='newest')pubs.sort(function(a,b){return b.key-a.key});
+  else if(AV_SORT==='oldest')pubs.sort(function(a,b){return a.key-b.key});
+  else if(AV_SORT==='cites')pubs.sort(function(a,b){return(b.oa||0)-(a.oa||0)});
+  else if(AV_SORT==='journal')pubs.sort(function(a,b){return(a.j?a.j.name:'').localeCompare(b.j?b.j.name:'')});
+  avSumm(pubs);drawAllCharts(pubs);
+  var cnt=document.getElementById('av-count');
+  if(cnt)cnt.textContent=(AV_YR_FROM||AV_YR_TO)?pubs.length+' of '+AV_PUBS.length+' shown':'';
+  var display=pubs.slice(0,300);
+  var more=pubs.length>300
+    ?'<div class="note info" style="margin-top:12px"><strong>Showing 300 of '+pubs.length+' publications</strong>'
+      +'<p>Use the year filter to narrow the view.</p></div>':'';
+  document.getElementById('avlist').innerHTML=display.map(function(p,i){return card(p,i,p.j,true)}).join('')+more;
+  if(typeof window._altmetric_embed_init==='function')window._altmetric_embed_init();
+}
+
+function drawAllCharts(pubs){
+  if(!pubs)pubs=_filteredAVPubs();
+  var trackable=J.filter(function(j){return!j.nd&&j.dp.length&&!AV_HIDDEN[j.slug]});
+  var pb={},cb={},allYears={};
+  pubs.forEach(function(p){
+    if(!p.j)return;
+    var slug=p.j.slug;
+    if(p.yr){allYears[p.yr]=1;if(!pb[p.yr])pb[p.yr]={};pb[p.yr][slug]=(pb[p.yr][slug]||0)+1}
+    (p.cby||[]).forEach(function(cy){
+      if(cy.year&&cy.cited_by_count){
+        allYears[cy.year]=1;
+        if(!cb[cy.year])cb[cy.year]={};
+        cb[cy.year][slug]=(cb[cy.year][slug]||0)+cy.cited_by_count;
+      }
+    });
+  });
+  var years=Object.keys(allYears).map(Number).sort(function(a,b){return a-b});
+  if(AV_CHART_MODE==='stacked'){
+    stackedBarChart('acpw','acpa','yaa',pb,years,trackable,'pub');
+    stackedBarChart('accw','acca','yab',cb,years,trackable,'cite');
+  }else{
+    groupedBarChart('acpw','acpa','yaa',pb,years,trackable,'pub');
+    groupedBarChart('accw','acca','yab',cb,years,trackable,'cite');
+  }
+}
+
+function stackedBarChart(wrapId,axId,yaxId,data,years,journals,kind){
+  var wrap=document.getElementById(wrapId),ax=document.getElementById(axId),yax=document.getElementById(yaxId);
+  if(!years.length){if(wrap)wrap.innerHTML='';if(ax)ax.innerHTML='';if(yax)yax.innerHTML='';return}
+  var totals=years.map(function(yr){
+    var t=0;journals.forEach(function(j){t+=(data[yr]&&data[yr][j.slug])||0});return t;
+  });
+  var maxV=Math.max.apply(null,totals)||1;
+  var W=400,H=110,pT=4,pB=2,pL=2,pR=2,n=years.length,slot=(W-pL-pR)/n,bw=Math.max(2,slot*.75);
+  if(yax){
+    yax.innerHTML=[1,.75,.5,.25,0].map(function(t){
+      return'<span class="y-tick">'+fn(Math.round(maxV*t))+'</span>';
+    }).join('');
+  }
+  var out='<svg viewBox="0 0 '+W+' '+(H+pT+pB)+'" preserveAspectRatio="none" width="100%" height="100%">';
+  [0,.25,.5,.75,1].forEach(function(t){
+    var y=(pT+H*(1-t)).toFixed(1);
+    out+='<line x1="'+pL+'" y1="'+y+'" x2="'+(W-pR)+'" y2="'+y+'" stroke="#e2e7f0" stroke-width="1"/>';
+  });
+  out+='<line x1="'+pL+'" y1="'+(pT+H)+'" x2="'+(W-pR)+'" y2="'+(pT+H)+'" stroke="var(--border-mid)" stroke-width="1"/>';
+  years.forEach(function(yr,i){
+    var x=pL+i*slot+(slot-bw)/2,curY=pT+H;
+    journals.forEach(function(j){
+      var v=(data[yr]&&data[yr][j.slug])||0;if(!v)return;
+      var bh=Math.max(1,(v/maxV)*(H-2));curY-=bh;
+      var lbl=kind==='pub'?v+' pub'+(v!==1?'s':''):v+' citation'+(v!==1?'s':'');
+      out+='<rect x="'+x.toFixed(1)+'" y="'+curY.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'"'
+        +' fill="'+j.col+'" fill-opacity=".88"'
+        +' onmouseenter="showTT(event,\''+yr+' · '+e(j.abbr)+': '+lbl+'\')"'
+        +' onmouseleave="hideTT()" onmousemove="moveTT(event)" style="cursor:default"/>';
+    });
+  });
+  out+='</svg>';
+  if(wrap)wrap.innerHTML=out;
+  var step=Math.max(1,Math.ceil(n/7));
+  if(ax)ax.innerHTML=years.map(function(yr,i){return'<span>'+(i%step===0||i===n-1?yr:'')+'</span>'}).join('');
+}
+
+function groupedBarChart(wrapId,axId,yaxId,data,years,journals,kind){
+  if(!journals.length){stackedBarChart(wrapId,axId,yaxId,data,years,journals,kind);return}
+  var wrap=document.getElementById(wrapId),ax=document.getElementById(axId),yax=document.getElementById(yaxId);
+  if(!years.length){if(wrap)wrap.innerHTML='';if(ax)ax.innerHTML='';if(yax)yax.innerHTML='';return}
+  var maxV=1;
+  years.forEach(function(yr){
+    journals.forEach(function(j){var v=(data[yr]&&data[yr][j.slug])||0;if(v>maxV)maxV=v});
+  });
+  var W=400,H=110,pT=4,pB=2,pL=2,pR=2,n=years.length,nJ=journals.length;
+  var slot=(W-pL-pR)/n,bw=Math.max(1,(slot*.85)/nJ),gap=slot*.15/2;
+  if(yax){
+    yax.innerHTML=[1,.75,.5,.25,0].map(function(t){
+      return'<span class="y-tick">'+fn(Math.round(maxV*t))+'</span>';
+    }).join('');
+  }
+  var out='<svg viewBox="0 0 '+W+' '+(H+pT+pB)+'" preserveAspectRatio="none" width="100%" height="100%">';
+  [0,.25,.5,.75,1].forEach(function(t){
+    var y=(pT+H*(1-t)).toFixed(1);
+    out+='<line x1="'+pL+'" y1="'+y+'" x2="'+(W-pR)+'" y2="'+y+'" stroke="#e2e7f0" stroke-width="1"/>';
+  });
+  out+='<line x1="'+pL+'" y1="'+(pT+H)+'" x2="'+(W-pR)+'" y2="'+(pT+H)+'" stroke="var(--border-mid)" stroke-width="1"/>';
+  years.forEach(function(yr,i){
+    journals.forEach(function(j,ji){
+      var v=(data[yr]&&data[yr][j.slug])||0;if(!v)return;
+      var x=pL+i*slot+gap+ji*bw,bh=Math.max(1,(v/maxV)*(H-2)),y=pT+H-bh;
+      var lbl=kind==='pub'?v+' pub'+(v!==1?'s':''):v+' citation'+(v!==1?'s':'');
+      out+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'"'
+        +' fill="'+j.col+'" fill-opacity=".88"'
+        +' onmouseenter="showTT(event,\''+yr+' · '+e(j.abbr)+': '+lbl+'\')"'
+        +' onmouseleave="hideTT()" onmousemove="moveTT(event)" style="cursor:default"/>';
+    });
+  });
+  out+='</svg>';
+  if(wrap)wrap.innerHTML=out;
+  var step=Math.max(1,Math.ceil(n/7));
+  if(ax)ax.innerHTML=years.map(function(yr,i){return'<span>'+(i%step===0||i===n-1?yr:'')+'</span>'}).join('');
+}
+
+function avSumm(pubs){
+  if(!pubs)pubs=_filteredAVPubs();
+  var js=new Set(pubs.map(function(p){return p.j&&p.j.slug}).filter(Boolean)).size;
+  document.getElementById('av-j').textContent=js||J.filter(function(j){return!j.nd&&AV_CACHE[j.slug]}).length;
+  document.getElementById('av-p').textContent=fn(pubs.length);
+  document.getElementById('av-c').textContent=fn(pubs.reduce(function(s,p){return s+(p.oa||0)},0));
+  var yrs=pubs.map(function(p){return p.yr}).filter(Boolean).map(Number);
+  if(yrs.length){var mn=Math.min.apply(null,yrs),mx=Math.max.apply(null,yrs);document.getElementById('av-y').textContent=mn+'–'+mx}
+  else document.getElementById('av-y').textContent='—';
+}
+function avSt(cls,msg){
+  var d=document.getElementById('av-sdot'),t=document.getElementById('av-stxt');
+  if(d)d.className='sdot '+cls;if(t)t.textContent=msg;
+}
+
+/* ── INIT ── */
+buildGrid();buildDD('');
+document.getElementById('hs').style.display='block';
+loadStaticCache(); /* kick off in the background so it's usually ready before the first click */
+</script>
+<script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+</body>
+</html>
