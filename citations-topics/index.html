@@ -138,7 +138,14 @@ a.chip:hover{border-color:var(--c-accent);color:var(--c-accent);text-decoration:
 .card-header{padding:1rem 1.25rem;border-bottom:1px solid var(--c-border)}
 .card-header h3{font-size:1rem;font-weight:700}
 .card-body{padding:1.25rem}
-.chart-wrap{position:relative;width:100%}
+/* Chart.js's maintainAspectRatio:false makes a chart fill its canvas's parent --
+   but with no real height here (only a max-height cap on the canvas itself,
+   which caps a size but never establishes one), every chart in this file was
+   silently collapsing to the browser's built-in 150px canvas default. Giving
+   the wrapper itself a real height is what actually lets these charts grow;
+   specific wraps below override this with an inline height where more room
+   is needed. */
+.chart-wrap{position:relative;width:100%;height:360px}
 .chart-wrap canvas{max-height:360px}
 /* U15 benchmark charts list all 15 universities by name on the y-axis; the
    default 360px cap only leaves room for ~8 legible rows before Chart.js
@@ -472,11 +479,26 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Cost Distribution</h3></div><div class="card-body"><div class="chart-wrap" id="pc-histogram-wrap"><div class="skeleton skel-chart"></div></div></div></div>
 
-    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Cost by Publication Year, by Open Access Type</h3></div><div class="card-body"><div class="chart-wrap" id="pc-year-oa-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+    <div class="grid-2" style="margin-bottom:1.25rem">
+      <div class="card">
+        <div class="card-header"><h3>Cost by Publication Year, by Open Access Type</h3></div>
+        <div class="card-body">
+          <div class="chart-wrap" id="pc-year-oa-wrap" style="height:640px"><div class="skeleton skel-chart" style="height:640px"></div></div>
+          <p style="font-size:.75rem;color:var(--c-muted);margin-top:.5rem" id="pc-year-oa-note"></p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Cost by Publication Year, by Publisher</h3></div>
+        <div class="card-body">
+          <div class="chart-wrap" id="pc-year-pub-wrap" style="height:640px"><div class="skeleton skel-chart" style="height:640px"></div></div>
+          <p style="font-size:.75rem;color:var(--c-muted);margin-top:.5rem" id="pc-year-pub-note"></p>
+        </div>
+      </div>
+    </div>
 
     <div class="grid-2" style="margin-bottom:1.25rem">
-      <div class="card"><div class="card-header"><h3>Cost vs. Citations</h3></div><div class="card-body"><div class="chart-wrap" id="pc-scatter-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Citations by Cost Tier</h3></div><div class="card-body"><div class="chart-wrap" id="pc-tier-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Cost vs. Citations</h3></div><div class="card-body"><div class="chart-wrap" id="pc-scatter-wrap" style="height:640px"><div class="skeleton skel-chart" style="height:640px"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Citations by Cost Tier</h3></div><div class="card-body"><div class="chart-wrap" id="pc-tier-wrap" style="height:640px"><div class="skeleton skel-chart" style="height:640px"></div></div></div></div>
     </div>
 
     <div class="grid-2" style="margin-bottom:1.25rem">
@@ -499,7 +521,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
       <div class="card"><div class="card-header"><h3>Research Domain Profile</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:360px;width:100%" id="domain-radar-wrap"><div class="skeleton skel-chart"></div></div></div></div>
       <div class="card"><div class="card-header"><h3>Emerging Topics (2019–21 vs 2022–24)</h3></div><div class="card-body"><div id="emerging-topics-wrap"><div class="skeleton skel-chart"></div></div></div></div>
     </div>
-    <div class="card"><div class="card-header"><h3>SDG Alignment</h3></div><div class="card-body"><div class="chart-wrap" id="sdg-chart-wrap"><div class="skeleton skel-chart" style="height:400px"></div></div></div></div>
+    <div class="card"><div class="card-header"><h3>SDG Alignment</h3></div><div class="card-body"><div class="chart-wrap" id="sdg-chart-wrap" style="height:640px"><div class="skeleton skel-chart" style="height:640px"></div></div></div></div>
   </div>
 </section>
 
@@ -511,8 +533,8 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>International Co-authorship Map</h3></div><div class="card-body" style="position:relative"><div id="worldmap-wrap"><div class="skeleton skel-chart" style="height:420px"></div></div><div class="map-legend" id="map-legend"></div></div></div>
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Top 20 Collaborating Institutions</h3></div><div class="card-body"><div class="table-wrap" id="collab-inst-wrap"><div class="skeleton skel-table"></div></div></div></div>
     <div class="grid-2">
-      <div class="card"><div class="card-header"><h3>Top Countries by Year</h3></div><div class="card-body"><div class="chart-wrap" id="collab-countries-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Top Collaborating Institutions by Year</h3></div><div class="card-body"><div class="chart-wrap" id="collab-inst-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Top Countries by Year</h3></div><div class="card-body"><div class="chart-wrap" id="collab-countries-year-wrap" style="height:500px"><div class="skeleton skel-chart" style="height:500px"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Top Collaborating Institutions by Year</h3></div><div class="card-body"><div class="chart-wrap" id="collab-inst-year-wrap" style="height:500px"><div class="skeleton skel-chart" style="height:500px"></div></div></div></div>
     </div>
   </div>
 </section>
@@ -539,10 +561,8 @@ footer p{font-size:.8rem;color:var(--c-muted)}
       <input type="text" id="author-search" placeholder="Search authors by name (requires API key)…" aria-label="Search authors">
       <button class="btn btn-secondary" id="author-clear-btn" style="display:none" aria-label="Clear author search">Clear</button>
     </div>
-    <div class="author-grid" id="author-grid">
-      <div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div>
-      <div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div><div class="skeleton skel-kpi"></div>
-    </div>
+    <p style="font-size:.8rem;color:var(--c-muted);margin-bottom:.75rem">Click a column header to sort; click a row to load that author's most-cited work.</p>
+    <div class="table-wrap" id="author-table-wrap"><div class="skeleton skel-table" style="height:320px"></div></div>
     <div class="card" style="margin-top:1.5rem"><div class="card-header"><h3>Active Authors per Year (estimated)</h3></div><div class="card-body"><div class="chart-wrap" id="active-authors-wrap"><div class="skeleton skel-chart"></div></div></div></div>
   </div>
 </section>
@@ -554,13 +574,14 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     <div class="stat-cards" id="rw-stat-cards"><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div><div class="stat-card skeleton skel-kpi"></div></div>
     <div class="grid-2" style="margin:1.25rem 0">
       <div class="card"><div class="card-header"><h3>Notices by Year</h3></div><div class="card-body"><div class="chart-wrap" id="rw-year-wrap"><div class="skeleton skel-chart"></div></div></div></div>
-      <div class="card"><div class="card-header"><h3>Notice Type</h3></div><div class="card-body" style="display:flex;justify-content:center"><div class="chart-wrap" style="max-width:340px;width:100%" id="rw-nature-wrap"><div class="skeleton skel-chart"></div></div></div></div>
+      <div class="card"><div class="card-header"><h3>Notice Type</h3></div><div class="card-body"><div class="chart-wrap" id="rw-nature-wrap" style="height:160px"><div class="skeleton skel-chart" style="height:160px"></div></div></div></div>
     </div>
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>All Matched Notices</h3></div><div class="card-body"><div class="table-wrap" id="rw-table-wrap"><div class="skeleton skel-table" style="height:320px"></div></div></div></div>
     <div class="card" style="margin-bottom:1.25rem">
       <div class="card-header"><h3>Authors with Retractions</h3></div>
       <div class="card-body">
         <div class="filter-bar" id="rw-author-filter-bar" style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+          <input type="text" id="rw-author-search" placeholder="Search author name…" style="font-size:.85rem;padding:.4rem .6rem;border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-text)">
           <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--c-muted)"><input type="checkbox" id="rw-first-author"> Only count authors as first author</label>
           <span id="rw-author-count" style="font-size:.8rem;color:var(--c-muted);margin-left:auto"></span>
         </div>
@@ -602,7 +623,7 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     </div>
     <p>Data source: <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> (openalex.org) — CC0 licence. Dashboard built for the University of Münster.</p>
     <p>Strategic indicators reference the <em>Hochschulentwicklungsplan der Universität Münster 2024–2028</em>.</p>
-    <p>Last data refresh: <span id="footer-refresh"></span> &middot; v0.2</p>
+    <p>Last data refresh: <span id="footer-refresh"></span> &middot; v0.3</p>
   </div>
 </footer>
 
@@ -888,7 +909,7 @@ async function loadTopics(){
     setWrap('emerging-topics-wrap',growth.length?`<ol class="topic-list">${growth.map((t,i)=>`<li><span class="rank-dot">${i+1}</span><span class="topic-name">${t.name}</span><span class="growth">${SVG.up} ${t.rate>500?'>500 %':fmtP(t.rate)}</span></li>`).join('')}</ol>`:'<p style="color:var(--c-muted)">Insufficient data.</p>');
 
     const sg=(sdgData.group_by||[]).map(g=>{const num=parseInt((g.key||'').replace(/\D/g,''))||0;return {num,name:g.key_display_name||`SDG ${num}`,count:g.count,color:SDG_COLORS[num]||'#999'};}).filter(g=>g.num>0).sort((a,b)=>a.num-b.num);
-    setWrap('sdg-chart-wrap','<canvas id="sdg-chart" style="max-height:400px" aria-label="SDG bar" role="img"></canvas>');
+    setWrap('sdg-chart-wrap','<canvas id="sdg-chart" style="max-height:640px" aria-label="SDG bar" role="img"></canvas>');
     mkChart('sdg-chart',{type:'bar',data:{labels:sg.map(g=>`SDG ${g.num}: ${g.name}`),datasets:[{data:sg.map(g=>g.count),backgroundColor:sg.map(g=>g.color),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.raw)} works`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)}},y:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}}}});
     progressTick();
   }catch(err){ setWrap('treemap-wrap',errBox(err.message,'loadTopics')); progressTick(); }
@@ -937,7 +958,7 @@ async function loadCollaboration(){
     cByYear.forEach(yg=>yg.forEach(g=>{countryTotals[g.key]=(countryTotals[g.key]||0)+g.count;}));
     const topCountryKeys=Object.entries(countryTotals).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k])=>k);
     const countryName={}; cByYear.forEach(yg=>yg.forEach(g=>{countryName[g.key]=g.key_display_name||g.key;}));
-    setWrap('collab-countries-year-wrap','<canvas id="collab-countries-year-chart" aria-label="Top countries by year" role="img"></canvas>');
+    setWrap('collab-countries-year-wrap','<canvas id="collab-countries-year-chart" style="max-height:500px" aria-label="Top countries by year" role="img"></canvas>');
     mkChart('collab-countries-year-chart',{type:'bar',data:{labels:years,datasets:topCountryKeys.map((k,i)=>({label:countryName[k]||k,data:years.map((y,yi)=>cByYear[yi].find(g=>g.key===k)?.count||0),backgroundColor:COLLAB_YEAR_COLORS[i%COLLAB_YEAR_COLORS.length]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
 
     // Top collaborating institutions by year (excludes Münster itself)
@@ -946,7 +967,7 @@ async function loadCollaboration(){
     iByYear.forEach(yg=>yg.forEach(g=>{instTotals[g.key]=(instTotals[g.key]||0)+g.count;}));
     const topInstKeys=Object.entries(instTotals).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k])=>k);
     const instName={}; iByYear.forEach(yg=>yg.forEach(g=>{instName[g.key]=g.key_display_name||g.key;}));
-    setWrap('collab-inst-year-wrap','<canvas id="collab-inst-year-chart" aria-label="Top collaborating institutions by year" role="img"></canvas>');
+    setWrap('collab-inst-year-wrap','<canvas id="collab-inst-year-chart" style="max-height:500px" aria-label="Top collaborating institutions by year" role="img"></canvas>');
     mkChart('collab-inst-year-chart',{type:'bar',data:{labels:years,datasets:topInstKeys.map((k,i)=>({label:instName[k]||k,data:years.map((y,yi)=>iByYear[yi].find(g=>g.key===k)?.count||0),backgroundColor:COLLAB_YEAR_COLORS[i%COLLAB_YEAR_COLORS.length]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
     progressTick();
   }catch(err){ setWrap('worldmap-wrap',errBox(err.message,'loadCollaboration')); progressTick(); }
@@ -1004,25 +1025,66 @@ async function loadAuthors(){
     const ay=[]; for(let y=2015;y<=CURR_YEAR-1;y++) ay.push(y);
     const [authData,...aa]=await Promise.all([
       fetchAPI(buildUrl('/authors',{filter:`affiliations.institution.id:${INST_ID}`,sort:'cited_by_count:desc',per_page:'20'})),
-      ...ay.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'authorships.author.id',per_page:'1'})))
+      ...ay.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'authorships.author.id',per_page:'200'})))
     ]);
-    _topAuthors=authData.results||[]; renderAuthorGrid(_topAuthors);
+    _topAuthors=authData.results||[]; renderAuthorTable(_topAuthors);
+    // meta.groups_count is just the number of groups returned in this response (capped
+    // at per_page=200), not the true distinct-author total -- a year that hits exactly
+    // 200 is a floor, not an exact count, and gets marked as such rather than presented
+    // as precise.
+    const activeCounts=aa.map(d=>d.meta?.groups_count||0);
     setWrap('active-authors-wrap','<canvas id="active-authors-chart" aria-label="Active authors per year" role="img"></canvas>');
-    mkChart('active-authors-chart',{type:'line',data:{labels:ay,datasets:[{label:'Authors',data:aa.map(d=>d.meta?.groups_count||0),borderColor:'#009FE3',backgroundColor:'rgba(0,159,227,.12)',fill:true,tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#009FE3'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' authors'}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)},beginAtZero:true}}}});
+    mkChart('active-authors-chart',{type:'line',data:{labels:ay,datasets:[{label:'Authors',data:activeCounts,borderColor:'#009FE3',backgroundColor:'rgba(0,159,227,.12)',fill:true,tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:activeCounts.map(v=>v>=200?'#c1443c':'#009FE3')}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw>=200?`200+ authors (page limit reached — true count is higher)`:`${fmt(c.raw)} authors`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)},beginAtZero:true}}}});
     setupAuthorSearch();
     progressTick();
-  }catch(err){ setWrap('author-grid',`<div style="grid-column:1/-1">${errBox(err.message,'loadAuthors')}</div>`); progressTick(); }
+  }catch(err){ setWrap('author-table-wrap',errBox(err.message,'loadAuthors')); progressTick(); }
 }
-function renderAuthorGrid(authors){
-  const g=document.getElementById('author-grid'); if(!g) return;
-  if(!authors.length){ g.innerHTML='<p style="color:var(--c-muted)">No authors found.</p>'; return; }
-  g.innerHTML=authors.map(a=>{const id=(a.id||'').replace('https://openalex.org/','');return `<div class="author-card${a.orcid?' has-orcid':''}"><h4><a href="https://explore.openalex.org/authors/${id}" target="_blank" rel="noopener">${a.display_name||'Unknown'}</a></h4><div class="author-stats"><span class="author-stat"><strong>${fmt(a.works_count)}</strong> works</span><span class="author-stat"><strong>${fmt(a.cited_by_count)}</strong> citations</span><span class="author-stat"><strong>h=${fmt(a.summary_stats?.h_index??'—')}</strong></span></div>${a.orcid?`<a href="${a.orcid}" target="_blank" rel="noopener" class="orcid-badge" aria-label="ORCID">iD ORCID</a>`:''}</div>`;}).join('');
+let _authorSort={col:'cited_by_count',dir:'desc'};
+const _authorDetailCache={};
+function renderAuthorTable(authors){
+  const wrap=document.getElementById('author-table-wrap'); if(!wrap) return;
+  if(!authors.length){ wrap.innerHTML='<p style="color:var(--c-muted)">No authors found.</p>'; return; }
+  const cols=[{k:'display_name',l:'Author'},{k:'works_count',l:'Works'},{k:'cited_by_count',l:'Citations'},{k:'h_index',l:'h-index'}];
+  const val=(a,k)=>k==='h_index'?(a.summary_stats?.h_index||0):(k==='display_name'?(a.display_name||''):(a[k]||0));
+  const sorted=[...authors].sort((a,b)=>{
+    const av=val(a,_authorSort.col), bv=val(b,_authorSort.col);
+    if(typeof av==='string') return _authorSort.dir==='asc'?av.localeCompare(bv):bv.localeCompare(av);
+    return _authorSort.dir==='asc'?av-bv:bv-av;
+  });
+  wrap.innerHTML=`<table id="author-table"><thead><tr>${cols.map(c=>`<th class="${c.k===_authorSort.col?('sorted'+(_authorSort.dir==='asc'?' asc':'')):''}" data-key="${c.k}">${c.l}</th>`).join('')}<th>ORCID</th></tr></thead><tbody>${sorted.map(a=>{
+    const id=(a.id||'').replace('https://openalex.org/','');
+    return `<tr class="author-row" data-aid="${id}" style="cursor:pointer"><td><a href="https://explore.openalex.org/authors/${id}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${a.display_name||'Unknown'}</a></td><td>${fmt(a.works_count)}</td><td>${fmt(a.cited_by_count)}</td><td>${fmt(a.summary_stats?.h_index??'—')}</td><td>${a.orcid?`<a href="${a.orcid}" target="_blank" rel="noopener" onclick="event.stopPropagation()">ORCID</a>`:'—'}</td></tr>`
+      +`<tr class="author-detail-row" id="author-detail-${id}" style="display:none"><td colspan="5"></td></tr>`;
+  }).join('')}</tbody></table>`;
+  wrap.querySelectorAll('#author-table th[data-key]').forEach(th=>th.addEventListener('click',()=>{
+    const k=th.dataset.key;
+    _authorSort={col:k,dir:(_authorSort.col===k&&_authorSort.dir==='desc')?'asc':'desc'};
+    renderAuthorTable(authors);
+  }));
+  wrap.querySelectorAll('tr.author-row').forEach(tr=>tr.addEventListener('click',()=>toggleAuthorDetail(tr.dataset.aid)));
+}
+async function toggleAuthorDetail(id){
+  const row=document.getElementById('author-detail-'+id); if(!row) return;
+  const opening=row.style.display==='none';
+  document.querySelectorAll('.author-detail-row').forEach(r=>{ r.style.display='none'; });
+  if(!opening) return;
+  row.style.display='table-row';
+  const cell=row.querySelector('td');
+  if(_authorDetailCache[id]){ cell.innerHTML=_authorDetailCache[id]; return; }
+  cell.innerHTML='<span style="color:var(--c-muted)">Loading most-cited work…</span>';
+  try{
+    const d=await fetchAPI(buildUrl('/works',{filter:`authorships.author.id:${id}`,sort:'cited_by_count:desc',per_page:'1',select:'title,primary_location,cited_by_count'}));
+    const w=(d.results||[])[0];
+    const html=w?`<strong>Most cited article:</strong> ${w.title||'(untitled)'} <span style="color:var(--c-muted)">— ${w.primary_location?.source?.display_name||'Unknown journal'} (${fmt(w.cited_by_count)} citations)</span>`:'<span style="color:var(--c-muted)">No works found for this author.</span>';
+    _authorDetailCache[id]=html;
+    cell.innerHTML=html;
+  }catch(err){ cell.innerHTML=`<span style="color:var(--c-muted)">Failed to load: ${err.message}</span>`; }
 }
 let _st=null;
 function setupAuthorSearch(){
   const inp=document.getElementById('author-search'), clr=document.getElementById('author-clear-btn');
-  inp.addEventListener('input',()=>{clearTimeout(_st);const q=inp.value.trim();clr.style.display=q?'inline-block':'none';if(!q){renderAuthorGrid(_topAuthors||[]);return;}_st=setTimeout(async()=>{try{const d=await fetchAPI(buildUrl('/authors',{filter:`affiliations.institution.id:${INST_ID}`,search:q,per_page:'10'}));renderAuthorGrid(d.results||[]);}catch{}},400);});
-  clr.addEventListener('click',()=>{inp.value='';clr.style.display='none';renderAuthorGrid(_topAuthors||[]);});
+  inp.addEventListener('input',()=>{clearTimeout(_st);const q=inp.value.trim();clr.style.display=q?'inline-block':'none';if(!q){renderAuthorTable(_topAuthors||[]);return;}_st=setTimeout(async()=>{try{const d=await fetchAPI(buildUrl('/authors',{filter:`affiliations.institution.id:${INST_ID}`,search:q,per_page:'10'}));renderAuthorTable(d.results||[]);}catch{}},400);});
+  clr.addEventListener('click',()=>{inp.value='';clr.style.display='none';renderAuthorTable(_topAuthors||[]);});
 }
 
 /* ============================================================ 8b · RETRACTIONS */
@@ -1052,7 +1114,9 @@ function rwComputeAuthorStats(records,firstOnly){
 }
 function rwRenderAuthorsPage(){
   const firstOnly=document.getElementById('rw-first-author').checked;
-  const stats=rwComputeAuthorStats(_rwRecords,firstOnly);
+  const q=(document.getElementById('rw-author-search').value||'').trim().toLowerCase();
+  let stats=rwComputeAuthorStats(_rwRecords,firstOnly);
+  if(q) stats=stats.filter(a=>a.name.toLowerCase().includes(q));
   const totalPages=Math.max(1,Math.ceil(stats.length/RW_AUTHORS_PER_PAGE));
   if(_rwAuthorPage>=totalPages) _rwAuthorPage=totalPages-1;
   if(_rwAuthorPage<0) _rwAuthorPage=0;
@@ -1100,8 +1164,8 @@ async function loadRetractions(){
     mkChart('rw-year-chart',{type:'bar',data:{labels:yearRange,datasets:[{data:yearRange.map(y=>yearCounts[y]||0),backgroundColor:'#00305D',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' notices'}}},scales:{x:{grid:{display:false},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),stepSize:1},beginAtZero:true}}}});
 
     const natureLabels=RW_NATURE_KEYS.filter(k=>natureCounts[k]>0);
-    setWrap('rw-nature-wrap','<canvas id="rw-nature-chart" aria-label="Notice type" role="img"></canvas>');
-    mkChart('rw-nature-chart',{type:'doughnut',data:{labels:natureLabels,datasets:[{data:natureLabels.map(k=>natureCounts[k]),backgroundColor:natureLabels.map(k=>RW_NATURE_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:tickColor()}}},cutout:'60%'}});
+    setWrap('rw-nature-wrap','<canvas id="rw-nature-chart" style="max-height:160px" aria-label="Notice type" role="img"></canvas>');
+    mkChart('rw-nature-chart',{type:'bar',data:{labels:['Notices'],datasets:natureLabels.map(k=>({label:k,data:[natureCounts[k]],backgroundColor:RW_NATURE_COLORS[k]}))},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),stepSize:1}},y:{stacked:true,grid:{display:false},ticks:{color:tickColor(),display:false}}}}});
 
     const rows=[...records].sort((a,b)=>(rwParseDate(b.retractionDate)?.getTime()||0)-(rwParseDate(a.retractionDate)?.getTime()||0));
     setWrap('rw-table-wrap',`<table><thead><tr><th>Title</th><th>Journal</th><th>Type</th><th>Date</th><th>Reason</th><th>Links</th></tr></thead><tbody>${rows.map(r=>{
@@ -1119,6 +1183,7 @@ async function loadRetractions(){
     _rwAuthorPage=0;
     rwRenderAuthorsPage();
     document.getElementById('rw-first-author').addEventListener('change',()=>{ _rwAuthorPage=0; rwRenderAuthorsPage(); });
+    document.getElementById('rw-author-search').addEventListener('input',()=>{ _rwAuthorPage=0; rwRenderAuthorsPage(); });
     progressTick();
   }catch(err){ setWrap('rw-table-wrap',errBox(err.message,'loadRetractions')); setWrap('rw-year-wrap',''); setWrap('rw-nature-wrap',''); setWrap('rw-author-table-wrap',errBox(err.message,'loadRetractions')); progressTick(); }
 }
@@ -1264,27 +1329,74 @@ function renderPublicationCosts(){
   setWrap('oa-trend-wrap','<canvas id="oa-trend-chart" aria-label="OA share trend by year" role="img"></canvas>');
   mkChart('oa-trend-chart',{type:'line',data:{labels:oaYears,datasets:PC_OA_KEYS.map(k=>({label:PC_OA_LABELS[k],data:oaYears.map(y=>{const g=byYearOa[y]||{};const t=Object.values(g).reduce((s,v)=>s+v,0);return t>0?(g[k]||0)/t*100:0;}),fill:true,backgroundColor:PC_OA_COLORS[k]+'cc',borderColor:PC_OA_COLORS[k],borderWidth:1,tension:.3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtP(c.raw)}`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{stacked:true,min:0,max:100,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>v+'%'}}}}});
 
-  // Cost by year, stacked by OA type
+  // Cost by year, stacked by OA type / by publisher. A handful of works carry bogus
+  // OpenAlex publication_year values (e.g. 1862) that would otherwise stretch the
+  // x-axis to uselessness -- clip to 2012 onward and say so, rather than pretending
+  // the chart shows the full range.
+  const PC_YEAR_FLOOR=2012;
   const byYear={};
-  for(const i of idx){ const y=ds.year[i], c=ds.cost[i]; if(y==null||c==null) continue; const k=ds.oa[i]||'unknown'; if(!byYear[y])byYear[y]={}; byYear[y][k]=(byYear[y][k]||0)+c; }
+  for(const i of idx){ const y=ds.year[i], c=ds.cost[i]; if(y==null||c==null||y<PC_YEAR_FLOOR) continue; const k=ds.oa[i]||'unknown'; if(!byYear[y])byYear[y]={}; byYear[y][k]=(byYear[y][k]||0)+c; }
   const years=Object.keys(byYear).map(Number).sort((a,b)=>a-b);
-  setWrap('pc-year-oa-wrap','<canvas id="pc-year-oa-chart" style="max-height:320px" aria-label="Cost by year by OA type" role="img"></canvas>');
+  const earliestRawYear=idx.reduce((min,i)=>{const y=ds.year[i];return (y!=null&&y<min)?y:min;},Infinity);
+  const truncNote=earliestRawYear<PC_YEAR_FLOOR?`X-axis truncated: starts at ${PC_YEAR_FLOOR}. A small number of works carry an earlier (likely erroneous) publication year in OpenAlex, back to ${earliestRawYear}.`:'';
+  document.getElementById('pc-year-oa-note').textContent=truncNote;
+  document.getElementById('pc-year-pub-note').textContent=truncNote;
+  setWrap('pc-year-oa-wrap','<canvas id="pc-year-oa-chart" style="max-height:640px" aria-label="Cost by year by OA type" role="img"></canvas>');
   mkChart('pc-year-oa-chart',{type:'bar',data:{labels:years,datasets:PC_OA_KEYS.map(k=>({label:PC_OA_LABELS[k],data:years.map(y=>Math.round(pcToEUR(byYear[y][k]||0))),backgroundColor:PC_OA_COLORS[k]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: €${fmt(c.raw)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>'€'+fmtK(v)}}}}});
 
-  // Cost vs citations scatter (sampled)
+  // Cost by year, stacked by publisher (top 6 by total cost; the rest grouped as "Other")
+  const byYearPub={};
+  for(const i of idx){ const y=ds.year[i], c=ds.cost[i]; if(y==null||c==null||y<PC_YEAR_FLOOR) continue; const pubName=ds.publisherDict[ds.publisher[i]]||'(unknown)'; if(!byYearPub[y])byYearPub[y]={}; byYearPub[y][pubName]=(byYearPub[y][pubName]||0)+c; }
+  const pubTotals={};
+  Object.values(byYearPub).forEach(g=>Object.entries(g).forEach(([name,v])=>{pubTotals[name]=(pubTotals[name]||0)+v;}));
+  const topPublishers=Object.entries(pubTotals).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([name])=>name);
+  const PC_PUBLISHER_COLORS=['#00305D','#009FE3','#2e7d32','#FF8F00','#c1443c','#7a4fa3','#9e9e9e'];
+  setWrap('pc-year-pub-wrap','<canvas id="pc-year-pub-chart" style="max-height:640px" aria-label="Cost by year by publisher" role="img"></canvas>');
+  mkChart('pc-year-pub-chart',{type:'bar',data:{labels:years,datasets:[...topPublishers,'Other'].map((name,i)=>({label:name,data:years.map(y=>{const g=byYearPub[y]||{};if(name==='Other'){const known=topPublishers.reduce((s,n)=>s+(g[n]||0),0);const total=Object.values(g).reduce((s,v)=>s+v,0);return Math.round(pcToEUR(total-known));}return Math.round(pcToEUR(g[name]||0));}),backgroundColor:PC_PUBLISHER_COLORS[i%PC_PUBLISHER_COLORS.length]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: €${fmt(c.raw)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tickColor()}},y:{stacked:true,grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>'€'+fmtK(v)}}}}});
+
+  // Cost vs citations scatter (sampled). Citations axis is log10 -- a log scale can't
+  // plot zero, so zero-citation works are nudged to a small positive value for
+  // position only, while the tooltip always shows the real (possibly zero) count.
   const candidates=idx.filter(i=>ds.cost[i]!=null && ds.citations[i]!=null);
   const cap=2500, stride=candidates.length>cap?Math.ceil(candidates.length/cap):1;
   const sampled=[]; for(let i=0;i<candidates.length;i+=stride) sampled.push(candidates[i]);
-  const points=sampled.map(i=>({x:pcToEUR(ds.cost[i]),y:ds.citations[i],title:ds.title[i]||'(untitled)'}));
-  setWrap('pc-scatter-wrap','<canvas id="pc-scatter-chart" aria-label="Cost vs citations" role="img"></canvas>');
-  mkChart('pc-scatter-chart',{type:'scatter',data:{datasets:[{data:points,backgroundColor:'rgba(0,159,227,.5)',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0]?.raw?.title||'',label:c=>[`Cost: €${fmt(c.parsed.x)}`,`Citations: ${fmt(c.parsed.y)}`]}}},scales:{x:{title:{display:true,text:'APC cost (EUR)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}},y:{title:{display:true,text:'Citations',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
+  const points=sampled.map(i=>({x:pcToEUR(ds.cost[i]),y:ds.citations[i]>0?ds.citations[i]:0.5,realY:ds.citations[i],title:ds.title[i]||'(untitled)'}));
+  setWrap('pc-scatter-wrap','<canvas id="pc-scatter-chart" style="max-height:640px" aria-label="Cost vs citations" role="img"></canvas>');
+  mkChart('pc-scatter-chart',{type:'scatter',data:{datasets:[{data:points,backgroundColor:'rgba(0,159,227,.5)',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0]?.raw?.title||'',label:c=>[`Cost: €${fmt(c.parsed.x)}`,`Citations: ${fmt(c.raw.realY)}`]}}},scales:{x:{title:{display:true,text:'APC cost (EUR)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}},y:{type:'logarithmic',title:{display:true,text:'Citations (log scale)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>{const l=Math.log10(v);return Number.isInteger(l)?fmt(v):(v===0.5?'0':'');}}}}}});
 
-  // Citations by cost tier
-  const tierSums=[0,0,0,0], tierCounts=[0,0,0,0];
-  for(const i of idx){ const c=ds.cost[i]; if(c==null) continue; const t=pcTierIndex(c); tierSums[t]+=ds.citations[i]||0; tierCounts[t]++; }
-  const tierAvgs=tierSums.map((s,i)=>tierCounts[i]?Math.round(s/tierCounts[i]*10)/10:0);
-  setWrap('pc-tier-wrap','<canvas id="pc-tier-chart" aria-label="Citations by cost tier" role="img"></canvas>');
-  mkChart('pc-tier-chart',{type:'bar',data:{labels:PC_TIER_LABELS,datasets:[{data:tierAvgs,backgroundColor:PC_TIER_COLORS,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${tierCounts[c.dataIndex]} works, avg ${c.raw} citations`}}},scales:{x:{grid:{display:false},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
+  // Citations by cost tier -- a data-driven histogram: the free (€0) bucket stays a
+  // single bar, but each of the three paid tiers is split into several quantile-based
+  // sub-bins (equal work counts, not equal euro width) so the shape of the paid
+  // distribution is visible instead of being flattened into one average per tier.
+  let zeroCount=0, zeroCiteTotal=0;
+  const nonZeroByTier=[[],[],[]];
+  for(const i of idx){
+    const c=ds.cost[i]; if(c==null) continue;
+    const t=pcTierIndex(c);
+    if(t===0){ zeroCount++; zeroCiteTotal+=ds.citations[i]||0; }
+    else nonZeroByTier[t-1].push({cost:pcToEUR(c),citations:ds.citations[i]||0});
+  }
+  function pcQuantileBins(items,k){
+    if(!items.length) return [];
+    const sorted=[...items].sort((a,b)=>a.cost-b.cost);
+    const n=sorted.length, bins=Math.max(1,Math.min(k,n)), out=[];
+    for(let b=0;b<bins;b++){
+      const slice=sorted.slice(Math.floor(b*n/bins),Math.floor((b+1)*n/bins));
+      if(!slice.length) continue;
+      out.push({min:slice[0].cost,max:slice[slice.length-1].cost,avg:Math.round(slice.reduce((s,d)=>s+d.citations,0)/slice.length*10)/10,count:slice.length});
+    }
+    return out;
+  }
+  const PC_TIER_SUBBINS=5;
+  const tierBars=[{label:'€0',avg:zeroCount?Math.round(zeroCiteTotal/zeroCount*10)/10:0,count:zeroCount,color:PC_TIER_COLORS[0]}];
+  nonZeroByTier.forEach((items,ti)=>{
+    pcQuantileBins(items,PC_TIER_SUBBINS).forEach(b=>{
+      const label=Math.round(b.min)===Math.round(b.max)?`€${fmt(Math.round(b.min))}`:`€${fmt(Math.round(b.min))}–${fmt(Math.round(b.max))}`;
+      tierBars.push({label,avg:b.avg,count:b.count,color:PC_TIER_COLORS[ti+1]});
+    });
+  });
+  setWrap('pc-tier-wrap','<canvas id="pc-tier-chart" style="max-height:640px" aria-label="Citations by cost tier" role="img"></canvas>');
+  mkChart('pc-tier-chart',{type:'bar',data:{labels:tierBars.map(b=>b.label),datasets:[{data:tierBars.map(b=>b.avg),backgroundColor:tierBars.map(b=>b.color),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${tierBars[c.dataIndex].count} works, avg ${c.raw} citations`}}},scales:{x:{grid:{display:false},ticks:{color:tickColor(),maxRotation:60,minRotation:40,font:{size:9}}},y:{grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
 
   // Top publishers / fields by cost
   function topBy(dictArr, idxArr, canvasId){
@@ -1298,7 +1410,7 @@ function renderPublicationCosts(){
   topBy(ds.fieldDict, ds.field, 'pc-field');
 }
 
-const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','oa-trend-wrap','pc-year-oa-wrap','pc-scatter-wrap','pc-tier-wrap','pc-publisher-wrap','pc-field-wrap'];
+const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','oa-trend-wrap','pc-year-oa-wrap','pc-year-pub-wrap','pc-scatter-wrap','pc-tier-wrap','pc-publisher-wrap','pc-field-wrap'];
 async function loadPublicationCosts(){
   if(_sectionLoaded.pubcosts) return; _sectionLoaded.pubcosts=true;
   try{

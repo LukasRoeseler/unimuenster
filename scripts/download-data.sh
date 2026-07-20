@@ -140,8 +140,15 @@ download "authors" \
   "${API}/authors?filter=affiliations.institution.id:${INST}&sort=cited_by_count:desc&per_page=20"
 
 for year in $(seq 2015 $(( CURR_YEAR - 1 ))); do
+  # per_page=200 (OpenAlex's group_by max), not 1: meta.groups_count is the number of
+  # groups actually RETURNED in this response, capped at per_page, not the true total
+  # distinct-author count -- per_page=1 was silently reporting 1 active author for
+  # every single year. 200 still undercounts years with more than 200 distinct
+  # authors (there's no cheaper way to get an exact count from this endpoint), but
+  # the dashboard treats a count that hits exactly 200 as a capped lower bound
+  # rather than presenting it as exact.
   download "active_${year}" \
-    "${API}/works?filter=institutions.id:${INST},publication_year:${year}&group_by=authorships.author.id&per_page=1"
+    "${API}/works?filter=institutions.id:${INST},publication_year:${year}&group_by=authorships.author.id&per_page=200"
 done
 
 # ── Summary ───────────────────────────────────────────────────────────────────
