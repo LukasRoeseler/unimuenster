@@ -567,7 +567,6 @@ footer p{font-size:.8rem;color:var(--c-muted)}
     </div>
     <p style="font-size:.8rem;color:var(--c-muted);margin-bottom:.75rem">Click a column header to sort; click a row to load that author's most-cited work.</p>
     <div class="table-wrap" id="author-table-wrap"><div class="skeleton skel-table" style="height:320px"></div></div>
-    <div class="card" style="margin-top:1.5rem"><div class="card-header"><h3>Active Authors per Year (estimated)</h3></div><div class="card-body"><div class="chart-wrap" id="active-authors-wrap"><div class="skeleton skel-chart"></div></div></div></div>
   </div>
 </section>
 
@@ -729,9 +728,6 @@ function localFilePath(url){
     }
     if(p==='/works' && gb==='authorships.institutions.id')   return 'data/collab_institutions.json';
     if(p==='/works' && filter.includes('countries_distinct_count:>1')) return 'data/collab_intl.json';
-    if(p==='/works' && gb==='authorships.author.id'){
-      const m=filter.match(/publication_year:(\d{4})/); if(m) return `data/active_${m[1]}.json`;
-    }
     if(p.startsWith('/institutions/')){
       const id=p.replace('/institutions/','');
       return id===INST_ID ? 'data/institution.json' : `data/bench_${id}.json`;
@@ -1026,19 +1022,8 @@ function renderBenchCallout(data){
 async function loadAuthors(){
   if(_sectionLoaded.authors) return; _sectionLoaded.authors=true;
   try{
-    const ay=[]; for(let y=2015;y<=CURR_YEAR-1;y++) ay.push(y);
-    const [authData,...aa]=await Promise.all([
-      fetchAPI(buildUrl('/authors',{filter:`affiliations.institution.id:${INST_ID}`,sort:'cited_by_count:desc',per_page:'20'})),
-      ...ay.map(y=>fetchAPI(buildUrl('/works',{filter:`institutions.id:${INST_ID},publication_year:${y}`,group_by:'authorships.author.id',per_page:'200'})))
-    ]);
+    const authData=await fetchAPI(buildUrl('/authors',{filter:`affiliations.institution.id:${INST_ID}`,sort:'cited_by_count:desc',per_page:'20'}));
     _topAuthors=authData.results||[]; renderAuthorTable(_topAuthors);
-    // meta.groups_count is just the number of groups returned in this response (capped
-    // at per_page=200), not the true distinct-author total -- a year that hits exactly
-    // 200 is a floor, not an exact count, and gets marked as such rather than presented
-    // as precise.
-    const activeCounts=aa.map(d=>d.meta?.groups_count||0);
-    setWrap('active-authors-wrap','<canvas id="active-authors-chart" aria-label="Active authors per year" role="img"></canvas>');
-    mkChart('active-authors-chart',{type:'line',data:{labels:ay,datasets:[{label:'Authors',data:activeCounts,borderColor:'#009FE3',backgroundColor:'rgba(0,159,227,.12)',fill:true,tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:activeCounts.map(v=>v>=200?'#c1443c':'#009FE3')}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw>=200?`200+ authors (page limit reached — true count is higher)`:`${fmt(c.raw)} authors`}}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor()}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>fmtK(v)},beginAtZero:true}}}});
     setupAuthorSearch();
     progressTick();
   }catch(err){ setWrap('author-table-wrap',errBox(err.message,'loadAuthors')); progressTick(); }
