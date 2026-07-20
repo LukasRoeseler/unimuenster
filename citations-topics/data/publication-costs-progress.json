@@ -1,9 +1,9 @@
 {
-  "cursor": "Ils5NC4wLCA4LCAnaHR0cHM6Ly9vcGVuYWxleC5vcmcvVzIwMTg2NDA4MCddIg==",
-  "fetchedCount": 60200,
+  "cursor": null,
+  "fetchedCount": 117049,
   "totalCount": 117049,
-  "done": false,
-  "backlogCompletedAt": null,
-  "lastRunAt": "2026-07-20T06:38:27.885Z",
-  "runs": 2
+  "done": true,
+  "backlogCompletedAt": "2026-07-20T08:21:13.419Z",
+  "lastRunAt": "2026-07-20T08:21:13.419Z",
+  "runs": 3
 }
