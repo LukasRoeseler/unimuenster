@@ -469,6 +469,8 @@ footer p{font-size:.8rem;color:var(--c-muted)}
 
     <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>OA Works by Year (count)</h3></div><div class="card-body"><div class="chart-wrap" id="oa-count-wrap" style="height:420px"><div class="skeleton skel-chart" style="height:420px"></div></div></div></div>
 
+    <div class="card" style="margin-bottom:1.25rem"><div class="card-header"><h3>Citations by OA Type</h3></div><div class="card-body"><div class="chart-wrap" id="pc-oa-violin-wrap" style="height:640px"><div class="skeleton skel-chart" style="height:640px"></div></div></div></div>
+
     <div class="callout" id="oa-explainer" style="margin-bottom:1.25rem">
       <strong>Understanding OA types:</strong>
       <strong>Gold</strong> — published in a fully open-access journal.
@@ -1280,6 +1282,47 @@ function renderOaDonut(ds, idx){
   mkChart('pc-oa-donut-chart',{type:'doughnut',data:{labels:PC_OA_KEYS.map(k=>PC_OA_LABELS[k]),datasets:[{data,backgroundColor:PC_OA_KEYS.map(k=>PC_OA_COLORS[k]),borderWidth:2,borderColor:isDark()?'#353f4b':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:tickColor()}},tooltip:{callbacks:{label:c=>byWorks?`${c.label}: ${fmt(c.raw)}${total?' ('+fmtP(c.raw/total*100)+')':''}`:`${c.label}: €${fmt(c.raw)}${total?' ('+fmtP(c.raw/total*100)+')':''}`}}},cutout:'60%'}});
 }
 
+function pcMedian(sortedVals){
+  const n=sortedVals.length; if(!n) return 0;
+  return n%2 ? sortedVals[(n-1)/2] : (sortedVals[n/2-1]+sortedVals[n/2])/2;
+}
+function pcViolinShape(values,bins,cap){
+  if(!values.length) return null;
+  const sorted=[...values].sort((a,b)=>a-b);
+  const median=pcMedian(sorted), min=sorted[0], max=sorted[sorted.length-1];
+  const clippedMax=Math.min(max,cap);
+  const clipped=values.filter(v=>v<=cap);
+  const offScale=values.length-clipped.length;
+  if(clippedMax===min) return {min,max:clippedMax,median,offScale,curve:[{y:min,d:1}]};
+  const bw=(clippedMax-min)/bins, counts=new Array(bins+1).fill(0);
+  clipped.forEach(v=>{ counts[Math.min(bins,Math.floor((v-min)/bw))]++; });
+  const maxCount=Math.max(...counts);
+  return {min,max:clippedMax,median,offScale,curve:counts.map((c,i)=>({y:min+i*bw,d:c/maxCount}))};
+}
+// Shared violin-plot renderer: one violin per category, each showing that category's
+// full value distribution (not just its average) with a solid dash at the median.
+// A handful of extreme outliers would otherwise stretch a linear axis until every
+// category's actual body is squashed to an invisible sliver, so the KDE and axis are
+// capped at the 95th percentile across all categories combined, with that disclosed
+// in a note -- same approach as this file's other truncated-axis charts.
+function pcRenderViolin(wrapId,canvasId,ariaLabel,labels,colors,valueArrays){
+  const PC_VIOLIN_BINS=24, PC_VIOLIN_HALF_WIDTH=0.42;
+  const allVals=valueArrays.flat().sort((a,b)=>a-b);
+  const cap=Math.max(allVals.length?allVals[Math.min(allVals.length-1,Math.floor(allVals.length*0.95))]:0,1);
+  const violins=valueArrays.map((vals,i)=>({label:labels[i],color:colors[i],count:vals.length,shape:pcViolinShape(vals,PC_VIOLIN_BINS,cap)}));
+  const violinDatasets=[];
+  violins.forEach((v,ti)=>{
+    if(!v.shape) return;
+    const rightSide=v.shape.curve.map(p=>({x:ti+p.d*PC_VIOLIN_HALF_WIDTH,y:p.y}));
+    const leftSide=v.shape.curve.slice().reverse().map(p=>({x:ti-p.d*PC_VIOLIN_HALF_WIDTH,y:p.y}));
+    violinDatasets.push({label:v.label,tierIndex:ti,data:[...rightSide,...leftSide],borderColor:v.color,backgroundColor:v.color+'55',fill:true,borderWidth:1.5,pointRadius:0,tension:.25,showLine:true});
+    violinDatasets.push({label:v.label+' (median)',tierIndex:ti,data:[{x:ti-PC_VIOLIN_HALF_WIDTH*.85,y:v.shape.median},{x:ti+PC_VIOLIN_HALF_WIDTH*.85,y:v.shape.median}],borderColor:isDark()?'#ffffff':'#111111',borderWidth:3,pointRadius:0,fill:false,showLine:true});
+  });
+  const anyOffScale=violins.some(v=>v.shape&&v.shape.offScale>0);
+  setWrap(wrapId,`<canvas id="${canvasId}" style="max-height:${anyOffScale?580:640}px" aria-label="${ariaLabel}" role="img"></canvas>${anyOffScale?`<p style="font-size:.75rem;color:var(--c-muted);margin-top:.5rem">Y-axis capped at ${fmt(Math.round(cap))} citations (the 95th percentile). A small number of highly-cited works fall above this and are excluded from the shape shown, though they still count toward each category's median.</p>`:''}`);
+  mkChart(canvasId,{type:'line',data:{datasets:violinDatasets},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:'nearest',intersect:true},plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items.length?violins[items[0].dataset.tierIndex].label:'',label:c=>{const v=violins[c.dataset.tierIndex];return v?`${v.count} works, median ${v.shape?v.shape.median:0} citations`:'';}}}},scales:{x:{type:'linear',min:-0.6,max:labels.length-0.4,grid:{display:false},ticks:{color:tickColor(),stepSize:1,font:{size:labels.length>6?9:11},callback:v=>Number.isInteger(v)&&v>=0&&v<labels.length?labels[v]:''}},y:{title:{display:true,text:'Citations',color:tickColor()},beginAtZero:true,max:cap,grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
+}
+
 function renderPublicationCosts(){
   const ds=_pcDataset, idx=pcFilteredIndices();
   document.getElementById('pc-count').textContent = `${fmt(idx.length)} of ${fmt(ds.n)} crawled works shown here match the current filter`;
@@ -1379,49 +1422,15 @@ function renderPublicationCosts(){
   mkChart('pc-scatter-chart',{type:'scatter',data:{datasets:[{data:points,backgroundColor:'rgba(0,159,227,.5)',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0]?.raw?.title||'',label:c=>[`Cost: €${fmt(c.parsed.x)}`,`Citations: ${fmt(c.raw.realY)}`]}}},scales:{x:{title:{display:true,text:'APC cost (EUR)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor()}},y:{type:'logarithmic',title:{display:true,text:'Citations (log scale)',color:tickColor()},grid:{color:gridColor()},ticks:{color:tickColor(),callback:v=>{const l=Math.log10(v);return Number.isInteger(l)?fmt(v):(v===0.5?'0':'');}}}}}});
 
   // Citations by cost tier -- a violin plot: each tier's full citation distribution
-  // (not just its average), with a solid dash marking the median. A violin already
-  // shows the distribution's shape, so this uses the four broad tiers directly
-  // rather than sub-dividing them further.
+  // (not just its average), with a solid dash marking the median.
   const tierValues=[[],[],[],[]];
   for(const i of idx){ const c=ds.cost[i]; if(c==null) continue; tierValues[pcTierIndex(c)].push(ds.citations[i]||0); }
-  function pcMedian(sortedVals){
-    const n=sortedVals.length; if(!n) return 0;
-    return n%2 ? sortedVals[(n-1)/2] : (sortedVals[n/2-1]+sortedVals[n/2])/2;
-  }
-  // A handful of works with hundreds or thousands of citations would otherwise
-  // stretch a linear axis until every tier's actual body (most works sit under
-  // ~100 citations) is squashed to an invisible sliver -- cap the KDE and the
-  // axis at the 95th percentile across all tiers combined, same disclosure
-  // approach as the truncated cost-by-year x-axis above.
-  const allCiteVals=tierValues.flat().sort((a,b)=>a-b);
-  const pctCap=allCiteVals.length?allCiteVals[Math.min(allCiteVals.length-1,Math.floor(allCiteVals.length*0.95))]:0;
-  const violinCap=Math.max(pctCap,1);
-  function pcViolinShape(values,bins,cap){
-    if(!values.length) return null;
-    const sorted=[...values].sort((a,b)=>a-b);
-    const median=pcMedian(sorted), min=sorted[0], max=sorted[sorted.length-1];
-    const clippedMax=Math.min(max,cap);
-    const clipped=values.filter(v=>v<=cap);
-    const offScale=values.length-clipped.length;
-    if(clippedMax===min) return {min,max:clippedMax,median,offScale,curve:[{y:min,d:1}]};
-    const bw=(clippedMax-min)/bins, counts=new Array(bins+1).fill(0);
-    clipped.forEach(v=>{ counts[Math.min(bins,Math.floor((v-min)/bw))]++; });
-    const maxCount=Math.max(...counts);
-    return {min,max:clippedMax,median,offScale,curve:counts.map((c,i)=>({y:min+i*bw,d:c/maxCount}))};
-  }
-  const PC_VIOLIN_BINS=24, PC_VIOLIN_HALF_WIDTH=0.42;
-  const violins=tierValues.map((vals,ti)=>({label:PC_TIER_LABELS[ti],color:PC_TIER_COLORS[ti],count:vals.length,shape:pcViolinShape(vals,PC_VIOLIN_BINS,violinCap)}));
-  const violinDatasets=[];
-  violins.forEach((v,ti)=>{
-    if(!v.shape) return;
-    const rightSide=v.shape.curve.map(p=>({x:ti+p.d*PC_VIOLIN_HALF_WIDTH,y:p.y}));
-    const leftSide=v.shape.curve.slice().reverse().map(p=>({x:ti-p.d*PC_VIOLIN_HALF_WIDTH,y:p.y}));
-    violinDatasets.push({label:v.label,tierIndex:ti,data:[...rightSide,...leftSide],borderColor:v.color,backgroundColor:v.color+'55',fill:true,borderWidth:1.5,pointRadius:0,tension:.25,showLine:true});
-    violinDatasets.push({label:v.label+' (median)',tierIndex:ti,data:[{x:ti-PC_VIOLIN_HALF_WIDTH*.85,y:v.shape.median},{x:ti+PC_VIOLIN_HALF_WIDTH*.85,y:v.shape.median}],borderColor:isDark()?'#ffffff':'#111111',borderWidth:3,pointRadius:0,fill:false,showLine:true});
-  });
-  const anyOffScale=violins.some(v=>v.shape&&v.shape.offScale>0);
-  setWrap('pc-tier-wrap',`<canvas id="pc-tier-chart" style="max-height:${anyOffScale?580:640}px" aria-label="Citations by cost tier, violin plot" role="img"></canvas>${anyOffScale?`<p style="font-size:.75rem;color:var(--c-muted);margin-top:.5rem">Y-axis capped at ${fmt(Math.round(violinCap))} citations (the 95th percentile). A small number of highly-cited works fall above this and are excluded from the shape shown, though they still count toward each tier's median.</p>`:''}`);
-  mkChart('pc-tier-chart',{type:'line',data:{datasets:violinDatasets},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:'nearest',intersect:true},plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items.length?violins[items[0].dataset.tierIndex].label:'',label:c=>{const v=violins[c.dataset.tierIndex];return v?`${v.count} works, median ${v.shape?v.shape.median:0} citations`:'';}}}},scales:{x:{type:'linear',min:-0.6,max:PC_TIER_LABELS.length-0.4,grid:{display:false},ticks:{color:tickColor(),stepSize:1,callback:v=>Number.isInteger(v)&&v>=0&&v<PC_TIER_LABELS.length?PC_TIER_LABELS[v]:''}},y:{title:{display:true,text:'Citations',color:tickColor()},beginAtZero:true,max:violinCap,grid:{color:gridColor()},ticks:{color:tickColor()}}}}});
+  pcRenderViolin('pc-tier-wrap','pc-tier-chart','Citations by cost tier, violin plot',PC_TIER_LABELS,PC_TIER_COLORS,tierValues);
+
+  // Citations by OA type -- same violin treatment, one per OA status.
+  const oaTypeValues=PC_OA_KEYS.map(()=>[]);
+  for(const i of idx){ const ki=PC_OA_KEYS.indexOf(ds.oa[i]||'unknown'); if(ki<0) continue; oaTypeValues[ki].push(ds.citations[i]||0); }
+  pcRenderViolin('pc-oa-violin-wrap','pc-oa-violin-chart','Citations by OA type, violin plot',PC_OA_KEYS.map(k=>PC_OA_LABELS[k]),PC_OA_KEYS.map(k=>PC_OA_COLORS[k]),oaTypeValues);
 
   // Top publishers / fields by cost
   function topBy(dictArr, idxArr, canvasId){
@@ -1435,7 +1444,7 @@ function renderPublicationCosts(){
   topBy(ds.fieldDict, ds.field, 'pc-field');
 }
 
-const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','oa-trend-wrap','oa-count-wrap','pc-year-oa-wrap','pc-year-pub-wrap','pc-scatter-wrap','pc-tier-wrap','pc-publisher-wrap','pc-field-wrap'];
+const PC_WRAP_IDS=['pc-histogram-wrap','pc-oa-donut-wrap','oa-trend-wrap','oa-count-wrap','pc-year-oa-wrap','pc-year-pub-wrap','pc-scatter-wrap','pc-tier-wrap','pc-oa-violin-wrap','pc-publisher-wrap','pc-field-wrap'];
 async function loadPublicationCosts(){
   if(_sectionLoaded.pubcosts) return; _sectionLoaded.pubcosts=true;
   try{
