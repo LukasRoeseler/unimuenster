@@ -39,7 +39,17 @@ jobs:
             echo "No data changes to commit."
           else
             git commit -m "Update ejournals data"
-            git push
+            # main can move between checkout and here -- rebase onto the latest tip
+            # before pushing, retrying a few times, instead of failing outright on a
+            # non-fast-forward rejection. This commit only ever touches
+            # ejournals/data/*, which nothing else writes to, so the rebase is
+            # always a clean replay, never a real conflict.
+            for attempt in 1 2 3 4 5; do
+              git fetch origin main
+              git rebase origin/main && git push origin HEAD:main && break
+              echo "Push attempt ${attempt} failed; retrying after rebase..."
+              sleep 5
+            done
           fi
 
       - name: Fail the job if the crawl step failed
