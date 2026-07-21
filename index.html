@@ -38,7 +38,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:56px 2
 .hero h1{font-size:34px;font-weight:700;line-height:1.2;letter-spacing:-.01em;color:var(--c-primary);margin-bottom:14px;text-wrap:balance}
 .hero p{font-size:16px;color:var(--c-muted);line-height:1.7}
 
-.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:680px;width:100%}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;width:100%}
+@media (max-width:860px){.choices{grid-template-columns:repeat(2,1fr);max-width:680px}}
 @media (max-width:600px){.choices{grid-template-columns:1fr}}
 
 .choice{background:var(--c-card);border:1px solid var(--c-border);border-radius:12px;padding:28px 24px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
@@ -62,8 +63,8 @@ footer .sep{margin:0 6px}
 
 <main>
   <div class="hero">
-    <h1>Two views into Münster's research</h1>
-    <p>Independent, openly built tools covering the University of Münster's open access e-journals and its institution-wide research output.</p>
+    <h1>Three views into Münster's research</h1>
+    <p>Independent, openly built tools covering the University of Münster's open access e-journals, its institution-wide research output, and the bibliometric concepts behind them.</p>
   </div>
 
   <div class="choices">
@@ -72,6 +73,13 @@ footer .sep{margin:0 6px}
       <h2>E-Journals</h2>
       <p>Bibliometrics for the open access e-journals hosted by the Universitäts- und Landesbibliothek Münster: browse any of its journals, or the collection as a whole.</p>
       <span class="go">Open the dashboard &rarr;</span>
+    </a>
+
+    <a class="choice" href="bibliometrics-101/index.html">
+      <div class="icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5.5 10 2l8 3.5-8 3.5-8-3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 8v5c0 1.4 2.24 2.5 5 2.5s5-1.1 5-2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2>Bibliometrics 101</h2>
+      <p>An interactive explainer on why citation distributions are non-normal, using real data from the journal Science: simulate, resample, and inject outliers to see how mean and median respond.</p>
+      <span class="go">Open the tool &rarr;</span>
     </a>
 
     <a class="choice" href="citations-topics/index.html">
