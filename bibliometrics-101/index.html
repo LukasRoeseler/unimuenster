@@ -197,9 +197,19 @@ footer a{color:var(--c-accent)}
           <h3>Data source</h3>
           <div class="mode-toggle" id="mode-toggle">
             <button type="button" class="active" data-mode="real">Real Science sample</button>
-            <button type="button" data-mode="sim">Simulate (&chi;&sup2;, df=1)</button>
+            <button type="button" data-mode="sim">Simulate (by mean)</button>
           </div>
           <p class="hint" style="margin-top:.5rem" id="mode-hint"></p>
+        </div>
+
+        <div class="control-group" id="ctrl-target-mean" style="display:none">
+          <h3>Target mean citations</h3>
+          <label for="target-mean-input">Simulate a journal with this average citation count (its JIF, or OpenAlex mean citedness)</label>
+          <div class="inline-row">
+            <input type="number" id="target-mean-input" min="0.1" step="0.1" value="40">
+            <button type="button" class="btn btn-secondary btn-sm" id="target-mean-apply-btn">Apply</button>
+          </div>
+          <p class="hint">Starts at Science's own mean. Assumes the same relative variability (dispersion) as Science &mdash; only the average is different, so treat this as a rough what-if, not a real prediction.</p>
         </div>
 
         <div class="control-group" id="ctrl-seed">
@@ -331,45 +341,56 @@ function randNormal(rng){
   while(v===0)v=rng();
   return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
 }
-/* Calibrated at init() from the real Science data (zero-share, power, scale)
-   so Simulate mode starts out resembling the real distribution instead of an
-   arbitrary chi-squared shape -- see calibrateSimParams(). */
-let SIM_ZERO_SHARE=0, SIM_POWER=1, SIM_SCALE=20;
-function simulateChiSq1Citation(rng){
-  if(rng()<SIM_ZERO_SHARE) return 0;
-  const z=randNormal(rng);
-  return Math.max(1,Math.round(Math.pow(z*z,SIM_POWER)*SIM_SCALE));
+/* Citation counts are classically modeled as negative binomial (over-dispersed
+   Poisson) rather than a textbook chi-squared shape -- see e.g. citation-count
+   regression literature. It's a Gamma(r, mean/r)-Poisson mixture: draw a rate
+   from the Gamma, then a Poisson count from that rate. */
+function randGamma(rng,shape){
+  if(shape<1){
+    const g=randGamma(rng,shape+1);
+    const u=rng();
+    return g*Math.pow(u,1/shape);
+  }
+  const d=shape-1/3, c=1/Math.sqrt(9*d);
+  while(true){
+    let x,v;
+    do{ x=randNormal(rng); v=1+c*x; }while(v<=0);
+    v=v*v*v;
+    const u=rng(), x2=x*x;
+    if(u<1-0.0331*x2*x2) return d*v;
+    if(Math.log(u)<0.5*x2+d*(1-v+Math.log(v))) return d*v;
+  }
 }
-/* Fits SIM_POWER/SIM_SCALE so the zero-inflated, power-transformed chi-squared
-   (df=1) model above reproduces the real dataset's zero-citation share, mean,
-   and median as closely as a 2-parameter family can. Power controls skew
-   (median relative to mean); scale is solved for directly given the mean. */
-function calibrateSimParams(targetMean,targetMedian,targetZeroShare){
-  const K=20000;
-  const rng=mulberry32(777001);
-  const z2=Array.from({length:K},()=>{ const z=randNormal(rng); return z*z; });
-  const z0=Math.min(0.95,Math.max(0,targetZeroShare));
-  const q=(0.5-z0)/(1-z0);
-  function statsForPower(p){
-    const w=z2.map(v=>Math.pow(v,p));
-    const meanW=w.reduce((s,v)=>s+v,0)/w.length;
-    const scale=targetMean/((1-z0)*meanW);
-    const sw=w.slice().sort((a,b)=>a-b);
-    const idx=Math.min(sw.length-1,Math.max(0,Math.floor(q*sw.length)));
-    return {scale,modelMedian:scale*sw[idx]};
+function randPoisson(rng,lambda){
+  if(lambda<30){
+    const L=Math.exp(-lambda);
+    let k=0,p=1;
+    do{ k++; p*=rng(); }while(p>L);
+    return k-1;
   }
-  let lo=0.3,hi=4,power=1,scale=targetMean;
-  if(q>0){
-    for(let i=0;i<24;i++){
-      power=(lo+hi)/2;
-      const r=statsForPower(power);
-      scale=r.scale;
-      if(r.modelMedian>targetMedian) lo=power; else hi=power;
-    }
-  }else{
-    scale=statsForPower(1).scale;
+  return Math.max(0,Math.round(lambda+Math.sqrt(lambda)*randNormal(rng)));
+}
+/* SIM_DISPERSION_R is fixed once, calibrated from Science's own data (see
+   solveDispersionR below); SIM_TARGET_MEAN is whatever mean the "Target mean
+   citations" control is set to. Holding dispersion fixed while only the mean
+   changes is what lets that control stand in for "a journal with this JIF". */
+let SIM_TARGET_MEAN=40, SIM_DISPERSION_R=0.25;
+function simulateCitation(rng){
+  const theta=SIM_TARGET_MEAN/SIM_DISPERSION_R;
+  const lambda=randGamma(rng,SIM_DISPERSION_R)*theta;
+  return randPoisson(rng,lambda);
+}
+/* For a negative binomial with mean mu and dispersion r, P(X=0)=(r/(r+mu))^r,
+   monotonically decreasing in r. Solve for the r that reproduces the real
+   dataset's own zero-citation share at its own mean, by bisection. */
+function solveDispersionR(targetMean,targetZeroShare){
+  const p0=(r)=>Math.pow(r/(r+targetMean),r);
+  let lo=1e-4,hi=1000,r=1;
+  for(let i=0;i<100;i++){
+    r=(lo+hi)/2;
+    if(p0(r)>targetZeroShare) lo=r; else hi=r;
   }
-  return {power,scale,zeroShare:z0};
+  return r;
 }
 
 /* ============================================================ STATE */
@@ -387,7 +408,7 @@ function regeneratePool(){
   if(mode==='real'){
     pool=seededShuffle(FULL.citations,rng).slice(0,POOL_MAX);
   }else{
-    pool=Array.from({length:POOL_MAX},()=>simulateChiSq1Citation(rng));
+    pool=Array.from({length:POOL_MAX},()=>simulateCitation(rng));
   }
 }
 
@@ -411,15 +432,16 @@ function hIndex(values){
   return h;
 }
 
-/* Fixed large sample standing in for the chi-squared "population", so the
+/* Fixed large sample standing in for the simulated "population", so the
    reference panel has something stable to show in Simulate mode -- independent
-   of the interactive seed/resample controls, which are meant to vary instead. */
+   of the interactive seed/resample controls, which are meant to vary instead.
+   Invalidated (simRefPool=null) whenever the target mean changes. */
 const SIM_REF_N=20000, SIM_REF_SEED=20260721;
 let simRefPool=null;
 function getSimRefPool(){
   if(!simRefPool){
     const rng=mulberry32(SIM_REF_SEED);
-    simRefPool=Array.from({length:SIM_REF_N},()=>simulateChiSq1Citation(rng));
+    simRefPool=Array.from({length:SIM_REF_N},()=>simulateCitation(rng));
   }
   return simRefPool;
 }
@@ -450,11 +472,13 @@ nSlider.addEventListener('input',updateNFromSlider);
 
 /* ============================================================ MODE TOGGLE */
 const modeHintEl=document.getElementById('mode-hint');
+const ctrlTargetMean=document.getElementById('ctrl-target-mean');
 document.querySelectorAll('#mode-toggle button').forEach(btn=>{
   btn.addEventListener('click',()=>{
     if(btn.dataset.mode===mode) return;
     mode=btn.dataset.mode;
     document.querySelectorAll('#mode-toggle button').forEach(b=>b.classList.toggle('active',b===btn));
+    ctrlTargetMean.style.display = mode==='sim' ? '' : 'none';
     resampleCount=0;
     regeneratePool();
     updateModeHint();
@@ -465,7 +489,7 @@ document.querySelectorAll('#mode-toggle button').forEach(btn=>{
 function updateModeHint(){
   modeHintEl.textContent = mode==='real'
     ? 'A random subsample of the real citation counts downloaded from OpenAlex.'
-    : 'A zero-inflated chi-squared (df=1) model, calibrated to match the real Science data\'s mean, zero-citation share, and skew — a starting point you can then reshape with the controls below.';
+    : 'A negative binomial model (the standard way to describe over-dispersed citation counts), with a mean you set below and dispersion calibrated to Science\'s own data.';
 }
 
 /* ============================================================ REFERENCE PANEL (mode-aware) */
@@ -473,10 +497,10 @@ function updateReferenceStats(){
   const values = mode==='real' ? FULL.citations : getSimRefPool();
   document.getElementById('ref-heading').textContent = mode==='real'
     ? 'Full Science dataset (for reference)'
-    : 'Simulated χ² population (for reference)';
+    : 'Simulated population (for reference)';
   document.getElementById('ref-caption').textContent = mode==='real'
     ? '2023–2025, research articles only. Source: OpenAlex.'
-    : `${fmt(SIM_REF_N)} synthetic draws from a chi-squared (df=1) model calibrated to match the real Science data above — a large fixed sample, independent of the seed/resample controls below.`;
+    : `${fmt(SIM_REF_N)} synthetic draws from a negative binomial model with mean ${fmt(SIM_TARGET_MEAN)} and Science-like dispersion — a large fixed sample, independent of the seed/resample controls below.`;
   const sorted=values.slice().sort((a,b)=>a-b);
   document.getElementById('ref-n').textContent=fmt(values.length);
   document.getElementById('ref-mean').textContent=fmt(mean(values));
@@ -485,6 +509,23 @@ function updateReferenceStats(){
   document.getElementById('ref-uncited').textContent=fmtPct(uncitedShare(values));
   document.getElementById('ref-hindex').textContent=fmt(hIndex(values));
 }
+
+/* ============================================================ TARGET MEAN (Simulate mode) */
+const targetMeanInput=document.getElementById('target-mean-input');
+function applyTargetMean(){
+  const v=parseFloat(targetMeanInput.value);
+  if(!Number.isFinite(v)||v<=0) return;
+  SIM_TARGET_MEAN=v;
+  simRefPool=null;
+  if(mode==='sim'){
+    regeneratePool();
+    updateReferenceStats();
+    renderChart();
+  }
+}
+targetMeanInput.addEventListener('change',applyTargetMean);
+document.getElementById('target-mean-apply-btn').addEventListener('click',applyTargetMean);
+targetMeanInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') applyTargetMean(); });
 
 /* ============================================================ SEED / RESAMPLE */
 const seedInput=document.getElementById('seed-input');
@@ -642,8 +683,9 @@ async function init(){
     document.getElementById('sample-summary').textContent='Could not load the Science citation dataset.';
   }
   if(FULL.citations.length){
-    const cal=calibrateSimParams(mean(FULL.citations),median(FULL.citations),uncitedShare(FULL.citations));
-    SIM_POWER=cal.power; SIM_SCALE=cal.scale; SIM_ZERO_SHARE=cal.zeroShare;
+    SIM_TARGET_MEAN=mean(FULL.citations);
+    SIM_DISPERSION_R=solveDispersionR(SIM_TARGET_MEAN,uncitedShare(FULL.citations));
+    targetMeanInput.value=Math.round(SIM_TARGET_MEAN*10)/10;
   }
   updateReferenceStats();
 
@@ -660,7 +702,8 @@ const WT_STEPS=[
   {sel:'#chart-card',title:'The citation distribution',text:'This histogram shows how many articles received each number of citations. Real citation data almost never looks like a bell curve — it piles up near zero and stretches into a long tail.'},
   {sel:'#ctrl-reference',title:'The full dataset, for reference',text:'These numbers describe the full reference population: real 2023–2025 Science articles from OpenAlex in "Real" mode, or a large fixed simulated sample in "Simulate" mode. Everything else on this page lets you take a smaller slice and compare it against this "ground truth".'},
   {sel:'#ctrl-n',title:'Sample size',text:()=>`Drag this to change how many works are drawn into the sample, from just 4 up to 6,000 — a bit past Science's own count, so you can push beyond the real data too. It starts right at Science's actual figure (${FULL?fmt(FULL.n):'~5,100'}) on a log scale, so both ends of the range stay usable. The text below tells you roughly what kind of journal publishes that many articles in 3 years.`},
-  {sel:'#ctrl-source',title:'Real data vs. simulation',text:"Switch between an actual random subsample of Science's citation counts, and a synthetic chi-squared (df=1) model calibrated to start out resembling that same real distribution — matching its mean, zero-citation share, and skew — before you reshape it with the controls below."},
+  {sel:'#ctrl-source',title:'Real data vs. simulation',text:"Switch between an actual random subsample of Science's citation counts, and a negative binomial model — the standard way statisticians describe over-dispersed citation counts — calibrated to start out resembling that same real distribution."},
+  {sel:'#ctrl-target-mean',title:'Predict by target mean',text:"In Simulate mode, type in any mean citation count — a journal's JIF, or its OpenAlex mean citedness — and the distribution reshapes around that new average, keeping Science's dispersion pattern. It's a rough what-if for \"what might a journal with this citation average look like\", not a real prediction for any specific article."},
   {sel:'#ctrl-seed',title:'Seed & resampling',text:'The sample is drawn using a seeded random number generator. The same seed and the same number of resamples always reproduces the exact same draw — click "Resample" a few times to see how much the shape (and the mean!) varies between draws from the very same distribution.'},
   {sel:'#ctrl-outlier',title:'The outlier effect',text:'Type in a citation count and click Add to inject one extra, hypothetical work into the sample. Watch how much a single very-highly-cited article can drag the mean line to the right, compared to how little it moves the median.'},
   {sel:'#explain-card',title:'Why it matters',text:'This explains what the non-normal shape means for anyone trying to interpret a journal-level citation metric — including why the mean is such an unreliable summary here, how the median and h-index compare as alternatives, and why that matters for individual authors.'},
@@ -674,7 +717,7 @@ function positionWalkthrough(){
   if(wtStep<0) return;
   const step=WT_STEPS[wtStep];
   const el=document.querySelector(step.sel);
-  if(!el){ wtNext(); return; }
+  if(!el || getComputedStyle(el).display==='none'){ wtNext(); return; }
   el.scrollIntoView({behavior:'smooth',block:'center'});
   requestAnimationFrame(()=>{
     const r=el.getBoundingClientRect();
