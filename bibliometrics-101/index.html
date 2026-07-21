@@ -24,6 +24,7 @@
   --c-card:      #ffffff;
   --c-mean:      #c1443c;
   --c-median:    #7a4fa3;
+  --c-hindex:    #1f8a70;
   --shadow:      0 1px 4px rgba(0,0,0,.08);
   --radius:      8px;
   --font-h:      Calibri, Carlito, 'Segoe UI', system-ui, sans-serif;
@@ -41,6 +42,7 @@
   --c-card:      #353f4b;
   --c-mean:      #e8756c;
   --c-median:    #c6a2e8;
+  --c-hindex:    #3ecfa3;
   --shadow:      0 1px 6px rgba(0,0,0,.4);
 }
 
@@ -132,6 +134,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .explain .legend-key{display:inline-flex;align-items:center;gap:.3rem;font-weight:700;white-space:nowrap}
 .legend-line{display:inline-block;width:18px;height:0;border-top:3px solid var(--c-mean)}
 .legend-line.dashed{border-top:3px dashed var(--c-median);border-color:var(--c-median)}
+.legend-line.dotted{border-top:3px dotted var(--c-hindex);border-color:var(--c-hindex)}
 
 footer{padding:1.5rem 0 2.5rem;text-align:center;font-size:.78rem;color:var(--c-muted);border-top:1px solid var(--c-border);margin-top:2rem}
 footer a{color:var(--c-accent)}
@@ -171,15 +174,16 @@ footer a{color:var(--c-accent)}
       <div class="card-body">
 
         <div class="control-group" id="ctrl-reference">
-          <h3>Full Science dataset (for reference)</h3>
+          <h3 id="ref-heading">Full Science dataset (for reference)</h3>
           <div class="reference-stats">
-            <div><span class="num" id="ref-n">–</span><span class="lbl">Articles</span></div>
+            <div><span class="num" id="ref-n">–</span><span class="lbl">Works</span></div>
             <div><span class="num" id="ref-mean">–</span><span class="lbl">Mean citations</span></div>
             <div><span class="num" id="ref-median">–</span><span class="lbl">Median citations</span></div>
-            <div><span class="num" id="ref-max">–</span><span class="lbl">Most-cited article</span></div>
+            <div><span class="num" id="ref-max">–</span><span class="lbl">Highest citation count</span></div>
             <div><span class="num" id="ref-uncited">–</span><span class="lbl">Never cited</span></div>
+            <div><span class="num" id="ref-hindex">–</span><span class="lbl">H-index</span></div>
           </div>
-          <p class="hint" style="margin-top:.6rem">2023&ndash;2025, research articles only. Source: OpenAlex.</p>
+          <p class="hint" style="margin-top:.6rem" id="ref-caption">2023&ndash;2025, research articles only. Source: OpenAlex.</p>
         </div>
 
         <div class="control-group" id="ctrl-n">
@@ -241,6 +245,7 @@ footer a{color:var(--c-accent)}
           <h3>Why this matters</h3>
           <p>This is a <strong>non-normal</strong> distribution: heavily right-skewed, with most articles receiving relatively few citations and a small number receiving an enormous number. It looks nothing like the bell-shaped "normal" distribution that a lot of statistical intuition assumes, and that shape makes it very difficult to predict how many citations any individual article published in this journal will actually receive.</p>
           <p>The <span class="legend-key"><span class="legend-line"></span> solid mean line</span> and the <span class="legend-key"><span class="legend-line dashed"></span> dashed median line</span> above show why: in the full dataset the mean sits several times higher than the median, because it is dragged upward by a handful of extremely highly cited articles. A single outlier (try the field on the left) can shift the mean far more than it shifts the median, which is exactly why the mean is such an unstable summary of a skewed distribution.</p>
+          <p>The <span class="legend-key"><span class="legend-line dotted"></span> dotted h-index line</span> is a third way to summarize the same sample: the largest number <em>h</em> for which <em>h</em> works each have at least <em>h</em> citations. Popularized as a researcher-level metric, it is sometimes applied to journals too, because like the median it resists being dragged around by one or two extreme outliers, unlike the mean, though it still grows with sample size in a way the median doesn't.</p>
           <p>This is the underlying reason citation-based journal metrics &mdash; the Journal Impact Factor, OpenAlex's mean citedness, and similar &mdash; are contested: they report a <em>mean</em> of a distribution where the mean is not a stable or representative number. The median is more robust, but even it can't tell you how an individual article, including yours, will actually perform. The <a href="https://sfdora.org/" target="_blank" rel="noopener">San Francisco Declaration on Research Assessment (DORA)</a> recommends against using journal-level citation metrics to judge individual articles or researchers for exactly this reason.</p>
         </div>
       </div>
@@ -362,6 +367,27 @@ function median(values){
   const n=s.length;
   return n%2 ? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2;
 }
+function hIndex(values){
+  const s=values.slice().sort((a,b)=>b-a);
+  let h=0;
+  for(let i=0;i<s.length;i++){
+    if(s[i]>=i+1) h=i+1; else break;
+  }
+  return h;
+}
+
+/* Fixed large sample standing in for the chi-squared "population", so the
+   reference panel has something stable to show in Simulate mode -- independent
+   of the interactive seed/resample controls, which are meant to vary instead. */
+const SIM_REF_N=20000, SIM_REF_SEED=20260721;
+let simRefPool=null;
+function getSimRefPool(){
+  if(!simRefPool){
+    const rng=mulberry32(SIM_REF_SEED);
+    simRefPool=Array.from({length:SIM_REF_N},()=>simulateChiSq1Citation(rng));
+  }
+  return simRefPool;
+}
 
 /* ============================================================ N SLIDER (log scale) */
 const nSlider=document.getElementById('n-slider');
@@ -397,6 +423,7 @@ document.querySelectorAll('#mode-toggle button').forEach(btn=>{
     resampleCount=0;
     regeneratePool();
     updateModeHint();
+    updateReferenceStats();
     renderChart();
   });
 });
@@ -404,6 +431,24 @@ function updateModeHint(){
   modeHintEl.textContent = mode==='real'
     ? 'A random subsample of the real citation counts downloaded from OpenAlex.'
     : `Synthetic draws from a chi-squared distribution with 1 degree of freedom (scaled ×${CHI_SQ_SCALE}) — a simplified stand-in with the same heavy right skew, not a fit to the real data.`;
+}
+
+/* ============================================================ REFERENCE PANEL (mode-aware) */
+function updateReferenceStats(){
+  const values = mode==='real' ? FULL.citations : getSimRefPool();
+  document.getElementById('ref-heading').textContent = mode==='real'
+    ? 'Full Science dataset (for reference)'
+    : 'Simulated χ² population (for reference)';
+  document.getElementById('ref-caption').textContent = mode==='real'
+    ? '2023–2025, research articles only. Source: OpenAlex.'
+    : `${fmt(SIM_REF_N)} synthetic draws from χ²(df=1), scaled ×${CHI_SQ_SCALE} — a large fixed sample approximating the population, independent of the seed/resample controls above.`;
+  const sorted=values.slice().sort((a,b)=>a-b);
+  document.getElementById('ref-n').textContent=fmt(values.length);
+  document.getElementById('ref-mean').textContent=fmt(mean(values));
+  document.getElementById('ref-median').textContent=fmt(median(values));
+  document.getElementById('ref-max').textContent=sorted.length?fmt(sorted[sorted.length-1]):'–';
+  document.getElementById('ref-uncited').textContent=fmtPct(uncitedShare(values));
+  document.getElementById('ref-hindex').textContent=fmt(hIndex(values));
 }
 
 /* ============================================================ SEED / RESAMPLE */
@@ -472,7 +517,7 @@ const referenceLinesPlugin={
       ctx.lineTo(xPixel,chartArea.bottom);
       ctx.strokeStyle=line.color;
       ctx.lineWidth=2.5;
-      ctx.setLineDash(line.dash?[6,4]:[]);
+      ctx.setLineDash(line.dashPattern||[]);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle=line.color;
@@ -503,14 +548,14 @@ function fractionalIndexForCap(value,bw){ return Math.min(value,1e9)/bw; }
 
 function renderChart(){
   const sample=currentSample();
-  const m=mean(sample), md=median(sample);
+  const m=mean(sample), md=median(sample), h=hIndex(sample);
   const sorted=sample.slice().sort((a,b)=>a-b);
   const cap=Math.max(sorted.length?sorted[Math.min(sorted.length-1,Math.floor(sorted.length*0.95))]:1,1);
   const BIN_COUNT=28;
   const {counts,labels,bw,offScale}=computeHistogram(sample,BIN_COUNT,cap);
 
   document.getElementById('sample-summary').textContent=
-    `n = ${fmt(sample.length)} · mean = ${fmt(m)} · median = ${fmt(md)} · never cited = ${fmtPct(uncitedShare(sample))}`;
+    `n = ${fmt(sample.length)} · mean = ${fmt(m)} · median = ${fmt(md)} · h-index = ${fmt(h)} · never cited = ${fmtPct(uncitedShare(sample))}`;
 
   const noteEl=document.getElementById('offscale-note');
   noteEl.textContent = offScale>0
@@ -519,10 +564,12 @@ function renderChart(){
 
   const meanClamped = m>cap;
   const medianClamped = md>cap;
+  const hClamped = h>cap;
   const rootStyle=getComputedStyle(document.documentElement);
   const lines=[
-    {fractionalIndex:fractionalIndexForCap(m,bw),color:rootStyle.getPropertyValue('--c-mean').trim(),label:`Mean: ${fmt(m)}${meanClamped?' →':''}`,dash:false,labelRow:0},
-    {fractionalIndex:fractionalIndexForCap(md,bw),color:rootStyle.getPropertyValue('--c-median').trim(),label:`Median: ${fmt(md)}${medianClamped?' →':''}`,dash:true,labelRow:1},
+    {fractionalIndex:fractionalIndexForCap(m,bw),color:rootStyle.getPropertyValue('--c-mean').trim(),label:`Mean: ${fmt(m)}${meanClamped?' →':''}`,dashPattern:[],labelRow:0},
+    {fractionalIndex:fractionalIndexForCap(md,bw),color:rootStyle.getPropertyValue('--c-median').trim(),label:`Median: ${fmt(md)}${medianClamped?' →':''}`,dashPattern:[6,4],labelRow:1},
+    {fractionalIndex:fractionalIndexForCap(h,bw),color:rootStyle.getPropertyValue('--c-hindex').trim(),label:`H-index: ${fmt(h)}${hClamped?' →':''}`,dashPattern:[2,3],labelRow:2},
   ];
 
   mkChart('hist-chart',{
@@ -559,12 +606,7 @@ async function init(){
     FULL={n:0,citations:[]};
     document.getElementById('sample-summary').textContent='Could not load the Science citation dataset.';
   }
-  const sorted=FULL.citations.slice().sort((a,b)=>a-b);
-  document.getElementById('ref-n').textContent=fmt(FULL.n);
-  document.getElementById('ref-mean').textContent=fmt(mean(FULL.citations));
-  document.getElementById('ref-median').textContent=fmt(median(FULL.citations));
-  document.getElementById('ref-max').textContent=sorted.length?fmt(sorted[sorted.length-1]):'–';
-  document.getElementById('ref-uncited').textContent=fmtPct(uncitedShare(FULL.citations));
+  updateReferenceStats();
 
   nSlider.value=1000;
   updateNFromSlider();
@@ -577,12 +619,12 @@ init();
 /* ============================================================ WALKTHROUGH */
 const WT_STEPS=[
   {sel:'#chart-card',title:'The citation distribution',text:'This histogram shows how many articles received each number of citations. Real citation data almost never looks like a bell curve — it piles up near zero and stretches into a long tail.'},
-  {sel:'#ctrl-reference',title:'The full dataset, for reference',text:'These four numbers describe all 2023–2025 Science research articles, downloaded once from OpenAlex. Everything else on this page lets you take a smaller (or synthetic) slice and compare it against this "ground truth".'},
+  {sel:'#ctrl-reference',title:'The full dataset, for reference',text:'These numbers describe the full reference population: real 2023–2025 Science articles from OpenAlex in "Real" mode, or a large fixed simulated sample in "Simulate" mode. Everything else on this page lets you take a smaller slice and compare it against this "ground truth".'},
   {sel:'#ctrl-n',title:'Sample size',text:'Drag this to change how many articles are drawn into the sample, from just 4 up to 3,000, on a log scale so both ends of the range stay usable. The text below tells you roughly what kind of journal publishes that many articles in 3 years.'},
   {sel:'#ctrl-source',title:'Real data vs. simulation',text:"Switch between an actual random subsample of Science's citation counts, and synthetic data drawn from a chi-squared distribution — a textbook-simple distribution that shares the same heavy right skew."},
   {sel:'#ctrl-seed',title:'Seed & resampling',text:'The sample is drawn using a seeded random number generator. The same seed and the same number of resamples always reproduces the exact same draw — click "Resample" a few times to see how much the shape (and the mean!) varies between draws from the very same distribution.'},
   {sel:'#ctrl-outlier',title:'The outlier effect',text:'Type in a citation count and click Add to inject one extra, hypothetical work into the sample. Watch how much a single very-highly-cited article can drag the mean line to the right, compared to how little it moves the median.'},
-  {sel:'#explain-card',title:'Why it matters',text:'This explains what the non-normal shape means for anyone trying to interpret a journal-level citation metric — including why the mean is such an unreliable summary here, and why that matters for individual authors.'},
+  {sel:'#explain-card',title:'Why it matters',text:'This explains what the non-normal shape means for anyone trying to interpret a journal-level citation metric — including why the mean is such an unreliable summary here, how the median and h-index compare as alternatives, and why that matters for individual authors.'},
 ];
 let wtStep=-1;
 const wtBackdrop=document.getElementById('wt-backdrop');
