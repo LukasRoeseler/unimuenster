@@ -95,6 +95,7 @@ main{padding:2rem 0 3rem}
 
 .reference-stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .8rem}
 .reference-stats div{background:var(--c-surface);border-radius:6px;padding:.5rem .6rem}
+.reference-stats div:last-child:nth-child(odd){grid-column:1/-1}
 .reference-stats .num{font-size:1.05rem;font-weight:700;color:var(--c-primary);display:block;line-height:1.2}
 .reference-stats .lbl{font-size:.68rem;color:var(--c-muted);text-transform:uppercase;letter-spacing:.03em}
 
@@ -176,6 +177,7 @@ footer a{color:var(--c-accent)}
             <div><span class="num" id="ref-mean">–</span><span class="lbl">Mean citations</span></div>
             <div><span class="num" id="ref-median">–</span><span class="lbl">Median citations</span></div>
             <div><span class="num" id="ref-max">–</span><span class="lbl">Most-cited article</span></div>
+            <div><span class="num" id="ref-uncited">–</span><span class="lbl">Never cited</span></div>
           </div>
           <p class="hint" style="margin-top:.6rem">2023&ndash;2025, research articles only. Source: OpenAlex.</p>
         </div>
@@ -485,6 +487,8 @@ const referenceLinesPlugin={
 if(window.Chart) Chart.register(referenceLinesPlugin);
 
 const fmt=(n)=>Math.round(n).toLocaleString('en-US');
+const fmtPct=(n)=>(Math.round(n*1000)/10).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const uncitedShare=(values)=> values.length ? values.filter(v=>v===0).length/values.length : 0;
 
 function computeHistogram(values,binCount,cap){
   const clipped=values.filter(v=>v<=cap);
@@ -506,7 +510,7 @@ function renderChart(){
   const {counts,labels,bw,offScale}=computeHistogram(sample,BIN_COUNT,cap);
 
   document.getElementById('sample-summary').textContent=
-    `n = ${fmt(sample.length)} · mean = ${fmt(m)} · median = ${fmt(md)}`;
+    `n = ${fmt(sample.length)} · mean = ${fmt(m)} · median = ${fmt(md)} · never cited = ${fmtPct(uncitedShare(sample))}`;
 
   const noteEl=document.getElementById('offscale-note');
   noteEl.textContent = offScale>0
@@ -560,6 +564,7 @@ async function init(){
   document.getElementById('ref-mean').textContent=fmt(mean(FULL.citations));
   document.getElementById('ref-median').textContent=fmt(median(FULL.citations));
   document.getElementById('ref-max').textContent=sorted.length?fmt(sorted[sorted.length-1]):'–';
+  document.getElementById('ref-uncited').textContent=fmtPct(uncitedShare(FULL.citations));
 
   nSlider.value=1000;
   updateNFromSlider();
