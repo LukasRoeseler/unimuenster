@@ -379,9 +379,8 @@ let addedOutliers=[];
 let mode='real';
 let seed=42;
 let resampleCount=0;
-const N_MIN=4;
-let N_MAX=3000, POOL_MAX=3000; // reset to FULL.n at init() so the top of the slider is the actual dataset
-let sampleSize=N_MAX;
+const N_MIN=4, N_MAX=6000, POOL_MAX=6000;
+let sampleSize=N_MAX; // set to Science's actual count at init(), once FULL loads
 
 function regeneratePool(){
   const rng=mulberry32((seed>>>0) ^ Math.imul(resampleCount+1,0x9E3779B1));
@@ -642,14 +641,13 @@ async function init(){
     FULL={n:0,citations:[]};
     document.getElementById('sample-summary').textContent='Could not load the Science citation dataset.';
   }
-  if(FULL.n>N_MIN){ N_MAX=FULL.n; POOL_MAX=FULL.n; sampleSize=N_MAX; }
   if(FULL.citations.length){
     const cal=calibrateSimParams(mean(FULL.citations),median(FULL.citations),uncitedShare(FULL.citations));
     SIM_POWER=cal.power; SIM_SCALE=cal.scale; SIM_ZERO_SHARE=cal.zeroShare;
   }
   updateReferenceStats();
 
-  nSlider.value=1000;
+  nSlider.value = FULL.n>N_MIN ? nToSliderPos(Math.min(FULL.n,N_MAX)) : 1000;
   updateNFromSlider();
   updateModeHint();
   regeneratePool();
@@ -661,7 +659,7 @@ init();
 const WT_STEPS=[
   {sel:'#chart-card',title:'The citation distribution',text:'This histogram shows how many articles received each number of citations. Real citation data almost never looks like a bell curve — it piles up near zero and stretches into a long tail.'},
   {sel:'#ctrl-reference',title:'The full dataset, for reference',text:'These numbers describe the full reference population: real 2023–2025 Science articles from OpenAlex in "Real" mode, or a large fixed simulated sample in "Simulate" mode. Everything else on this page lets you take a smaller slice and compare it against this "ground truth".'},
-  {sel:'#ctrl-n',title:'Sample size',text:()=>`Drag this to change how many works are drawn into the sample, from just 4 up to ${FULL?fmt(FULL.n):'the full dataset'}, on a log scale so both ends of the range stay usable. The text below tells you roughly what kind of journal publishes that many articles in 3 years.`},
+  {sel:'#ctrl-n',title:'Sample size',text:()=>`Drag this to change how many works are drawn into the sample, from just 4 up to 6,000 — a bit past Science's own count, so you can push beyond the real data too. It starts right at Science's actual figure (${FULL?fmt(FULL.n):'~5,100'}) on a log scale, so both ends of the range stay usable. The text below tells you roughly what kind of journal publishes that many articles in 3 years.`},
   {sel:'#ctrl-source',title:'Real data vs. simulation',text:"Switch between an actual random subsample of Science's citation counts, and a synthetic chi-squared (df=1) model calibrated to start out resembling that same real distribution — matching its mean, zero-citation share, and skew — before you reshape it with the controls below."},
   {sel:'#ctrl-seed',title:'Seed & resampling',text:'The sample is drawn using a seeded random number generator. The same seed and the same number of resamples always reproduces the exact same draw — click "Resample" a few times to see how much the shape (and the mean!) varies between draws from the very same distribution.'},
   {sel:'#ctrl-outlier',title:'The outlier effect',text:'Type in a citation count and click Add to inject one extra, hypothetical work into the sample. Watch how much a single very-highly-cited article can drag the mean line to the right, compared to how little it moves the median.'},
