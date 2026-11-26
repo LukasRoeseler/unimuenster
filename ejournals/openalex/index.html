@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenAlex Coverage of the e-Journals Münster</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%230d2137'/%3E%3Crect x='3' y='20' width='6' height='9' rx='1' fill='%232e7dc4'/%3E%3Crect x='11' y='14' width='6' height='15' rx='1' fill='%232e7dc4'/%3E%3Crect x='19' y='8' width='6' height='21' rx='1' fill='%232e7dc4'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--brand:#00305D;--brand-hover:#0a3f70;--brand-border:#1f6396}
+:root,
+[data-theme="light"] {
+  --navy:#00305D;--navy2:#0a3f70;--navy3:#155184;--navy-bdr:#1f6396;
+  --accent:#009FE3;--accent-lt:#e5f6fd;--accent-bdr:#9adcf5;--accent-dk:#00729f;
+  --bg:#ffffff;--bg-card:#ffffff;--bg-soft:#eef1f4;--bg-chip:#e2e7f0;
+  --border:#dce1e6;--border-mid:#b0bacb;
+  --text:#1a1d21;--text2:#374455;--textm:#5b6770;
+  --green:#15803d;--green-bg:#f0fdf4;--green-bdr:#86efac;
+  --amber:#b45309;--amber-bg:#fffbeb;--amber-bdr:#fde68a;
+  --red:#dc2626;--red-bg:#fef2f2;--red-bdr:#fecaca;
+  --serif:Calibri,Carlito,'Segoe UI',system-ui,sans-serif;
+  --sans:Calibri,Carlito,'Segoe UI',system-ui,sans-serif;
+  --mono:Consolas,'Courier New',monospace;
+}
+[data-theme="dark"] {
+  --navy:#5fb5e5;--navy2:#7fc4ea;--navy3:#9ad3ee;--navy-bdr:#3a6a8a;
+  --accent:#00A0E0;--accent-lt:rgba(0,160,224,.14);--accent-bdr:#1f6396;--accent-dk:#5fb5e5;
+  --bg:#2c343f;--bg-card:#353f4b;--bg-soft:#3b4654;--bg-chip:#3f4b59;
+  --border:#4a5663;--border-mid:#5c6a79;
+  --text:#eef2f6;--text2:#c7d1db;--textm:#a7b4c0;
+  --green:#4ade80;--green-bg:rgba(34,197,94,.15);--green-bdr:#3a6a4f;
+  --amber:#fbbf24;--amber-bg:rgba(245,158,11,.15);--amber-bdr:#7a5c22;
+  --red:#f87171;--red-bg:rgba(239,68,68,.15);--red-bdr:#7a3535;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes countUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+
+/* ── HEADER ── */
+.hdr{background:var(--brand);padding:0 36px;display:flex;align-items:stretch;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.35);min-height:56px;animation:fadeIn .3s ease}
+.hdr::before{content:"";position:absolute;top:0;left:0;width:70px;height:56px;background:var(--accent);clip-path:polygon(0 0,0 100%,70% 0);pointer-events:none;opacity:.9}
+.wordmark{display:flex;align-items:center;gap:12px;text-decoration:none;cursor:pointer;padding:10px 0;margin-left:44px}
+.back-link{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex-shrink:0;margin:auto 0 auto 4px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:.95rem;font-weight:700;text-decoration:none;transition:background .15s}
+.back-link:hover{background:rgba(255,255,255,.25)}
+.wm-title{font-family:var(--sans);font-size:15px;font-weight:700;color:#fff;letter-spacing:.01em;line-height:1}
+.hdr-nav{display:flex;align-items:center;gap:2px;padding:8px 0}
+.hdr-tab{padding:6px 14px;border:none;background:transparent;color:rgba(255,255,255,.65);font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border-radius:0;transition:all .2s;white-space:nowrap}
+.hdr-tab:hover{background:rgba(255,255,255,.1);color:#fff;transform:translateY(-1px)}
+.hdr-tab.on{background:var(--accent);color:#fff}
+.icon-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin-left:8px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;transition:background .15s,transform .15s;flex-shrink:0}
+.icon-btn:hover{background:rgba(255,255,255,.18);transform:translateY(-1px)}
+.icon-btn .icon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1200px;margin:0 auto;padding:0 36px 80px}
+
+/* ── HERO ── */
+.hero{padding:52px 0 40px;border-bottom:1px solid var(--border);margin-bottom:36px;animation:fadeSlideIn .45s ease both}
+.hero h1{font-family:var(--serif);font-size:38px;font-weight:700;line-height:1.12;letter-spacing:-.02em;color:var(--navy);margin-bottom:14px}
+.hero h1 em{color:var(--accent);font-style:normal;border-bottom:3px solid var(--accent-bdr)}
+.hero p{font-size:15px;color:var(--text2);max-width:640px;line-height:1.72;margin-bottom:22px}
+.hint{display:inline-flex;align-items:center;gap:8px;background:var(--accent-lt);border:1px solid var(--accent-bdr);border-radius:0;padding:9px 14px;font-size:12.5px;color:var(--accent-dk);font-weight:500;animation:fadeIn .6s .3s both}
+
+/* ── STATS STRIP ── */
+.sstrip{display:flex;border:1px solid var(--border);border-radius:0;overflow:hidden;margin-bottom:24px;background:var(--bg-card);animation:scaleIn .35s .1s ease both}
+.scell{flex:1;padding:16px 18px;text-align:center;border-right:1px solid var(--border)}
+.scell:last-child{border-right:none}
+.snum{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);line-height:1;margin-bottom:3px;font-variant-numeric:tabular-nums;animation:countUp .4s .2s both}
+.snum.g{color:var(--green)}
+.snum.a{color:var(--amber)}
+.snum.r{color:var(--red)}
+.slbl{font-size:9.5px;color:var(--textm);font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+
+/* ── LEGEND ── */
+.jlegend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.jleg-it{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);padding:3px 8px;border-radius:0;border:1px solid var(--border);background:var(--bg-card)}
+.jleg-dot{width:10px;height:10px;border-radius:0;flex-shrink:0}
+
+/* ── TABLE ── */
+.jtable-wrap{overflow-x:auto;background:var(--bg-card);border:1px solid var(--border);animation:fadeSlideIn .4s .1s both}
+table.jtable{width:100%;border-collapse:collapse;font-size:12.5px}
+.jtable thead th{position:sticky;top:0;background:var(--bg-soft);text-align:left;font-size:10.5px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none}
+.jtable thead th:hover{color:var(--text)}
+.jtable thead th.sorted{color:var(--accent)}
+.jtable thead th.sorted::after{content:'';display:inline-block;margin-left:5px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--accent);vertical-align:middle}
+.jtable thead th.sorted.asc::after{border-top:none;border-bottom:5px solid var(--accent)}
+.jtable tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.jtable tbody tr:hover{background:var(--bg-soft)}
+.jt-name{display:flex;flex-direction:column;gap:2px;min-width:0}
+.jt-title{font-weight:600;color:var(--text);line-height:1.35}
+.jt-slug{font-size:10px;color:var(--textm);font-family:var(--mono)}
+.jt-status{font-size:9px;font-weight:700;padding:2px 6px;border-radius:0;white-space:nowrap}
+.jt-status.ac{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
+.jt-status.in{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bdr)}
+.jt-status.nd{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr)}
+.jt-issnl{font-size:10px;color:var(--textm);font-family:var(--mono)}
+.jt-src{color:var(--accent);text-decoration:none;font-weight:600}
+.jt-src:hover{text-decoration:underline}
+.covwrap{display:flex;align-items:center;gap:8px;min-width:120px}
+.covbar{flex:1;height:6px;background:var(--bg-chip);border-radius:0;overflow:hidden;min-width:60px}
+.covfill{height:100%;border-radius:0}
+.covfill.g{background:var(--green)}
+.covfill.a{background:var(--amber)}
+.covfill.r{background:var(--red)}
+.covnum{font-family:var(--mono);font-size:11px;color:var(--textm);white-space:nowrap}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr.missing td{background:var(--red-bg)}
+tr.missing:hover{background:var(--red-bg)}
+tr.novenue td{background:var(--amber-bg)}
+tr.novenue:hover{background:var(--amber-bg)}
+
+/* ── NOTICES ── */
+.note{padding:20px 24px;border-radius:0;margin:18px 0;background:var(--bg-card);border:1px solid var(--border);animation:fadeSlideIn .3s ease both}
+.note.info{border-left:4px solid var(--accent)}
+.note.err{border-left:4px solid var(--red)}
+.note strong{font-weight:700;font-size:14px;display:block;margin-bottom:5px}
+.note p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px}
+.note code{font-family:var(--mono);font-size:11px;background:var(--bg-chip);padding:1px 5px;border-radius:0}
+.note a{color:var(--accent);font-weight:600}
+.note ul{margin:6px 0 0 18px;font-size:13px;color:var(--text2);line-height:1.7}
+
+/* ── FOOTER ── */
+.ft{border-top:1px solid var(--border);padding:16px 36px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--textm);max-width:1200px;margin:0 auto}
+.ft a{color:var(--accent);text-decoration:none}
+.ft a:hover{text-decoration:underline}
+.fts{color:var(--border-mid)}
+.brand-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border);width:100%}
+.wl-wordmark{font-family:var(--sans);font-size:1.15rem;font-weight:300;color:var(--text)}
+.wl-wordmark b{font-weight:700}
+.mucos-logo{height:34px;width:auto;background:#fff;padding:5px 9px;border-radius:0;border:1px solid var(--border)}
+.ft-warning{width:100%;margin-top:8px;padding:8px 12px;background:var(--amber-bg);border:1px solid var(--amber-bdr);border-radius:0;font-size:11px;color:var(--amber);display:flex;align-items:flex-start;gap:7px;line-height:1.55}
+.ft-warning svg{flex-shrink:0;margin-top:1px}
+
+@media(max-width:760px){
+  .hdr,.ft{padding:0 14px}
+  .hdr::before{display:none}
+  .wordmark{margin-left:0}
+  .wrap{padding:0 14px 60px}
+  .sstrip{flex-wrap:wrap}
+  .scell{border-right:none;border-bottom:1px solid var(--border);min-width:50%}
+  .hero h1{font-size:28px}
+  .hdr-nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="../index.html" class="back-link" aria-label="Back to the e-journals dashboard" title="Back to the e-journals dashboard">&larr;</a>
+  <div class="wordmark" onclick="window.location='../index.html'">
+    <span class="wm-title">OpenAlex Coverage &middot; e-Journals Münster</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px">
+    <nav class="hdr-nav">
+      <a class="hdr-tab" href="../index.html">E-Journals Dashboard</a>
+      <span class="hdr-tab on">OpenAlex Coverage</span>
+    </nav>
+    <button class="icon-btn" id="theme-btn" aria-label="Toggle light or dark theme"></button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Is every e-journal<br>in <em>OpenAlex</em>?</h1>
+    <p>For each of the 23 open access e-journals hosted by the Universitäts- und Landesbibliothek Münster, this page shows whether the journal is indexed in OpenAlex and how many of its works are discoverable there. Journals that are missing or only partially indexed are highlighted.</p>
+    <div class="hint">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v4l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Click any column header to sort. Rows highlighted in red are missing from OpenAlex.
+    </div>
+  </div>
+
+  <div class="sstrip" id="sstrip">
+    <div class="scell"><div class="snum" id="s-j">—</div><div class="slbl">Journals</div></div>
+    <div class="scell"><div class="snum g" id="s-ok">—</div><div class="slbl">Indexed</div></div>
+    <div class="scell"><div class="snum a" id="s-part">—</div><div class="slbl">Partial / No venue</div></div>
+    <div class="scell"><div class="snum r" id="s-miss">—</div><div class="slbl">Missing</div></div>
+    <div class="scell"><div class="snum" id="s-w">—</div><div class="slbl">Works indexed</div></div>
+    <div class="scell"><div class="snum" id="s-r">—</div><div class="slbl">Works registered</div></div>
+  </div>
+
+  <div class="jlegend">
+    <span class="jleg-it"><span class="jleg-dot" style="background:var(--green)"></span>Indexed in OpenAlex</span>
+    <span class="jleg-it"><span class="jleg-dot" style="background:var(--amber)"></span>Partial coverage</span>
+    <span class="jleg-it"><span class="jleg-dot" style="background:var(--amber)"></span>Works indexed, no OpenAlex venue</span>
+    <span class="jleg-it"><span class="jleg-dot" style="background:var(--red)"></span>Missing from OpenAlex</span>
+  </div>
+
+  <div class="jtable-wrap">
+    <table class="jtable" id="jtable">
+      <thead>
+        <tr>
+          <th data-col="name">Journal</th>
+          <th data-col="status">Status</th>
+          <th data-col="indexed">Works in OpenAlex</th>
+          <th data-col="registered">Works registered</th>
+          <th data-col="coverage">Coverage</th>
+          <th class="nosort">OpenAlex venue</th>
+        </tr>
+      </thead>
+      <tbody id="jtable-body"></tbody>
+    </table>
+  </div>
+
+  <div class="note info" id="missing-note"></div>
+
+  <div class="note" style="border-left:4px solid var(--amber)">
+    <strong>Method &amp; caveats</strong>
+    <p><strong>Works in OpenAlex</strong> is OpenAlex's own live count of works attributed to the journal's source (venue). For journals with no dedicated OpenAlex venue, it is the number of the journal's registered DOIs found in OpenAlex (usually attributed to the publisher, <code>Universitäts- und Landesbibliothek Münster</code>).</p>
+    <p><strong>Works registered</strong> is the number of DOIs the journal registers with DataCite, as cached by the main dashboard's monthly crawl. This count is capped at 500 per journal, so journals showing exactly 500 may have more.</p>
+    <p>Coverage is <code>Works in OpenAlex ÷ Works registered</code>. A journal is marked <strong>missing</strong> when OpenAlex has neither a venue nor any of its works; <strong>partial</strong> when coverage is below 75%; and <strong>indexed</strong> when it has a venue with good coverage (or no DOI registration but a healthy venue).</p>
+    <p>Several journals' registered ISSNs differ from the ISSNs OpenAlex holds (or hold no ISSN at all), so matching is by exact title as well as ISSN.</p>
+  </div>
+</div>
+
+<footer class="ft">
+  <div class="brand-bar">
+    <span class="wl-wordmark">living.<b>knowledge</b></span>
+    <img class="mucos-logo" src="../data/logo-mucos.jpg" alt="MüCOS: Münster Center for Open Science">
+  </div>
+  <span>OpenAlex Coverage of the e-Journals Münster</span>
+  <span class="fts">·</span><span>v0.3</span>
+  <span class="fts">·</span>
+  <span>An independent project by <a href="https://lukasroeseler.github.io" target="_blank">Lukas Röseler</a></span>
+  <span class="fts">·</span>
+  <span>Data: <a href="https://openalex.org" target="_blank">OpenAlex</a> + <a href="https://datacite.org" target="_blank">DataCite</a></span>
+  <span class="fts">·</span>
+  <span><a href="https://ejournals.uni-muenster.de" target="_blank">ULB Münster ↗</a></span>
+  <span class="fts">·</span>
+  <span>Updated: <span id="ftu">—</span></span>
+  <div class="ft-warning">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 12H1L7 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 5.5v3M7 10v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span><strong>Important notice:</strong> Indexing coverage is a measure of discoverability, not of research quality. Absence from OpenAlex does not mean a journal lacks merit — it may simply not have been registered or harvested yet.</span>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════
+   OPENALEX COVERAGE DATA
+   Snapshot computed against the live OpenAlex + DataCite APIs.
+   The monthly GitHub Action (scripts/crawl-openalex-coverage.js) refreshes
+   this and writes ../data/openalex.json, which overrides the snapshot below.
+═══════════════════════════════ */
+var SNAPSHOT=[
+  {slug:'aods',name:'Archive of Orofacial Data Science',abbr:'AOD',issn:'2941-783X',status:'partial',indexed:18,registered:44,doiIndexed:16,sourceId:'S7407078502',sourceName:'Archive of Orofacial Data Science',sourceIssnL:'2943-5706'},
+  {slug:'byzrev',name:'The Byzantine Review',abbr:'BR',issn:'2700-0524',status:'partial',indexed:156,registered:365,doiIndexed:151,sourceId:'S7407066533',sourceName:'The Byzantine Review',sourceIssnL:'2699-4267'},
+  {slug:'fnp',name:'Free Neuropathology',abbr:'FN',issn:'2699-4445',status:'indexed',indexed:195,registered:203,doiIndexed:199,sourceId:'S4393919117',sourceName:'Free Neuropathology',sourceIssnL:'2699-4445'},
+  {slug:'ifgimpulse',name:'IfG Impulse',abbr:'IFG',issn:'',status:'partial',indexed:5,registered:8,doiIndexed:5,sourceId:'S7407081835',sourceName:'IfG Impulse',sourceIssnL:'3052-1270'},
+  {slug:'jcsw',name:'Jahrbuch für Christliche Sozialwissenschaften',abbr:'JCS',issn:'0075-2592',status:'indexed',indexed:1075,registered:500,doiIndexed:488,sourceId:'S4306514795',sourceName:'Jahrbuch für Christliche Sozialwissenschaften',sourceIssnL:'0075-2584'},
+  {slug:'mittelalterdigi',name:'Mittelalter Digital',abbr:'MD',issn:'2702-9069',status:'novenue',indexed:17,registered:19,doiIndexed:17,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'mfiphs',name:'Münstersche Fachzeitschrift für islamische und philosophische Studien',abbr:'MFI',issn:'2749-4330',status:'novenue',indexed:12,registered:41,doiIndexed:12,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'mwsca',name:'Münster Working Paper Series in Social and Cultural Anthropology',abbr:'MWP',issn:'',status:'novenue',indexed:1,registered:1,doiIndexed:1,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'nn',name:'nachbarsprache niederländisch',abbr:'NN',issn:'',status:'indexed',indexed:929,registered:500,doiIndexed:500,sourceId:'S7407065988',sourceName:'nachbarsprache niederländisch',sourceIssnL:'0936-5761'},
+  {slug:'ozean',name:'Online Zeitschrift zur Antiken Numismatik',abbr:'OZeAN',issn:'2698-3079',status:'partial',indexed:7,registered:52,doiIndexed:9,sourceId:'S7407077854',sourceName:'Online Zeitschrift zur Antiken Numismatik',sourceIssnL:'2698-4490'},
+  {slug:'paradigma',name:'Paradigma',abbr:'PAR',issn:'',status:'missing',indexed:0,registered:93,doiIndexed:0,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'pop',name:'POP. Kultur & Kritik',abbr:'POP',issn:'2192-9408',status:'indexed',indexed:704,registered:0,doiIndexed:null,sourceId:'S4210215660',sourceName:'POP Kultur und Kritik',sourceIssnL:'2194-6981'},
+  {slug:'replicationresearch',name:'Replication Research',abbr:'R2',issn:'',status:'partial',indexed:2,registered:4,doiIndexed:3,sourceId:'S7407154776',sourceName:'Replication Research',sourceIssnL:'3052-5977'},
+  {slug:'satura',name:'Satura',abbr:'SAT',issn:'2700-2640',status:'novenue',indexed:77,registered:195,doiIndexed:77,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'sbi',name:'Schule. Bildung. Inklusion',abbr:'SBI',issn:'',status:'missing',indexed:0,registered:0,doiIndexed:null,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'sun',name:'Soziologie und Nachhaltigkeit',abbr:'SuN',issn:'2364-1282',status:'partial',indexed:91,registered:135,doiIndexed:85,sourceId:'S7407062131',sourceName:'Soziologie und Nachhaltigkeit',sourceIssnL:'2364-1282'},
+  {slug:'tjo',name:'Teiresias Journal Online',abbr:'TJO',issn:'',status:'partial',indexed:10,registered:64,doiIndexed:20,sourceId:'S7407077427',sourceName:'Teiresias Journal Online',sourceIssnL:'2751-6946'},
+  {slug:'tso',name:'Teiresias Supplements Online',abbr:'TSO',issn:'',status:'missing',indexed:0,registered:4,doiIndexed:0,sourceId:null,sourceName:null,sourceIssnL:null},
+  {slug:'thrv',name:'Theologische Revue',abbr:'TR',issn:'0040-568X',status:'partial',indexed:144,registered:500,doiIndexed:145,sourceId:'S4306532607',sourceName:'Theologische Revue',sourceIssnL:null},
+  {slug:'ZfK',name:'Zeitschrift für Kulturwissenschaften',abbr:'ZfK',issn:'1862-8060',status:'indexed',indexed:479,registered:0,doiIndexed:null,sourceId:'S4210202375',sourceName:'Zfk - Zeitschrift für Kulturwissenschaften',sourceIssnL:'2197-9103'},
+  {slug:'zkr',name:'Zeitschrift für Kanonisches Recht',abbr:'ZKR',issn:'',status:'partial',indexed:6,registered:25,doiIndexed:6,sourceId:'S7407079693',sourceName:'Zeitschrift für Kanonisches Recht',sourceIssnL:'2941-430X'},
+  {slug:'zpth',name:'Zeitschrift für Pastoraltheologie',abbr:'ZPTh',issn:'0555-9308',status:'indexed',indexed:391,registered:500,doiIndexed:25,sourceId:'S4306535626',sourceName:'Zeitschrift für Pastoraltheologie (ZPTh)',sourceIssnL:'0555-9308'},
+  {slug:'zts',name:'Zeitschrift für Theoretische Soziologie',abbr:'ZTS',issn:'2195-0695',status:'partial',indexed:203,registered:349,doiIndexed:163,sourceId:'S4394708440',sourceName:'ZTS Zeitschrift für Theoretische Soziologie',sourceIssnL:'2195-0695'}
+];
+
+var DATA=SNAPSHOT.slice();
+var STATUS_LABEL={indexed:'Indexed',partial:'Partial',novenue:'No venue',missing:'Missing'};
+var STATUS_CLS={indexed:'ac',partial:'in',novenue:'in',missing:'nd'};
+var STATUS_COLOR={indexed:'var(--green)',partial:'var(--amber)',novenue:'var(--amber)',missing:'var(--red)'};
+var SORT={col:'name',dir:'asc'};
+
+function e(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fn(n){return(n===null||n===undefined||n==='')?'—':Number(n).toLocaleString('en')}
+function coverage(j){
+  if(!j.registered||j.registered<=0)return null;
+  if(!j.indexed||j.indexed<=0)return 0;
+  return j.indexed/j.registered;
+}
+function coverageBar(j){
+  var c=coverage(j);
+  if(c===null)return'<span class="covnum">—</span>';
+  var pct=Math.round(c*100);
+  var col=pct>=75?'g':(pct>0?'a':'r');
+  return'<div class="covwrap"><div class="covbar"><div class="covfill '+col+'" style="width:'+Math.min(pct,100)+'%"></div></div><span class="covnum">'+pct+'%</span></div>';
+}
+function srcCell(j){
+  if(!j.sourceId)return'<span style="color:var(--textm);font-size:11px">No venue</span>';
+  return'<a class="jt-src" href="https://openalex.org/'+j.sourceId+'" target="_blank" rel="noopener">'+e(j.sourceName)+'</a>'
+    +(j.sourceIssnL?'<div class="jt-issnl">ISSN '+e(j.sourceIssnL)+'</div>':'');
+}
+function rowHtml(j){
+  var cls=j.status==='missing'?'missing':(j.status==='novenue'?'novenue':'');
+  var reg=j.registered?(fn(j.registered)):'<span title="No DOI registration with DataCite">—</span>';
+  return'<tr class="'+cls+'" data-slug="'+e(j.slug)+'">'
+    +'<td><div class="jt-name"><span class="jt-title">'+e(j.name)+'</span><span class="jt-slug">'+e(j.slug)+'</span></div></td>'
+    +'<td><span class="jt-status '+STATUS_CLS[j.status]+'">'+STATUS_LABEL[j.status]+'</span></td>'
+    +'<td class="num">'+fn(j.indexed)+'</td>'
+    +'<td class="num">'+reg+'</td>'
+    +'<td>'+coverageBar(j)+'</td>'
+    +'<td>'+srcCell(j)+'</td>'
+    +'</tr>';
+}
+function sortVal(j,col){
+  switch(col){
+    case 'status':return{indexed:0,partial:1,novenue:1,missing:2}[j.status];
+    case 'indexed':return j.indexed||0;
+    case 'registered':return j.registered||0;
+    case 'coverage':{var c=coverage(j);return c===null?-1:c;}
+    default:return (j.name||'').toLowerCase();
+  }
+}
+function render(){
+  var rows=DATA.slice();
+  var col=SORT.col,dir=SORT.dir,mul=dir==='asc'?1:-1;
+  rows.sort(function(a,b){
+    var av=sortVal(a,col),bv=sortVal(b,col);
+    if(typeof av==='string')return mul*av.localeCompare(bv);
+    return mul*(av-bv);
+  });
+  document.getElementById('jtable-body').innerHTML=rows.map(rowHtml).join('');
+  document.querySelectorAll('#jtable thead th[data-col]').forEach(function(th){
+    var k=th.dataset.col;
+    th.classList.toggle('sorted',k===SORT.col);
+    th.classList.toggle('asc',k===SORT.col&&SORT.dir==='asc');
+    th.onclick=function(){
+      if(SORT.col===k)SORT.dir=SORT.dir==='asc'?'desc':'asc';
+      else SORT={col:k,dir:(k==='name'||k==='status')?'asc':'desc'};
+      render();
+    };
+  });
+  updateStats();
+}
+function updateStats(){
+  var total=DATA.length;
+  var ok=DATA.filter(function(j){return j.status==='indexed'}).length;
+  var part=DATA.filter(function(j){return j.status==='partial'||j.status==='novenue'}).length;
+  var miss=DATA.filter(function(j){return j.status==='missing'}).length;
+  var works=DATA.reduce(function(s,j){return s+(j.indexed||0)},0);
+  var reg=DATA.reduce(function(s,j){return s+(j.registered||0)},0);
+  document.getElementById('s-j').textContent=fn(total);
+  document.getElementById('s-ok').textContent=fn(ok);
+  document.getElementById('s-part').textContent=fn(part);
+  document.getElementById('s-miss').textContent=fn(miss);
+  document.getElementById('s-w').textContent=fn(works);
+  document.getElementById('s-r').textContent=fn(reg);
+
+  var missing=DATA.filter(function(j){return j.status==='missing'});
+  var novenue=DATA.filter(function(j){return j.status==='novenue'});
+  var html='<strong>Missing from OpenAlex</strong>';
+  if(missing.length){
+    html+='<p>OpenAlex has neither a venue nor any indexed works for '
+      +missing.map(function(j){return'<code>'+e(j.name)+'</code>'}).join(', ')
+      +'. These journals are not discoverable through OpenAlex at all.</p>';
+  }else{
+    html+='<p>No journals are fully missing from OpenAlex.</p>';
+  }
+  if(novenue.length){
+    html+='<p><strong>Works indexed but no dedicated venue:</strong> '
+      +novenue.map(function(j){return'<code>'+e(j.name)+'</code>'}).join(', ')
+      +' have some works in OpenAlex, but attributed to the publisher (<code>Universitäts- und Landesbibliothek Münster</code>) rather than to a journal venue of their own.</p>';
+  }
+  var low=DATA.filter(function(j){var c=coverage(j);return c!==null&&c>0&&c<0.5});
+  if(low.length){
+    html+='<p><strong>Low coverage (under 50%):</strong> '
+      +low.map(function(j){return'<code>'+e(j.name)+'</code>'}).join(', ')
+      +' are in OpenAlex but only a minority of their works are indexed.</p>';
+  }
+  document.getElementById('missing-note').innerHTML=html;
+}
+
+/* ── THEME TOGGLE ── */
+var THEME_ICON_SUN='<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>';
+var THEME_ICON_MOON='<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark'}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  var btn=document.getElementById('theme-btn');
+  if(btn){
+    btn.innerHTML=t==='dark'?THEME_ICON_SUN:THEME_ICON_MOON;
+    btn.setAttribute('aria-label',t==='dark'?'Switch to light theme':'Switch to dark theme');
+  }
+}
+function initTheme(){
+  var stored=localStorage.getItem('theme');
+  var t=stored||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  applyTheme(t);
+}
+document.getElementById('theme-btn').addEventListener('click',function(){
+  var next=isDark()?'light':'dark';
+  localStorage.setItem('theme',next);
+  applyTheme(next);
+});
+
+/* ── INIT ── */
+initTheme();
+render();
+document.getElementById('ftu').textContent='—';
+/* Try to load the refreshed data file written by the monthly crawl; fall back to the snapshot. */
+fetch('../data/openalex.json',{cache:'no-store'}).then(function(r){
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}).then(function(json){
+  if(json&&Array.isArray(json.journals)&&json.journals.length){
+    DATA=json.journals.slice();
+    render();
+  }
+  if(json&&json.generatedAt)document.getElementById('ftu').textContent=String(json.generatedAt).slice(0,10);
+}).catch(function(){});
+</script>
+</body>
+</html>

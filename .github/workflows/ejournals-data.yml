@@ -29,6 +29,11 @@ jobs:
         continue-on-error: true
         run: node scripts/crawl-ejournals.js
 
+      - name: Compute OpenAlex coverage for all journals
+        id: crawl-oa
+        continue-on-error: true
+        run: node scripts/crawl-openalex-coverage.js
+
       - name: Commit updated data
         if: always()
         run: |
@@ -52,6 +57,6 @@ jobs:
             done
           fi
 
-      - name: Fail the job if the crawl step failed
-        if: steps.crawl.outcome == 'failure'
+      - name: Fail the job if a crawl step failed
+        if: steps.crawl.outcome == 'failure' || steps.crawl-oa.outcome == 'failure'
         run: exit 1
