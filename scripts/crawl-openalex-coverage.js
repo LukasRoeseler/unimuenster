@@ -71,6 +71,10 @@ const fs = require("fs");
 const path = require("path");
 
 const CONTACT_EMAIL = "lukas.roeseler@uni-muenster.de";
+// Optional OpenAlex API key, shared with the other crawlers (crawl-publication-costs.js,
+// download-data.sh). Raising the request budget avoids the per-IP throttling that a
+// bare `mailto` is subject to. Set via the OA_API_KEY GitHub Actions secret.
+const OA_API_KEY = process.env.OA_API_KEY || null;
 const DATA_DIR = path.join(__dirname, "..", "ejournals", "data");
 const PUBLICATIONS_FILE = path.join(DATA_DIR, "publications.json");
 const OUT_FILE = path.join(DATA_DIR, "openalex.json");
@@ -110,8 +114,14 @@ async function fetchJson(url, ms) {
 }
 
 async function sourceWorks(sid) {
-  const data = await fetchJson(`${OA}/works?filter=primary_location.source.id:${sid}&mailto=${CONTACT_EMAIL}&per-page=1`);
+  const data = await fetchJson(oaUrl(`${OA}/works?filter=primary_location.source.id:${sid}&mailto=${CONTACT_EMAIL}&per-page=1`));
   return data.meta ? data.meta.count : 0;
+}
+
+// Append the optional API key so OpenAlex gives this request the account's own
+// (higher) request budget instead of the shared per-IP budget.
+function oaUrl(url) {
+  return OA_API_KEY ? url + "&api_key=" + encodeURIComponent(OA_API_KEY) : url;
 }
 
 // Returns the subset of the given DOIs that OpenAlex has indexed. DOIs are
@@ -121,7 +131,7 @@ async function indexedDois(dois) {
   const found = new Set();
   for (let i = 0; i < dois.length; i += DOI_BATCH) {
     const batch = dois.slice(i, i + DOI_BATCH);
-    const url = `${OA}/works?filter=doi:${batch.join("|")}&mailto=${CONTACT_EMAIL}&per-page=200&select=doi`;
+    const url = oaUrl(`${OA}/works?filter=doi:${batch.join("|")}&mailto=${CONTACT_EMAIL}&per-page=200&select=doi`);
     const data = await fetchJson(url);
     if (data.results) {
       for (const w of data.results) if (w.doi) found.add(w.doi.toLowerCase());

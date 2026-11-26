@@ -35,6 +35,8 @@ jobs:
         # not blocked. Non-fatal: the pages fall back to a live browser check if
         # this step fails or the files are absent.
         continue-on-error: true
+        env:
+          OA_API_KEY: ${{ secrets.OA_API_KEY }}
         run: node scripts/crawl-openalex-coverage.js
 
       - name: Setup Pages

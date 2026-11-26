@@ -32,6 +32,8 @@ jobs:
       - name: Compute OpenAlex coverage for all journals
         id: crawl-oa
         continue-on-error: true
+        env:
+          OA_API_KEY: ${{ secrets.OA_API_KEY }}
         run: node scripts/crawl-openalex-coverage.js
 
       - name: Commit updated data
