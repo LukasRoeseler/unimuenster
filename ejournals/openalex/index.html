@@ -65,6 +65,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 .hero h1 em{color:var(--accent);font-style:normal;border-bottom:3px solid var(--accent-bdr)}
 .hero p{font-size:15px;color:var(--text2);max-width:640px;line-height:1.72;margin-bottom:22px}
 .hint{display:inline-flex;align-items:center;gap:8px;background:var(--accent-lt);border:1px solid var(--accent-bdr);border-radius:0;padding:9px 14px;font-size:12.5px;color:var(--accent-dk);font-weight:500;animation:fadeIn .6s .3s both}
+.data-asof{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--text2);animation:fadeIn .6s .4s both}
+.data-asof .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);background:var(--bg-card);border-radius:0;font-size:11px;color:var(--textm)}
+.data-asof .chip strong{color:var(--text);font-weight:700}
+.data-asof .chip svg{flex-shrink:0}
+.da-note{font-size:11px;color:var(--textm)}
 
 /* ── STATS STRIP ── */
 .sstrip{display:flex;border:1px solid var(--border);border-radius:0;overflow:hidden;margin-bottom:24px;background:var(--bg-card);animation:scaleIn .35s .1s ease both}
@@ -90,6 +95,7 @@ table.jtable{width:100%;border-collapse:collapse;font-size:12.5px}
 .jtable thead th.sorted::after{content:'';display:inline-block;margin-left:5px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--accent);vertical-align:middle}
 .jtable thead th.sorted.asc::after{border-top:none;border-bottom:5px solid var(--accent)}
 .jtable tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.jtable tbody tr{cursor:pointer}
 .jtable tbody tr:hover{background:var(--bg-soft)}
 .jt-name{display:flex;flex-direction:column;gap:2px;min-width:0}
 .jt-title{font-weight:600;color:var(--text);line-height:1.35}
@@ -171,7 +177,14 @@ tr.novenue:hover{background:var(--amber-bg)}
     <p>For each of the 23 open access e-journals hosted by the Universitäts- und Landesbibliothek Münster, this page shows whether the journal is indexed in OpenAlex and how many of its works are discoverable there. Journals that are missing or only partially indexed are highlighted.</p>
     <div class="hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v4l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      Click any column header to sort. Rows highlighted in red are missing from OpenAlex.
+      Click a journal to open its article list and see which works are in OpenAlex. Click any column header to sort.
+    </div>
+    <div class="data-asof" id="data-asof">
+      <span class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Data as of: <strong id="da">—</strong>
+      </span>
+      <span class="da-note" id="da-note">—</span>
     </div>
   </div>
 
@@ -215,6 +228,7 @@ tr.novenue:hover{background:var(--amber-bg)}
     <p><strong>Works registered</strong> is the number of DOIs the journal registers with DataCite, as cached by the main dashboard's monthly crawl. This count is capped at 500 per journal, so journals showing exactly 500 may have more.</p>
     <p>Coverage is <code>Works in OpenAlex ÷ Works registered</code>. A journal is marked <strong>missing</strong> when OpenAlex has neither a venue nor any of its works; <strong>partial</strong> when coverage is below 75%; and <strong>indexed</strong> when it has a venue with good coverage (or no DOI registration but a healthy venue).</p>
     <p>Several journals' registered ISSNs differ from the ISSNs OpenAlex holds (or hold no ISSN at all), so matching is by exact title as well as ISSN.</p>
+    <p><strong>Data freshness.</strong> The figures are recomputed once a month by an automated GitHub Actions crawl (<code>scripts/crawl-openalex-coverage.js</code>), which is what the "Data as of" date above reflects. So this is <em>not</em> a one-time screenshot: the numbers are refreshed periodically. If the crawl has not run since the numbers were first produced, the date shown is the date of that initial snapshot.</p>
   </div>
 </div>
 
@@ -232,7 +246,7 @@ tr.novenue:hover{background:var(--amber-bg)}
   <span class="fts">·</span>
   <span><a href="https://ejournals.uni-muenster.de" target="_blank">ULB Münster ↗</a></span>
   <span class="fts">·</span>
-  <span>Updated: <span id="ftu">—</span></span>
+  <span>Last updated: <span id="ftu">—</span></span>
   <div class="ft-warning">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 12H1L7 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 5.5v3M7 10v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
     <span><strong>Important notice:</strong> Indexing coverage is a measure of discoverability, not of research quality. Absence from OpenAlex does not mean a journal lacks merit — it may simply not have been registered or harvested yet.</span>
@@ -300,14 +314,17 @@ function srcCell(j){
 function rowHtml(j){
   var cls=j.status==='missing'?'missing':(j.status==='novenue'?'novenue':'');
   var reg=j.registered?(fn(j.registered)):'<span title="No DOI registration with DataCite">—</span>';
-  return'<tr class="'+cls+'" data-slug="'+e(j.slug)+'">'
-    +'<td><div class="jt-name"><span class="jt-title">'+e(j.name)+'</span><span class="jt-slug">'+e(j.slug)+'</span></div></td>'
+  return'<tr class="'+cls+'" data-slug="'+e(j.slug)+'" onclick="openDetail(\''+e(j.slug)+'\')" title="Show all articles for '+e(j.name)+'">'
+    +'<td><div class="jt-name"><a class="jt-title" href="journal.html?slug='+encodeURIComponent(j.slug)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+e(j.name)+'</a><span class="jt-slug">'+e(j.slug)+'</span></div></td>'
     +'<td><span class="jt-status '+STATUS_CLS[j.status]+'">'+STATUS_LABEL[j.status]+'</span></td>'
     +'<td class="num">'+fn(j.indexed)+'</td>'
     +'<td class="num">'+reg+'</td>'
     +'<td>'+coverageBar(j)+'</td>'
     +'<td>'+srcCell(j)+'</td>'
     +'</tr>';
+}
+function openDetail(slug){
+  window.open('journal.html?slug='+encodeURIComponent(slug), '_blank', 'noopener');
 }
 function sortVal(j,col){
   switch(col){
@@ -401,9 +418,23 @@ document.getElementById('theme-btn').addEventListener('click',function(){
 });
 
 /* ── INIT ── */
+function fmtDate(iso){
+  if(!iso)return '—';
+  var d=new Date(iso);
+  if(isNaN(d.getTime()))return String(iso).slice(0,10);
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+function setGenerated(json){
+  var iso=json&&json.generatedAt?String(json.generatedAt):null;
+  document.getElementById('da').textContent=fmtDate(iso);
+  document.getElementById('ftu').textContent=fmtDate(iso);
+  document.getElementById('da-note').textContent=iso
+    ?'This data was generated on '+fmtDate(iso)+' by the monthly automated crawl (GitHub Actions), so it is refreshed periodically — not a one-time screenshot. Until the next crawl runs, the figures are a snapshot from that date.'
+    :'Data source: computed snapshot (no refresh timestamp available).';
+}
 initTheme();
 render();
-document.getElementById('ftu').textContent='—';
+setGenerated(null);
 /* Try to load the refreshed data file written by the monthly crawl; fall back to the snapshot. */
 fetch('../data/openalex.json',{cache:'no-store'}).then(function(r){
   if(!r.ok)throw new Error('HTTP '+r.status);
@@ -413,7 +444,7 @@ fetch('../data/openalex.json',{cache:'no-store'}).then(function(r){
     DATA=json.journals.slice();
     render();
   }
-  if(json&&json.generatedAt)document.getElementById('ftu').textContent=String(json.generatedAt).slice(0,10);
+  setGenerated(json);
 }).catch(function(){});
 </script>
 </body>

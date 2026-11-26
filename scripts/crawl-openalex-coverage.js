@@ -74,6 +74,7 @@ const CONTACT_EMAIL = "lukas.roeseler@uni-muenster.de";
 const DATA_DIR = path.join(__dirname, "..", "ejournals", "data");
 const PUBLICATIONS_FILE = path.join(DATA_DIR, "publications.json");
 const OUT_FILE = path.join(DATA_DIR, "openalex.json");
+const DETAIL_FILE = path.join(DATA_DIR, "openalex-detail.json");
 const OA = "https://api.openalex.org";
 const DOI_BATCH = 40;
 
@@ -113,15 +114,20 @@ async function sourceWorks(sid) {
   return data.meta ? data.meta.count : 0;
 }
 
-async function doiCount(dois) {
-  let count = 0;
+// Returns the subset of the given DOIs that OpenAlex has indexed. DOIs are
+// matched case-insensitively and returned lower-cased. OpenAlex supports OR-ing
+// DOIs in one filter (`filter=doi:d1|d2|...`), so we batch to keep requests low.
+async function indexedDois(dois) {
+  const found = new Set();
   for (let i = 0; i < dois.length; i += DOI_BATCH) {
     const batch = dois.slice(i, i + DOI_BATCH);
-    const url = `${OA}/works?filter=doi:${batch.join("|")}&mailto=${CONTACT_EMAIL}&per-page=1`;
+    const url = `${OA}/works?filter=doi:${batch.join("|")}&mailto=${CONTACT_EMAIL}&per-page=200&select=doi`;
     const data = await fetchJson(url);
-    if (data.meta) count += data.meta.count;
+    if (data.results) {
+      for (const w of data.results) if (w.doi) found.add(w.doi.toLowerCase());
+    }
   }
-  return count;
+  return [...found];
 }
 
 function statusFor(j, indexed, registered) {
@@ -141,20 +147,23 @@ async function main() {
   }
 
   const journals = [];
+  const detail = {}; // slug -> [indexed DOIs]
   for (const j of JOURNALS) {
     const registered = (pubs[j.slug] || []).length;
     const dois = (pubs[j.slug] || []).map((p) => p.doi);
     const src = SOURCES[j.slug] || null;
 
     let indexed;
-    let doiIndexed = null;
+    let doiSet = [];
     if (src) {
       indexed = await sourceWorks(src.id);
-      if (dois.length) doiIndexed = await doiCount(dois);
+      if (dois.length) doiSet = await indexedDois(dois);
     } else {
-      indexed = dois.length ? await doiCount(dois) : 0;
-      doiIndexed = indexed || 0;
+      doiSet = dois.length ? await indexedDois(dois) : [];
+      indexed = doiSet.length;
     }
+    const doiIndexed = doiSet.length;
+    detail[j.slug] = doiSet;
 
     journals.push({
       slug: j.slug,
@@ -179,7 +188,15 @@ async function main() {
     journals,
   };
   fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
+
+  const detailOut = {
+    generatedAt: out.generatedAt,
+    source: "OpenAlex (computed by scripts/crawl-openalex-coverage.js)",
+    indexedDois: detail,
+  };
+  fs.writeFileSync(DETAIL_FILE, JSON.stringify(detailOut, null, 2));
   console.log(`\nWrote ${OUT_FILE}`);
+  console.log(`Wrote ${DETAIL_FILE}`);
 }
 
 main().catch((err) => {
