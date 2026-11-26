@@ -124,17 +124,35 @@ function oaUrl(url) {
   return OA_API_KEY ? url + "&api_key=" + encodeURIComponent(OA_API_KEY) : url;
 }
 
+// Normalize a DOI to bare, lower-cased form so values from OpenAlex
+// ("https://doi.org/10.x/y" or "doi:10.x/y") and from publications.json
+// ("10.x/y") compare equal.
+function bareDoi(doi) {
+  return String(doi || "").trim()
+    .replace(/^https?:\/\/doi\.org\//i, "")
+    .replace(/^doi:/i, "")
+    .toLowerCase();
+}
+
 // Returns the subset of the given DOIs that OpenAlex has indexed. DOIs are
-// matched case-insensitively and returned lower-cased. OpenAlex supports OR-ing
-// DOIs in one filter (`filter=doi:d1|d2|...`), so we batch to keep requests low.
+// matched case-insensitively and returned in bare form. OpenAlex supports
+// OR-ing DOIs in one filter (`filter=doi:d1|d2|...`), so we batch to keep
+// requests low. Only a returned work whose DOI exactly matches one we asked
+// about is counted, so related/preprint DOIs OpenAlex may also surface are
+// ignored.
 async function indexedDois(dois) {
+  const wanted = new Set(dois.map(bareDoi));
   const found = new Set();
   for (let i = 0; i < dois.length; i += DOI_BATCH) {
     const batch = dois.slice(i, i + DOI_BATCH);
     const url = oaUrl(`${OA}/works?filter=doi:${batch.join("|")}&mailto=${CONTACT_EMAIL}&per-page=200&select=doi`);
     const data = await fetchJson(url);
     if (data.results) {
-      for (const w of data.results) if (w.doi) found.add(w.doi.toLowerCase());
+      for (const w of data.results) {
+        if (!w.doi) continue;
+        const bare = bareDoi(w.doi);
+        if (wanted.has(bare)) found.add(bare);
+      }
     }
   }
   return [...found];

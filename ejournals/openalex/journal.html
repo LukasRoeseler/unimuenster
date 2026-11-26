@@ -183,7 +183,7 @@ table.atable{width:100%;border-collapse:collapse;font-size:12.5px}
 var MAILTO='lukas.roeseler@uni-muenster.de';
 var BATCH=40;
 var e=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};
-var normDoi=function(d){return String(d||'').trim().toLowerCase()};
+var normDoi=function(d){return String(d||'').trim().replace(/^https?:\/\/doi\.org\//i,'').replace(/^doi:/i,'').toLowerCase()};
 function fn(n){return(n===null||n===undefined||n==='')?'—':Number(n).toLocaleString('en')}
 function fmtDate(iso){
   if(!iso)return '—';
