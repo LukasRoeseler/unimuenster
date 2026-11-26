@@ -24,6 +24,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Refresh OpenAlex coverage + per-article data
+        # OpenAlex rate-limits by IP address, and the local dev machine was
+        # throttled, so the data is (re)generated here on GitHub's IP, which is
+        # not blocked. Non-fatal: the pages fall back to a live browser check if
+        # this step fails or the files are absent.
+        continue-on-error: true
+        run: node scripts/crawl-openalex-coverage.js
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

@@ -86,6 +86,24 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 .jleg-it{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);padding:3px 8px;border-radius:0;border:1px solid var(--border);background:var(--bg-card)}
 .jleg-dot{width:10px;height:10px;border-radius:0;flex-shrink:0}
 
+/* ── STATUS CHART ── */
+.chart{margin:18px 0 22px;padding:16px 18px;background:var(--bg-card);border:1px solid var(--border);animation:fadeSlideIn .4s .15s both}
+.chart-title{font-size:11px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.stackbar{display:flex;height:18px;overflow:hidden;border:1px solid var(--border);background:var(--bg-chip)}
+.stackbar .seg{height:100%;min-width:0}
+.seg.g{background:var(--green)}
+.seg.a{background:var(--amber)}
+.seg.r{background:var(--red)}
+.seg.nv{background:#7d94ac}
+.seg.g2{background:var(--green)}
+.seg.a2{background:var(--amber)}
+.seg.r2{background:var(--red)}
+.stacklegend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-size:11.5px;color:var(--text2)}
+.stacklegend .li{display:flex;align-items:center;gap:6px}
+.stacklegend .dot{width:10px;height:10px;flex-shrink:0}
+.stacklegend b{font-variant-numeric:tabular-nums;font-weight:700}
+.stacklegend .pct{color:var(--textm)}
+
 /* ── TABLE ── */
 .jtable-wrap{overflow-x:auto;background:var(--bg-card);border:1px solid var(--border);animation:fadeSlideIn .4s .1s both}
 table.jtable{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -195,6 +213,12 @@ tr.novenue:hover{background:var(--amber-bg)}
     <div class="scell"><div class="snum r" id="s-miss">—</div><div class="slbl">Missing</div></div>
     <div class="scell"><div class="snum" id="s-w">—</div><div class="slbl">Works indexed</div></div>
     <div class="scell"><div class="snum" id="s-r">—</div><div class="slbl">Works registered</div></div>
+  </div>
+
+  <div class="chart" id="chart-journals">
+    <div class="chart-title">Journal coverage breakdown</div>
+    <div class="stackbar" id="stack-journals"></div>
+    <div class="stacklegend" id="legend-journals"></div>
   </div>
 
   <div class="jlegend">
@@ -392,6 +416,33 @@ function updateStats(){
       +' are in OpenAlex but only a minority of their works are indexed.</p>';
   }
   document.getElementById('missing-note').innerHTML=html;
+  renderJournalChart();
+}
+function renderJournalChart(){
+  var counts={
+    indexed:DATA.filter(function(j){return j.status==='indexed'}).length,
+    partial:DATA.filter(function(j){return j.status==='partial'}).length,
+    novenue:DATA.filter(function(j){return j.status==='novenue'}).length,
+    missing:DATA.filter(function(j){return j.status==='missing'}).length
+  };
+  var total=DATA.length||1;
+  var items=[
+    {label:'Indexed',count:counts.indexed,cls:'g'},
+    {label:'Partial',count:counts.partial,cls:'a'},
+    {label:'Works indexed, no venue',count:counts.novenue,cls:'nv'},
+    {label:'Missing from OpenAlex',count:counts.missing,cls:'r'}
+  ];
+  var bar=document.getElementById('stack-journals');
+  var legend=document.getElementById('legend-journals');
+  if(!bar)return;
+  bar.innerHTML=items.map(function(it){
+    var w=Math.round((it.count/total)*1000)/10;
+    return it.count?('<div class="seg '+it.cls+'" style="width:'+w+'%" title="'+e(it.label)+': '+it.count+'"></div>'):'';
+  }).join('');
+  legend.innerHTML=items.map(function(it){
+    var pct=(it.count/total*100);
+    return '<span class="li"><span class="dot" style="background:'+({g:'var(--green)',a:'var(--amber)',nv:'#7d94ac',r:'var(--red)'})[it.cls]+'"></span>'+e(it.label)+' <b>'+it.count+'</b> <span class="pct">('+pct.toFixed(0)+'%)</span></span>';
+  }).join('');
 }
 
 /* ── THEME TOGGLE ── */

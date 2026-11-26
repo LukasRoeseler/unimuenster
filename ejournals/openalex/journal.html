@@ -71,6 +71,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 .jlegend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .jleg-it{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);padding:3px 8px;border:1px solid var(--border);background:var(--bg-card)}
 .jleg-dot{width:10px;height:10px;flex-shrink:0}
+.chart{margin:18px 0 22px;padding:16px 18px;background:var(--bg-card);border:1px solid var(--border);animation:fadeIn .4s ease both}
+.chart-title{font-size:11px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.stackbar{display:flex;height:18px;overflow:hidden;border:1px solid var(--border);background:var(--bg-chip)}
+.stackbar .seg{height:100%;min-width:0}
+.seg.g{background:var(--green)}
+.seg.a{background:var(--amber)}
+.seg.r{background:var(--red)}
+.stacklegend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-size:11.5px;color:var(--text2)}
+.stacklegend .li{display:flex;align-items:center;gap:6px}
+.stacklegend .dot{width:10px;height:10px;flex-shrink:0}
+.stacklegend b{font-variant-numeric:tabular-nums;font-weight:700}
+.stacklegend .pct{color:var(--textm)}
 .table-wrap{overflow-x:auto;background:var(--bg-card);border:1px solid var(--border)}
 table.atable{width:100%;border-collapse:collapse;font-size:12.5px}
 .atable thead th{position:sticky;top:0;background:var(--bg-soft);text-align:left;font-size:10.5px;font-weight:700;color:var(--textm);text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -129,6 +141,12 @@ table.atable{width:100%;border-collapse:collapse;font-size:12.5px}
     <div class="scell"><div class="snum g" id="s-in">—</div><div class="slbl">In OpenAlex</div></div>
     <div class="scell"><div class="snum r" id="s-nf">—</div><div class="slbl">Not found</div></div>
     <div class="scell"><div class="snum a" id="s-nc">—</div><div class="slbl">Not checked</div></div>
+  </div>
+
+  <div class="chart" id="chart-articles">
+    <div class="chart-title">Article status distribution</div>
+    <div class="stackbar" id="stack-articles"></div>
+    <div class="stacklegend" id="legend-articles"></div>
   </div>
 
   <div class="jlegend">
@@ -200,6 +218,26 @@ async function queryOpenAlex(dois){
     }
   }
   return {found:found, checked:checked};
+}
+
+function renderArticleChart(cnt){
+  var total=(cnt.in+cnt.nf+cnt.nc)||1;
+  var items=[
+    {label:'In OpenAlex',count:cnt.in,cls:'g'},
+    {label:'Not found (missing)',count:cnt.nf,cls:'r'},
+    {label:'Not checked',count:cnt.nc,cls:'a'}
+  ];
+  var bar=document.getElementById('stack-articles');
+  var legend=document.getElementById('legend-articles');
+  if(!bar)return;
+  bar.innerHTML=items.map(function(it){
+    var w=Math.round((it.count/total)*1000)/10;
+    return it.count?('<div class="seg '+it.cls+'" style="width:'+w+'%" title="'+e(it.label)+': '+it.count+'"></div>'):'';
+  }).join('');
+  legend.innerHTML=items.map(function(it){
+    var pct=(it.count/total*100);
+    return '<span class="li"><span class="dot" style="background:'+({g:'var(--green)',a:'var(--amber)',r:'var(--red)'})[it.cls]+'"></span>'+e(it.label)+' <b>'+it.count+'</b> <span class="pct">('+pct.toFixed(0)+'%)</span></span>';
+  }).join('');
 }
 
 async function load(){
@@ -299,6 +337,7 @@ async function load(){
   document.getElementById('s-in').textContent=fn(cnt.in);
   document.getElementById('s-nf').textContent=fn(cnt.nf);
   document.getElementById('s-nc').textContent=fn(cnt.nc);
+  renderArticleChart(cnt);
 
   var note=document.getElementById('missing-note');
   if(cnt.nf||cnt.nc){
